@@ -1,2 +1,7 @@
-# main2024
-2024 robot code, this goes on the robot for competition
+**FRC 4944**
+
+
+*2024 Robot Code*
+
+
+![Hi Fives Hand](https://www.hi5robotics.com/hi-fives-hand.png)
