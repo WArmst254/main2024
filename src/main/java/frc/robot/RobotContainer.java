@@ -1,9 +1,13 @@
 package frc.robot;
 
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.CANSparkFlex;
+import com.revrobotics.CANSparkLowLevel;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -24,8 +28,123 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final XboxController driverController = new XboxController(0);
+  // private final XboxController operatorController = new XboxController(1);
+
+  /* Controllers */
+  // private final Joystick driver = new Joystick(0);
 
   // Dashboard inputs
+  private final TalonFX intake = new TalonFX(62);
+
+  private void intakeOnCommand() {
+    intake.set(0.95);
+  }
+
+  private void intakeOffCommand() {
+    intake.set(0);
+  }
+
+  private void outtakeOnCommand() {
+    intake.set(-0.95);
+  }
+
+  private void outtakeOffCommand() {
+    intake.set(0);
+  }
+
+  private final TalonFX shooterFeed = new TalonFX(60);
+  private final CANSparkFlex shooterLeft =
+      new CANSparkFlex(20, CANSparkLowLevel.MotorType.kBrushless);
+  private final CANSparkFlex shooterRight =
+      new CANSparkFlex(19, CANSparkLowLevel.MotorType.kBrushless);
+
+  private void shooterOnCommand() {
+    shooterFeed.set(-1);
+    shooterLeft.set(-1);
+    shooterRight.set(-.95);
+  }
+
+  private void shooterInCommand() {
+    shooterFeed.set(1);
+    shooterLeft.set(1);
+    shooterRight.set(.95);
+  }
+
+  private void shooterOffCommand() {
+    shooterFeed.set(0);
+    shooterLeft.set(0);
+    shooterRight.set(0);
+  }
+
+  private final TalonFX wrist = new TalonFX(17);
+
+  private void wristUpOnCommand() {
+    wrist.set(0.2);
+  }
+
+  private void wristUpOffCommand() {
+    wrist.set(0);
+  }
+
+  private void wristDownOnCommand() {
+    wrist.set(-0.2);
+  }
+
+  private void wristDownOffCommand() {
+    wrist.set(0);
+  }
+
+  private final TalonFX shooterAngle = new TalonFX(15);
+
+  private void shooterUpOnCommand() {
+    shooterAngle.set(0.05);
+  }
+
+  private void shooterUpOffCommand() {
+    shooterAngle.set(0);
+  }
+
+  private void shooterDownOnCommand() {
+    shooterAngle.set(-0.05);
+  }
+
+  private void shooterDownOffCommand() {
+    shooterAngle.set(0);
+  }
+
+  private final TalonFX elevator = new TalonFX(16);
+
+  private void elevatorUpCommand() {
+    elevator.set(0.05);
+  }
+
+  private void elevatorDownCommand() {
+    shooterAngle.set(0);
+  }
+
+  private final TalonFX AmpLeft = new TalonFX(50);
+  private final TalonFX AmpRight = new TalonFX(51);
+
+  private void AmpOuttakeOnCommand() {
+    AmpLeft.set(-.5);
+    AmpRight.set(-.5);
+  }
+
+  private void AmpOuttakeOffCommand() {
+    AmpLeft.set(0);
+    AmpRight.set(0);
+  }
+
+  private void HPIntakeOnCommand() {
+    AmpLeft.set(.5);
+    AmpRight.set(-.5);
+  }
+
+  private void HPIntakeOffCommand() {
+    AmpLeft.set(0);
+    AmpRight.set(0);
+  }
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -82,12 +201,74 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-  }
+    new Trigger(driverController::getAButton)
+        .whileTrue(new InstantCommand(() -> intakeOnCommand()));
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
+    new Trigger(driverController::getAButtonReleased)
+        .onTrue(new InstantCommand(() -> intakeOffCommand()));
+
+    new Trigger(driverController::getYButton)
+        .whileTrue(new InstantCommand(() -> outtakeOnCommand()));
+
+    new Trigger(driverController::getYButtonReleased)
+        .onTrue(new InstantCommand(() -> outtakeOffCommand()));
+
+    new Trigger(driverController::getXButton)
+        .whileTrue(new InstantCommand(() -> shooterOnCommand()));
+    new Trigger(driverController::getBButton)
+        .whileTrue(new InstantCommand(() -> shooterInCommand()));
+
+    new Trigger(driverController::getXButtonReleased)
+        .onTrue(new InstantCommand(() -> shooterOffCommand()));
+    new Trigger(driverController::getBButtonReleased)
+        .onTrue(new InstantCommand(() -> shooterOffCommand()));
+
+    new Trigger(driverController::getLeftBumper)
+        .whileTrue(new InstantCommand(() -> wristDownOnCommand()));
+
+    new Trigger(driverController::getLeftBumperReleased)
+        .onTrue(new InstantCommand(() -> wristDownOffCommand()));
+
+    new Trigger(driverController::getRightBumper)
+        .whileTrue(new InstantCommand(() -> wristUpOnCommand()));
+
+    new Trigger(driverController::getRightBumperReleased)
+        .whileTrue(new InstantCommand(() -> wristUpOffCommand()));
+
+    new Trigger(() -> driverController.getLeftTriggerAxis() > 0.1)
+        .whileTrue(new InstantCommand(() -> shooterDownOnCommand()));
+
+    new Trigger(() -> driverController.getLeftTriggerAxis() < 0.1)
+        .onTrue(new InstantCommand(() -> shooterDownOffCommand()));
+
+    new Trigger(() -> driverController.getRightTriggerAxis() > 0.1)
+        .whileTrue(new InstantCommand(() -> shooterUpOnCommand()));
+
+    new Trigger(() -> driverController.getRightTriggerAxis() < 0.1)
+        .onTrue(new InstantCommand(() -> shooterUpOffCommand()));
+    new Trigger(driverController::getStartButton)
+        .onTrue(new InstantCommand(() -> HPIntakeOnCommand()));
+
+    new Trigger(driverController::getStartButtonReleased)
+        .onTrue(new InstantCommand(() -> HPIntakeOffCommand()));
+    new Trigger(driverController::getBackButton)
+        .onTrue(new InstantCommand(() -> AmpOuttakeOnCommand()));
+    new Trigger(driverController::getBackButtonReleased)
+        .onTrue(new InstantCommand(() -> AmpOuttakeOffCommand()));
+
+    new Trigger(() -> driverController.getPOV() == 90)
+        .onTrue(new InstantCommand(() -> elevatorUpCommand()));
+    new Trigger(() -> driverController.getPOV() == 180)
+        .onTrue(new InstantCommand(() -> elevatorDownCommand()));
+
+    // 50 pos intake
+    // 51 negative intake
+    // both negative for outtake
+
+    /**
+     * Use this to pass the autonomous command to the main {@link Robot} class.
+     *
+     * @return the command to run in autonomous
+     */
+  }
 }
