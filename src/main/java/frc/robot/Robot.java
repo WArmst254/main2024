@@ -25,34 +25,7 @@ public class Robot extends LoggedRobot {
    */
   @Override
   public void robotInit() {
-    // TalonFXConfiguration cfg = new TalonFXConfiguration();
 
-    // /* Configure current limits */
-    // MotionMagicConfigs mm = cfg.MotionMagic;
-    // mm.MotionMagicCruiseVelocity = 5; // 5 rotations per second cruise
-    // mm.MotionMagicAcceleration = 10; // Take approximately 0.5 seconds to reach max vel
-    // // Take approximately 0.2 seconds to reach max accel
-    // mm.MotionMagicJerk = 50;
-
-    // Slot0Configs slot0 = cfg.Slot0;
-    // slot0.kP = 60;
-    // slot0.kI = 0;
-    // slot0.kD = 0.1;
-    // slot0.kV = 0.12;
-    // slot0.kS = 0.25; // Approximately 0.25V to get the mechanism moving
-
-    // FeedbackConfigs fdb = cfg.Feedback;
-    // fdb.SensorToMechanismRatio = 12.8;
-
-    // StatusCode status = StatusCode.StatusCodeNotInitialized;
-    // for (int i = 0; i < 5; ++i) {
-    //   status = elevator.getConfigurator().apply(cfg);
-    //   if (status.isOK()) break;
-    // }
-    // if (!status.isOK()) {
-    //   System.out.println("Could not configure device. Error: " + status.toString());
-    // }
-    // Record metadata
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
     Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
     Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
@@ -92,9 +65,6 @@ public class Robot extends LoggedRobot {
         break;
     }
 
-    // See http://bit.ly/3YIzFZ6 for more information on timestamps in AdvantageKit.
-    // Logger.disableDeterministicTimestamps()
-
     // Start AdvantageKit logger
     Logger.start();
     m_robotContainer = new RobotContainer();
@@ -112,13 +82,6 @@ public class Robot extends LoggedRobot {
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    // if (m_printCount++ > 10) {
-    //   m_printCount = 0;
-    //   System.out.println("Pos: " + elevator.getPosition());
-    //   System.out.println("Vel: " + elevator.getVelocity());
-    //   System.out.println();
-    // }
-    // m_mechanisms.update(elevator.getPosition(), elevator.getVelocity());
   }
 
   /** This function is called once when the robot is disabled. */
@@ -147,7 +110,6 @@ public class Robot extends LoggedRobot {
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
-    // final TalonFX elevator = new TalonFX(16);
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
@@ -159,13 +121,7 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {
-    // double leftY = m_joystick.getLeftY();
-    // elevator.setControl(m_mmReq.withPosition(leftY * 10).withSlot(0));
-    // if (m_joystick.getBButton()) {
-    //   elevator.setPosition(1);
-    // }
-  }
+  public void teleopPeriodic() {}
 
   /** This function is called once when test mode is enabled. */
   @Override

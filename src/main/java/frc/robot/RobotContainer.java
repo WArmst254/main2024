@@ -3,7 +3,6 @@ package frc.robot;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.path.PathPlannerPath;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -43,7 +42,6 @@ public class RobotContainer {
   // private final XboxController operatorController = new XboxController(1);
 
   /* Controllers */
-  // private final Joystick driver = new Joystick(0);
 
   // Dashboard inputs
   private final TalonFX intake = new TalonFX(62);
@@ -195,6 +193,7 @@ public class RobotContainer {
   private void configureButtonBindings() {
     elePid.zero();
     wrist.zero();
+
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
@@ -204,68 +203,46 @@ public class RobotContainer {
 
     new Trigger(driverController::getAButton)
         .whileTrue(new InstantCommand(() -> intakeOnCommand()));
-
     new Trigger(driverController::getAButtonReleased)
         .onTrue(new InstantCommand(() -> intakeOffCommand()));
-
     new Trigger(driverController::getYButton)
         .whileTrue(new InstantCommand(() -> outtakeOnCommand()));
-
     new Trigger(driverController::getYButtonReleased)
         .onTrue(new InstantCommand(() -> outtakeOffCommand()));
-
     new Trigger(driverController::getXButton)
         .whileTrue(new InstantCommand(() -> shooterOnCommand()));
     new Trigger(driverController::getBButton)
         .whileTrue(new InstantCommand(() -> shooterInCommand()));
-
     new Trigger(driverController::getXButtonReleased)
         .onTrue(new InstantCommand(() -> shooterOffCommand()));
     new Trigger(driverController::getBButtonReleased)
         .onTrue(new InstantCommand(() -> shooterOffCommand()));
-
     new Trigger(driverController::getLeftBumper)
         .onTrue(new InstantCommand(() -> wristDownOnCommand()));
-
     new Trigger(driverController::getRightBumper)
         .onTrue(new InstantCommand(() -> wristUpOnCommand()));
-
     new Trigger(() -> driverController.getLeftTriggerAxis() > 0.1)
         .whileTrue(new InstantCommand(() -> shooterDownOnCommand()));
-
     new Trigger(() -> driverController.getRightTriggerAxis() > 0.1)
         .whileTrue(new InstantCommand(() -> shooterUpOnCommand()));
-
     new Trigger(driverController::getStartButton)
         .onTrue(new InstantCommand(() -> HPIntakeOnCommand()));
-
     new Trigger(driverController::getStartButtonReleased)
         .onTrue(new InstantCommand(() -> HPIntakeOffCommand()));
     new Trigger(driverController::getBackButton)
         .onTrue(new InstantCommand(() -> AmpOuttakeOnCommand()));
     new Trigger(driverController::getBackButtonReleased)
         .onTrue(new InstantCommand(() -> AmpOuttakeOffCommand()));
-
     new Trigger(() -> driverController.getPOV() == 90)
         .onTrue(new InstantCommand(() -> elevatorUpCommand()));
     new Trigger(() -> driverController.getPOV() == 180)
         .onTrue(new InstantCommand(() -> elevatorDownCommand()));
-
-    // Add a button to run the example auto to SmartDashboard, this will also be in the auto chooser
-    // built above
-    SmartDashboard.putData("Example Auto", new PathPlannerAuto("Example Auto"));
-
-    // Add a button to SmartDashboard that will create and follow an on-the-fly path
-    // This example will simply move the robot 2m in the +X field direction
-
-    // 50 pos intake
-    // 51 negative intake
-    // both negative for outtake
   }
 
   public Command getAutonomousCommand() {
     // Load the path you want to follow using its name in the GUI
-    PathPlannerPath path = PathPlannerPath.fromPathFile("StraightPath");
+    // PathPlannerPath path = PathPlannerPath.fromPathFile("StraightPath");
+
     return new PathPlannerAuto("StraightAuto");
   }
 
