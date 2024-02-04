@@ -1,10 +1,16 @@
 package frc.robot;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -25,6 +31,8 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+
+  private final SendableChooser<Command> autoChooser;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -186,6 +194,8 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+    autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
+    SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
   /**
@@ -261,14 +271,27 @@ public class RobotContainer {
     new Trigger(() -> driverController.getPOV() == 180)
         .onTrue(new InstantCommand(() -> elevatorDownCommand()));
 
+    // Add a button to run the example auto to SmartDashboard, this will also be in the auto chooser
+    // built above
+    SmartDashboard.putData("Example Auto", new PathPlannerAuto("Example Auto"));
+
+    // Add a button to SmartDashboard that will create and follow an on-the-fly path
+    // This example will simply move the robot 2m in the +X field direction
+
     // 50 pos intake
     // 51 negative intake
     // both negative for outtake
-
-    /**
-     * Use this to pass the autonomous command to the main {@link Robot} class.
-     *
-     * @return the command to run in autonomous
-     */
   }
+
+  public Command getAutonomousCommand() {
+    // Load the path you want to follow using its name in the GUI
+    PathPlannerPath path = PathPlannerPath.fromPathFile("StraightPath");
+    return new PathPlannerAuto("StraightAuto");
+  }
+
+  /**
+   * Use this to pass the autonomous command to the main {@link Robot} class.
+   *
+   * @return the command to run in autonomous
+   */
 }

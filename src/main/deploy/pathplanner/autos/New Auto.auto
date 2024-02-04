@@ -1,16 +1,36 @@
 {
   "version": 1.0,
-  "startingPose": {
-    "position": {
-      "x": 1.3464015540130732,
-      "y": 5.531293435066112
-    },
-    "rotation": 0
-  },
+  "startingPose": null,
   "command": {
     "type": "sequential",
     "data": {
-      "commands": []
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Spin Straight"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 3.0
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "StraightPath"
+          }
+        }
+      ]
     }
   },
   "folder": null,

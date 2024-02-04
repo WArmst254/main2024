@@ -205,7 +205,6 @@ public class Drive extends SubsystemBase {
       headings[i] = getModuleTranslations()[i].getAngle();
     }
     kinematics.resetHeadings(headings);
-
     stop();
   }
 
@@ -229,8 +228,7 @@ public class Drive extends SubsystemBase {
     return states;
   }
 
-  /** Returns the module positions (turn angles and drive velocities) for all of the modules. */
-  @AutoLogOutput(key = "SwerveStates/Measured")
+  /** Returns the module positions (turn angles and drive positions) for all of the modules. */
   private SwerveModulePosition[] getModulePositions() {
     SwerveModulePosition[] states = new SwerveModulePosition[4];
     for (int i = 0; i < 4; i++) {

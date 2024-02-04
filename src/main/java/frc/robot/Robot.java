@@ -1,6 +1,5 @@
 package frc.robot;
 
-import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -17,16 +16,49 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  * project.
  */
 public class Robot extends LoggedRobot {
-  private Command autonomousCommand;
-  private RobotContainer robotContainer;
-  TalonFX elevator = new TalonFX(16, "CAN0");
+  private Command m_autonomousCommand;
+  private RobotContainer m_robotContainer;
+  // private static final boolean useTiming = false;
+  // TalonFX elevator = new TalonFX(16, "CAN0");
+  // private final MotionMagicVoltage m_mmReq =
+  //     new MotionMagicVoltage(0, true, 2, 0, true, useTiming, useTiming);
+  // private int m_printCount = 0;
+  // private final XboxController m_joystick = new XboxController(0);
 
+  // private final Mechanisms m_mechanisms = new Mechanisms();
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   @Override
   public void robotInit() {
+    // TalonFXConfiguration cfg = new TalonFXConfiguration();
+
+    // /* Configure current limits */
+    // MotionMagicConfigs mm = cfg.MotionMagic;
+    // mm.MotionMagicCruiseVelocity = 5; // 5 rotations per second cruise
+    // mm.MotionMagicAcceleration = 10; // Take approximately 0.5 seconds to reach max vel
+    // // Take approximately 0.2 seconds to reach max accel
+    // mm.MotionMagicJerk = 50;
+
+    // Slot0Configs slot0 = cfg.Slot0;
+    // slot0.kP = 60;
+    // slot0.kI = 0;
+    // slot0.kD = 0.1;
+    // slot0.kV = 0.12;
+    // slot0.kS = 0.25; // Approximately 0.25V to get the mechanism moving
+
+    // FeedbackConfigs fdb = cfg.Feedback;
+    // fdb.SensorToMechanismRatio = 12.8;
+
+    // StatusCode status = StatusCode.StatusCodeNotInitialized;
+    // for (int i = 0; i < 5; ++i) {
+    //   status = elevator.getConfigurator().apply(cfg);
+    //   if (status.isOK()) break;
+    // }
+    // if (!status.isOK()) {
+    //   System.out.println("Could not configure device. Error: " + status.toString());
+    // }
     // Record metadata
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
     Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
@@ -72,10 +104,10 @@ public class Robot extends LoggedRobot {
 
     // Start AdvantageKit logger
     Logger.start();
-
+    m_robotContainer = new RobotContainer();
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
-    robotContainer = new RobotContainer();
+
   }
 
   /** This function is called periodically during all modes. */
@@ -87,6 +119,13 @@ public class Robot extends LoggedRobot {
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    // if (m_printCount++ > 10) {
+    //   m_printCount = 0;
+    //   System.out.println("Pos: " + elevator.getPosition());
+    //   System.out.println("Vel: " + elevator.getVelocity());
+    //   System.out.println();
+    // }
+    // m_mechanisms.update(elevator.getPosition(), elevator.getVelocity());
   }
 
   /** This function is called once when the robot is disabled. */
@@ -100,10 +139,11 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
-    if (autonomousCommand != null) {
-      autonomousCommand.schedule();
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.schedule();
     }
   }
 
@@ -119,14 +159,20 @@ public class Robot extends LoggedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-    if (autonomousCommand != null) {
-      autonomousCommand.cancel();
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.cancel();
     }
   }
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    // double leftY = m_joystick.getLeftY();
+    // elevator.setControl(m_mmReq.withPosition(leftY * 10).withSlot(0));
+    // if (m_joystick.getBButton()) {
+    //   elevator.setPosition(1);
+    // }
+  }
 
   /** This function is called once when test mode is enabled. */
   @Override
