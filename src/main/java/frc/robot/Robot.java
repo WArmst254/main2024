@@ -18,14 +18,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
   private RobotContainer m_robotContainer;
-  // private static final boolean useTiming = false;
-  // TalonFX elevator = new TalonFX(16, "CAN0");
-  // private final MotionMagicVoltage m_mmReq =
-  //     new MotionMagicVoltage(0, true, 2, 0, true, useTiming, useTiming);
-  // private int m_printCount = 0;
-  // private final XboxController m_joystick = new XboxController(0);
 
-  // private final Mechanisms m_mechanisms = new Mechanisms();
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.

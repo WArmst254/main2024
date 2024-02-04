@@ -15,6 +15,9 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.IntakeWrist;
+import frc.robot.subsystems.ShootAngle;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -69,7 +72,7 @@ public class RobotContainer {
 
   private void shooterOnCommand() {
     shooterFeed.set(-1);
-    shooterLeft.set(-1);
+    shooterLeft.set(-.95);
     shooterRight.set(-.95);
   }
 
@@ -85,50 +88,35 @@ public class RobotContainer {
     shooterRight.set(0);
   }
 
-  private final TalonFX wrist = new TalonFX(17);
+  IntakeWrist wrist = new IntakeWrist();
 
   private void wristUpOnCommand() {
-    wrist.set(0.2);
-  }
-
-  private void wristUpOffCommand() {
-    wrist.set(0);
+    wrist.setSetpoint(1);
   }
 
   private void wristDownOnCommand() {
-    wrist.set(-0.2);
+    wrist.setSetpoint(0);
   }
 
-  private void wristDownOffCommand() {
-    wrist.set(0);
-  }
-
-  private final TalonFX shooterAngle = new TalonFX(15);
+  ShootAngle shootPid = new ShootAngle();
+  double angle = 0;
 
   private void shooterUpOnCommand() {
-    shooterAngle.set(0.05);
-  }
-
-  private void shooterUpOffCommand() {
-    shooterAngle.set(0);
+    shootPid.setSetpoint(angle = angle + .05);
   }
 
   private void shooterDownOnCommand() {
-    shooterAngle.set(-0.05);
+    shootPid.setSetpoint(angle = angle - .05);
   }
 
-  private void shooterDownOffCommand() {
-    shooterAngle.set(0);
-  }
-
-  private final TalonFX elevator = new TalonFX(16);
+  private final Elevator elePid = new Elevator();
 
   private void elevatorUpCommand() {
-    elevator.set(0.05);
+    elePid.setSetpoint(1);
   }
 
   private void elevatorDownCommand() {
-    shooterAngle.set(0);
+    elePid.setSetpoint(0);
   }
 
   private final TalonFX AmpLeft = new TalonFX(50);
@@ -205,12 +193,15 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    elePid.zero();
+    wrist.zero();
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
+
     new Trigger(driverController::getAButton)
         .whileTrue(new InstantCommand(() -> intakeOnCommand()));
 
@@ -234,28 +225,17 @@ public class RobotContainer {
         .onTrue(new InstantCommand(() -> shooterOffCommand()));
 
     new Trigger(driverController::getLeftBumper)
-        .whileTrue(new InstantCommand(() -> wristDownOnCommand()));
-
-    new Trigger(driverController::getLeftBumperReleased)
-        .onTrue(new InstantCommand(() -> wristDownOffCommand()));
+        .onTrue(new InstantCommand(() -> wristDownOnCommand()));
 
     new Trigger(driverController::getRightBumper)
-        .whileTrue(new InstantCommand(() -> wristUpOnCommand()));
-
-    new Trigger(driverController::getRightBumperReleased)
-        .whileTrue(new InstantCommand(() -> wristUpOffCommand()));
+        .onTrue(new InstantCommand(() -> wristUpOnCommand()));
 
     new Trigger(() -> driverController.getLeftTriggerAxis() > 0.1)
         .whileTrue(new InstantCommand(() -> shooterDownOnCommand()));
 
-    new Trigger(() -> driverController.getLeftTriggerAxis() < 0.1)
-        .onTrue(new InstantCommand(() -> shooterDownOffCommand()));
-
     new Trigger(() -> driverController.getRightTriggerAxis() > 0.1)
         .whileTrue(new InstantCommand(() -> shooterUpOnCommand()));
 
-    new Trigger(() -> driverController.getRightTriggerAxis() < 0.1)
-        .onTrue(new InstantCommand(() -> shooterUpOffCommand()));
     new Trigger(driverController::getStartButton)
         .onTrue(new InstantCommand(() -> HPIntakeOnCommand()));
 
