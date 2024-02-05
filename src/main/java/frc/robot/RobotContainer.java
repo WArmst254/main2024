@@ -140,6 +140,11 @@ public class RobotContainer {
     AmpRight.set(0);
   }
 
+  GyroIOPigeon2 gyro = new GyroIOPigeon2(true);
+  private void zeroGyro() {
+    zeroGyro();
+  }
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -202,41 +207,85 @@ public class RobotContainer {
             () -> -controller.getRightX()));
 
     new Trigger(driverController::getAButton)
-        .whileTrue(new InstantCommand(() -> intakeOnCommand()));
+        .whileTrue(
+          new InstantCommand(() -> intakeOnCommand())
+        );
     new Trigger(driverController::getAButtonReleased)
-        .onTrue(new InstantCommand(() -> intakeOffCommand()));
+        .onTrue(
+          new InstantCommand(() -> intakeOffCommand())
+        );
     new Trigger(driverController::getYButton)
-        .whileTrue(new InstantCommand(() -> outtakeOnCommand()));
+        .whileTrue(
+          new InstantCommand(() -> outtakeOnCommand())
+        );
     new Trigger(driverController::getYButtonReleased)
-        .onTrue(new InstantCommand(() -> outtakeOffCommand()));
+        .onTrue(
+          new InstantCommand(() -> outtakeOffCommand())
+        );
     new Trigger(driverController::getXButton)
-        .whileTrue(new InstantCommand(() -> shooterOnCommand()));
+        .whileTrue(
+          new InstantCommand(() -> shooterOnCommand())
+        );
     new Trigger(driverController::getBButton)
-        .whileTrue(new InstantCommand(() -> shooterInCommand()));
+        .whileTrue(
+          new InstantCommand(() -> shooterInCommand())
+        );
     new Trigger(driverController::getXButtonReleased)
-        .onTrue(new InstantCommand(() -> shooterOffCommand()));
+        .onTrue(
+          new InstantCommand(() -> shooterOffCommand())
+        );
     new Trigger(driverController::getBButtonReleased)
-        .onTrue(new InstantCommand(() -> shooterOffCommand()));
+        .onTrue(
+          new InstantCommand(() -> shooterOffCommand())
+        );
     new Trigger(driverController::getLeftBumper)
-        .onTrue(new InstantCommand(() -> wristDownOnCommand()));
+        .onTrue(
+          new InstantCommand(() -> wristDownOnCommand())
+        );
     new Trigger(driverController::getRightBumper)
-        .onTrue(new InstantCommand(() -> wristUpOnCommand()));
+        .onTrue(
+          new InstantCommand(() -> wristUpOnCommand())
+        );
     new Trigger(() -> driverController.getLeftTriggerAxis() > 0.1)
-        .whileTrue(new InstantCommand(() -> shooterDownOnCommand()));
+        .whileTrue(
+          new InstantCommand(() -> shooterDownOnCommand())
+        );
     new Trigger(() -> driverController.getRightTriggerAxis() > 0.1)
-        .whileTrue(new InstantCommand(() -> shooterUpOnCommand()));
+        .whileTrue(
+          new InstantCommand(() -> shooterUpOnCommand())
+        );
     new Trigger(driverController::getStartButton)
-        .onTrue(new InstantCommand(() -> HPIntakeOnCommand()));
-    new Trigger(driverController::getStartButtonReleased)
-        .onTrue(new InstantCommand(() -> HPIntakeOffCommand()));
+        .onTrue(
+          new InstantCommand(() -> zeroGyro())
+        );
     new Trigger(driverController::getBackButton)
-        .onTrue(new InstantCommand(() -> AmpOuttakeOnCommand()));
+        .onTrue(
+          new InstantCommand(() -> AmpOuttakeOnCommand())
+        );
     new Trigger(driverController::getBackButtonReleased)
-        .onTrue(new InstantCommand(() -> AmpOuttakeOffCommand()));
+        .onTrue(
+          new InstantCommand(() -> AmpOuttakeOffCommand())
+        );
     new Trigger(() -> driverController.getPOV() == 90)
-        .onTrue(new InstantCommand(() -> elevatorUpCommand()));
+        .onTrue(
+          new InstantCommand(() -> elevatorUpCommand())
+        );
     new Trigger(() -> driverController.getPOV() == 180)
-        .onTrue(new InstantCommand(() -> elevatorDownCommand()));
+        .onTrue(
+          new InstantCommand(() -> elevatorDownCommand())
+        );
+    new Trigger(() -> driverController.getPOV() == 0)
+         .onTrue(
+          new InstantCommand(() -> HPIntakeOnCommand())
+        );
+    new Trigger(() -> driverController.getPOV() != 0)
+        .onTrue(
+          new InstantCommand(() -> HPIntakeOffCommand())
+        );
+    new Trigger(driverController::getStartButton)
+        .onTrue(
+          new InstantCommand(() -> zeroGyro())
+        );
   }
 
   public Command getAutonomousCommand() {
