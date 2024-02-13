@@ -14,8 +14,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.IntakeWrist;
 import frc.robot.subsystems.ShootAngle;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -44,56 +42,48 @@ public class RobotContainer {
   /* Controllers */
 
   // Dashboard inputs
-  private final TalonFX intake = new TalonFX(62);
+  private final TalonFX intake = new TalonFX(17);
+  private final TalonFX feedFront = new TalonFX(13);
+  private final TalonFX feedBack = new TalonFX(14);
 
   private void intakeOnCommand() {
-    intake.set(0.95);
+    intake.set(0.75);
+    feedFront.set(-0.5);
+    feedBack.set(0.5);
   }
 
   private void intakeOffCommand() {
     intake.set(0);
+    feedFront.set(0);
+    feedBack.set(0);
   }
 
   private void outtakeOnCommand() {
-    intake.set(-0.95);
+    intake.set(-0.75);
   }
 
   private void outtakeOffCommand() {
     intake.set(0);
   }
 
-  private final TalonFX shooterFeed = new TalonFX(60);
   private final CANSparkFlex shooterLeft =
-      new CANSparkFlex(20, CANSparkLowLevel.MotorType.kBrushless);
-  private final CANSparkFlex shooterRight =
       new CANSparkFlex(19, CANSparkLowLevel.MotorType.kBrushless);
+  private final CANSparkFlex shooterRight =
+      new CANSparkFlex(20, CANSparkLowLevel.MotorType.kBrushless);
 
   private void shooterOnCommand() {
-    shooterFeed.set(-1);
     shooterLeft.set(-.95);
     shooterRight.set(-.95);
   }
 
   private void shooterInCommand() {
-    shooterFeed.set(1);
     shooterLeft.set(1);
     shooterRight.set(.95);
   }
 
   private void shooterOffCommand() {
-    shooterFeed.set(0);
     shooterLeft.set(0);
     shooterRight.set(0);
-  }
-
-  IntakeWrist wrist = new IntakeWrist();
-
-  private void wristUpOnCommand() {
-    wrist.setSetpoint(1);
-  }
-
-  private void wristDownOnCommand() {
-    wrist.setSetpoint(0);
   }
 
   ShootAngle shootPid = new ShootAngle();
@@ -107,18 +97,18 @@ public class RobotContainer {
     shootPid.setSetpoint(angle = angle - .05);
   }
 
-  private final Elevator elePid = new Elevator();
+  // private final Elevator elePid = new Elevator();
 
-  private void elevatorUpCommand() {
-    elePid.setSetpoint(1);
-  }
+  // private void elevatorUpCommand() {
+  //   elePid.setSetpoint(1);
+  // }
 
-  private void elevatorDownCommand() {
-    elePid.setSetpoint(0);
-  }
+  // private void elevatorDownCommand() {
+  //   elePid.setSetpoint(0);
+  // }
 
-  private final TalonFX AmpLeft = new TalonFX(50);
-  private final TalonFX AmpRight = new TalonFX(51);
+  private final TalonFX AmpLeft = new TalonFX(18);
+  private final TalonFX AmpRight = new TalonFX(19);
 
   private void AmpOuttakeOnCommand() {
     AmpLeft.set(-.5);
@@ -130,19 +120,10 @@ public class RobotContainer {
     AmpRight.set(0);
   }
 
-  private void HPIntakeOnCommand() {
-    AmpLeft.set(.5);
-    AmpRight.set(-.5);
-  }
-
-  private void HPIntakeOffCommand() {
-    AmpLeft.set(0);
-    AmpRight.set(0);
-  }
-
   GyroIOPigeon2 gyro = new GyroIOPigeon2(true);
-  private void zeroGyro() {
-    zeroGyro();
+
+  private void zeroSwerveGyro() {
+    gyro.zeroGyro();
   }
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -196,8 +177,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    elePid.zero();
-    wrist.zero();
+    // elePid.zero();
 
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -207,85 +187,37 @@ public class RobotContainer {
             () -> -controller.getRightX()));
 
     new Trigger(driverController::getAButton)
-        .whileTrue(
-          new InstantCommand(() -> intakeOnCommand())
-        );
+        .whileTrue(new InstantCommand(() -> intakeOnCommand()));
     new Trigger(driverController::getAButtonReleased)
-        .onTrue(
-          new InstantCommand(() -> intakeOffCommand())
-        );
+        .onTrue(new InstantCommand(() -> intakeOffCommand()));
     new Trigger(driverController::getYButton)
-        .whileTrue(
-          new InstantCommand(() -> outtakeOnCommand())
-        );
+        .whileTrue(new InstantCommand(() -> outtakeOnCommand()));
     new Trigger(driverController::getYButtonReleased)
-        .onTrue(
-          new InstantCommand(() -> outtakeOffCommand())
-        );
+        .onTrue(new InstantCommand(() -> outtakeOffCommand()));
     new Trigger(driverController::getXButton)
-        .whileTrue(
-          new InstantCommand(() -> shooterOnCommand())
-        );
+        .whileTrue(new InstantCommand(() -> shooterOnCommand()));
     new Trigger(driverController::getBButton)
-        .whileTrue(
-          new InstantCommand(() -> shooterInCommand())
-        );
+        .whileTrue(new InstantCommand(() -> shooterInCommand()));
     new Trigger(driverController::getXButtonReleased)
-        .onTrue(
-          new InstantCommand(() -> shooterOffCommand())
-        );
+        .onTrue(new InstantCommand(() -> shooterOffCommand()));
     new Trigger(driverController::getBButtonReleased)
-        .onTrue(
-          new InstantCommand(() -> shooterOffCommand())
-        );
-    new Trigger(driverController::getLeftBumper)
-        .onTrue(
-          new InstantCommand(() -> wristDownOnCommand())
-        );
-    new Trigger(driverController::getRightBumper)
-        .onTrue(
-          new InstantCommand(() -> wristUpOnCommand())
-        );
+        .onTrue(new InstantCommand(() -> shooterOffCommand()));
     new Trigger(() -> driverController.getLeftTriggerAxis() > 0.1)
-        .whileTrue(
-          new InstantCommand(() -> shooterDownOnCommand())
-        );
+        .whileTrue(new InstantCommand(() -> shooterDownOnCommand()));
     new Trigger(() -> driverController.getRightTriggerAxis() > 0.1)
-        .whileTrue(
-          new InstantCommand(() -> shooterUpOnCommand())
-        );
+        .whileTrue(new InstantCommand(() -> shooterUpOnCommand()));
     new Trigger(driverController::getStartButton)
-        .onTrue(
-          new InstantCommand(() -> zeroGyro())
-        );
-    new Trigger(driverController::getBackButton)
-        .onTrue(
-          new InstantCommand(() -> AmpOuttakeOnCommand())
-        );
-    new Trigger(driverController::getBackButtonReleased)
-        .onTrue(
-          new InstantCommand(() -> AmpOuttakeOffCommand())
-        );
-    new Trigger(() -> driverController.getPOV() == 90)
-        .onTrue(
-          new InstantCommand(() -> elevatorUpCommand())
-        );
-    new Trigger(() -> driverController.getPOV() == 180)
-        .onTrue(
-          new InstantCommand(() -> elevatorDownCommand())
-        );
+        .onTrue(new InstantCommand(() -> zeroSwerveGyro()));
     new Trigger(() -> driverController.getPOV() == 0)
-         .onTrue(
-          new InstantCommand(() -> HPIntakeOnCommand())
-        );
+        .onTrue(new InstantCommand(() -> AmpOuttakeOnCommand()));
     new Trigger(() -> driverController.getPOV() != 0)
-        .onTrue(
-          new InstantCommand(() -> HPIntakeOffCommand())
-        );
-    new Trigger(driverController::getStartButton)
-        .onTrue(
-          new InstantCommand(() -> zeroGyro())
-        );
+        .onTrue(new InstantCommand(() -> AmpOuttakeOffCommand()));
+    // new Trigger(() -> driverController.getPOV() == 90)
+    //     .onTrue(new InstantCommand(() -> elevatorUpCommand()));
+    // new Trigger(() -> driverController.getPOV() == 180)
+    //     .onTrue(new InstantCommand(() -> elevatorDownCommand()));
+    // new Trigger(driverController::getBackButton).onTrue(new InstantCommand(() ->
+    // zeroSwerveGyro()));
   }
 
   public Command getAutonomousCommand() {

@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Elevator extends SubsystemBase {
-  public final TalonFX eleMotor = new TalonFX(16);
+  public final TalonFX eleMotor = new TalonFX(20);
   public final PIDController pid = new PIDController(0.4, .01, 0);
   private double setPoint = 0;
 
