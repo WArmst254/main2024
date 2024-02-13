@@ -14,13 +14,14 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.ShootAngle;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.shootangle.ShootAngle;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -87,15 +88,16 @@ public class RobotContainer {
   }
 
   ShootAngle shootPid = new ShootAngle();
+
   double angle = 0;
 
-  private void shooterUpOnCommand() {
-    shootPid.setSetpoint(angle = angle + .05);
-  }
+  // private void shooterUpOnCommand() {
+  //   shootPid.setSetpoint(angle = angle + .05);
+  // }
 
-  private void shooterDownOnCommand() {
-    shootPid.setSetpoint(angle = angle - .05);
-  }
+  // private void shooterDownOnCommand() {
+  //   shootPid.setSetpoint(angle = angle - .05);
+  // }
 
   // private final Elevator elePid = new Elevator();
 
@@ -124,6 +126,26 @@ public class RobotContainer {
 
   private void zeroSwerveGyro() {
     gyro.zeroGyro();
+  }
+
+  Elevator elevator = new Elevator();
+
+  private void setElevatorPos() {
+    elevator.setElevatorPosition();
+  }
+
+  private void homeElevatorPos() {
+    elevator.homeElevator();
+  }
+
+  ShootAngle shootAngle = new ShootAngle();
+
+  private void setShootAnglePos() {
+    shootAngle.setShootAnglePosition();
+  }
+
+  private void homeShootAnglePos() {
+    shootAngle.homeShootAngle();
   }
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -178,6 +200,8 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // elePid.zero();
+    elevator.zeroElevatorPosition();
+    shootAngle.zeroShootAnglePosition();
 
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -203,21 +227,20 @@ public class RobotContainer {
     new Trigger(driverController::getBButtonReleased)
         .onTrue(new InstantCommand(() -> shooterOffCommand()));
     new Trigger(() -> driverController.getLeftTriggerAxis() > 0.1)
-        .whileTrue(new InstantCommand(() -> shooterDownOnCommand()));
+        .whileTrue(new InstantCommand(() -> setShootAnglePos()));
     new Trigger(() -> driverController.getRightTriggerAxis() > 0.1)
-        .whileTrue(new InstantCommand(() -> shooterUpOnCommand()));
+        .whileTrue(new InstantCommand(() -> homeShootAnglePos()));
     new Trigger(driverController::getStartButton)
         .onTrue(new InstantCommand(() -> zeroSwerveGyro()));
     new Trigger(() -> driverController.getPOV() == 0)
         .onTrue(new InstantCommand(() -> AmpOuttakeOnCommand()));
     new Trigger(() -> driverController.getPOV() != 0)
         .onTrue(new InstantCommand(() -> AmpOuttakeOffCommand()));
-    // new Trigger(() -> driverController.getPOV() == 90)
-    //     .onTrue(new InstantCommand(() -> elevatorUpCommand()));
-    // new Trigger(() -> driverController.getPOV() == 180)
-    //     .onTrue(new InstantCommand(() -> elevatorDownCommand()));
-    // new Trigger(driverController::getBackButton).onTrue(new InstantCommand(() ->
-    // zeroSwerveGyro()));
+    new Trigger(() -> driverController.getPOV() == 90)
+        .onTrue(new InstantCommand(() -> setElevatorPos()));
+    new Trigger(() -> driverController.getPOV() == 180)
+        .onTrue(new InstantCommand(() -> homeElevatorPos()));
+    new Trigger(driverController::getBackButton).onTrue(new InstantCommand(() -> zeroSwerveGyro()));
   }
 
   public Command getAutonomousCommand() {
