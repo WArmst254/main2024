@@ -38,7 +38,6 @@ public class RobotContainer {
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
   private final XboxController driverController = new XboxController(0);
-  // private final XboxController operatorController = new XboxController(1);
 
   /* Controllers */
 
@@ -48,9 +47,9 @@ public class RobotContainer {
   private final TalonFX feedBack = new TalonFX(14);
 
   private void intakeOnCommand() {
-    intake.set(0.75);
-    feedFront.set(-0.5);
-    feedBack.set(0.5);
+    intake.set(1);
+    feedFront.set(-0.95);
+    feedBack.set(0.95);
   }
 
   private void intakeOffCommand() {
@@ -59,12 +58,16 @@ public class RobotContainer {
     feedBack.set(0);
   }
 
-  private void outtakeOnCommand() {
-    intake.set(-0.75);
+   void outtakeOnCommand() {
+    intake.set(-0.95);
+    feedFront.set(0.95);
+    feedBack.set(-0.95);
   }
 
   private void outtakeOffCommand() {
     intake.set(0);
+    feedFront.set(0);
+    feedBack.set(0);
   }
 
   private final CANSparkFlex shooterLeft =
@@ -78,7 +81,7 @@ public class RobotContainer {
   }
 
   private void shooterInCommand() {
-    shooterLeft.set(1);
+    shooterLeft.set(0.95);
     shooterRight.set(.95);
   }
 
@@ -89,32 +92,12 @@ public class RobotContainer {
 
   ShootAngle shootPid = new ShootAngle();
 
-  double angle = 0;
-
-  // private void shooterUpOnCommand() {
-  //   shootPid.setSetpoint(angle = angle + .05);
-  // }
-
-  // private void shooterDownOnCommand() {
-  //   shootPid.setSetpoint(angle = angle - .05);
-  // }
-
-  // private final Elevator elePid = new Elevator();
-
-  // private void elevatorUpCommand() {
-  //   elePid.setSetpoint(1);
-  // }
-
-  // private void elevatorDownCommand() {
-  //   elePid.setSetpoint(0);
-  // }
-
   private final TalonFX AmpLeft = new TalonFX(18);
   private final TalonFX AmpRight = new TalonFX(19);
 
   private void AmpOuttakeOnCommand() {
-    AmpLeft.set(-.5);
-    AmpRight.set(-.5);
+    AmpLeft.set(-.95);
+    AmpRight.set(-.95);
   }
 
   private void AmpOuttakeOffCommand() {
@@ -199,7 +182,6 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    // elePid.zero();
     elevator.zeroElevatorPosition();
     shootAngle.zeroShootAnglePosition();
 
@@ -214,33 +196,39 @@ public class RobotContainer {
         .whileTrue(new InstantCommand(() -> intakeOnCommand()));
     new Trigger(driverController::getAButtonReleased)
         .onTrue(new InstantCommand(() -> intakeOffCommand()));
+
     new Trigger(driverController::getYButton)
         .whileTrue(new InstantCommand(() -> outtakeOnCommand()));
     new Trigger(driverController::getYButtonReleased)
         .onTrue(new InstantCommand(() -> outtakeOffCommand()));
+
     new Trigger(driverController::getXButton)
         .whileTrue(new InstantCommand(() -> shooterOnCommand()));
-    new Trigger(driverController::getBButton)
-        .whileTrue(new InstantCommand(() -> shooterInCommand()));
     new Trigger(driverController::getXButtonReleased)
         .onTrue(new InstantCommand(() -> shooterOffCommand()));
+
+    new Trigger(driverController::getBButton)
+        .whileTrue(new InstantCommand(() -> shooterInCommand()));
     new Trigger(driverController::getBButtonReleased)
         .onTrue(new InstantCommand(() -> shooterOffCommand()));
-    new Trigger(() -> driverController.getLeftTriggerAxis() > 0.1)
+
+    new Trigger(driverController::getLeftBumper)
         .whileTrue(new InstantCommand(() -> setShootAnglePos()));
+    new Trigger(driverController::getLeftBumperReleased)
+        .onTrue(new InstantCommand(() -> homeShootAnglePos()));
+
     new Trigger(() -> driverController.getRightTriggerAxis() > 0.1)
-        .whileTrue(new InstantCommand(() -> homeShootAnglePos()));
-    new Trigger(driverController::getStartButton)
-        .onTrue(new InstantCommand(() -> zeroSwerveGyro()));
-    new Trigger(() -> driverController.getPOV() == 0)
-        .onTrue(new InstantCommand(() -> AmpOuttakeOnCommand()));
-    new Trigger(() -> driverController.getPOV() != 0)
+        .whileTrue(new InstantCommand(() -> AmpOuttakeOnCommand()));
+    new Trigger(() -> driverController.getRightTriggerAxis() <= 0.1)
         .onTrue(new InstantCommand(() -> AmpOuttakeOffCommand()));
-    new Trigger(() -> driverController.getPOV() == 90)
+
+    new Trigger(() -> driverController.getPOV() == 0)
         .onTrue(new InstantCommand(() -> setElevatorPos()));
     new Trigger(() -> driverController.getPOV() == 180)
         .onTrue(new InstantCommand(() -> homeElevatorPos()));
-    new Trigger(driverController::getBackButton).onTrue(new InstantCommand(() -> zeroSwerveGyro()));
+
+    new Trigger(() -> driverController.getBackButton() || driverController.getStartButton())
+        .onTrue(new InstantCommand(() -> zeroSwerveGyro()));
   }
 
   public Command getAutonomousCommand() {
