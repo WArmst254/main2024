@@ -58,7 +58,7 @@ public class RobotContainer {
     feedBack.set(0);
   }
 
-   void outtakeOnCommand() {
+  void outtakeOnCommand() {
     intake.set(-0.95);
     feedFront.set(0.95);
     feedBack.set(-0.95);
@@ -119,6 +119,10 @@ public class RobotContainer {
 
   private void homeElevatorPos() {
     elevator.homeElevator();
+  }
+
+  private void setHomeposEle() {
+    elevator.setHomePos();
   }
 
   ShootAngle shootAngle = new ShootAngle();
@@ -224,8 +228,10 @@ public class RobotContainer {
 
     new Trigger(() -> driverController.getPOV() == 0)
         .onTrue(new InstantCommand(() -> setElevatorPos()));
-    new Trigger(() -> driverController.getPOV() == 180)
+    new Trigger(() -> driverController.getPOV() == 90)
         .onTrue(new InstantCommand(() -> homeElevatorPos()));
+    new Trigger(() -> driverController.getPOV() == 270)
+        .onTrue(new InstantCommand(() -> setHomeposEle()));
 
     new Trigger(() -> driverController.getBackButton() || driverController.getStartButton())
         .onTrue(new InstantCommand(() -> zeroSwerveGyro()));

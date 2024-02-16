@@ -20,20 +20,20 @@ public class Elevator extends SubsystemBase {
 
     /* Configure current limits */
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.MotionMagicCruiseVelocity = 5; // 5 rotations per second cruise
-    mm.MotionMagicAcceleration = 10; // Take approximately 0.5 seconds to reach max vel
+    mm.MotionMagicCruiseVelocity = 100; // 5 rotations per second cruise
+    mm.MotionMagicAcceleration = 100; // Take approximately 0.5 seconds to reach max vel
     // Take approximately 0.2 seconds to reach max accel
-    mm.MotionMagicJerk = 50;
+    mm.MotionMagicJerk = 180;
 
     Slot0Configs slot0 = cfg.Slot0;
-    slot0.kP = 10;
-    slot0.kI = 0;
-    slot0.kD = 0.1;
-    slot0.kV = 0.12;
-    slot0.kS = 0.25; // Approximately 0.25V to get the mechanism moving
+    slot0.kP = 100;
+    slot0.kI = .2;
+    slot0.kD = 0.4;
+    slot0.kV = 1.2;
+    slot0.kS = 1; // Approximately 0.25V to get the mechanism moving
 
     FeedbackConfigs fdb = cfg.Feedback;
-    fdb.SensorToMechanismRatio = 12.8;
+    fdb.SensorToMechanismRatio = 52;
 
     StatusCode status = StatusCode.StatusCodeNotInitialized;
     for (int i = 0; i < 5; ++i) {
@@ -48,11 +48,13 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber("Elevator Pos: ", elevator.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("Elevator Vel: ", elevator.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("ELEPWr", elevator.get());
+    SmartDashboard.putNumber("ele voltage", elevator.getMotorVoltage().getValueAsDouble());
     System.out.println();
   }
 
   public void setElevatorPosition() {
-    elevator.setControl(m_mmReq.withPosition(-1.2).withSlot(0));
+    elevator.setControl(m_mmReq.withPosition(-1).withSlot(0));
   }
 
   public void homeElevator() {
@@ -61,5 +63,13 @@ public class Elevator extends SubsystemBase {
 
   public void zeroElevatorPosition() {
     elevator.setPosition(0);
+  }
+
+  public void setHomePos() {
+    elevator.set(.2);
+    if (elevator.getMotorVoltage().getValueAsDouble() > .5) {
+      zeroElevatorPosition();
+      elevator.set(0);
+    }
   }
 }
