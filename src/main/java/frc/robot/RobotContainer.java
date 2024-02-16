@@ -3,8 +3,6 @@ package frc.robot;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkLowLevel;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -22,6 +20,7 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.shootangle.ShootAngle;
+import frc.robot.subsystems.shooter.Shooter;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -70,25 +69,20 @@ public class RobotContainer {
     feedBack.set(0);
   }
 
-  private final CANSparkFlex shooterLeft =
-      new CANSparkFlex(19, CANSparkLowLevel.MotorType.kBrushless);
-  private final CANSparkFlex shooterRight =
-      new CANSparkFlex(20, CANSparkLowLevel.MotorType.kBrushless);
+  // private final CANSparkFlex shooterLeft =
+  //     new CANSparkFlex(19, CANSparkLowLevel.MotorType.kBrushless);
 
-  private void shooterOnCommand() {
-    shooterLeft.set(-.95);
-    shooterRight.set(-.95);
-  }
+  // private void shooterOnCommand() {
+  //   shooterLeft.set(-.95);
+  // }
 
-  private void shooterInCommand() {
-    shooterLeft.set(0.95);
-    shooterRight.set(.95);
-  }
+  // private void shooterInCommand() {
+  //   shooterLeft.set(0.95);
+  // }
 
-  private void shooterOffCommand() {
-    shooterLeft.set(0);
-    shooterRight.set(0);
-  }
+  // private void shooterOffCommand() {
+  //   shooterLeft.set(0);
+  // }
 
   ShootAngle shootPid = new ShootAngle();
 
@@ -123,6 +117,12 @@ public class RobotContainer {
 
   private void setHomeposEle() {
     elevator.setHomePos();
+  }
+
+  Shooter shooter = new Shooter();
+
+  private void autofeedShooter() {
+    shooter.shooterAutoOnCommand();
   }
 
   ShootAngle shootAngle = new ShootAngle();
@@ -206,20 +206,23 @@ public class RobotContainer {
     new Trigger(driverController::getYButtonReleased)
         .onTrue(new InstantCommand(() -> outtakeOffCommand()));
 
-    new Trigger(driverController::getXButton)
-        .whileTrue(new InstantCommand(() -> shooterOnCommand()));
-    new Trigger(driverController::getXButtonReleased)
-        .onTrue(new InstantCommand(() -> shooterOffCommand()));
+    // new Trigger(driverController::getXButton)
+    //     .whileTrue(new InstantCommand(() -> shooterOnCommand()));
+    // new Trigger(driverController::getXButtonReleased)
+    //     .onTrue(new InstantCommand(() -> shooterOffCommand()));
 
-    new Trigger(driverController::getBButton)
-        .whileTrue(new InstantCommand(() -> shooterInCommand()));
-    new Trigger(driverController::getBButtonReleased)
-        .onTrue(new InstantCommand(() -> shooterOffCommand()));
+    // new Trigger(driverController::getBButton)
+    //     .whileTrue(new InstantCommand(() -> shooterInCommand()));
+    // new Trigger(driverController::getBButtonReleased)
+    //     .onTrue(new InstantCommand(() -> shooterOffCommand()));
 
     new Trigger(driverController::getLeftBumper)
         .whileTrue(new InstantCommand(() -> setShootAnglePos()));
     new Trigger(driverController::getLeftBumperReleased)
         .onTrue(new InstantCommand(() -> homeShootAnglePos()));
+
+    new Trigger(driverController::getRightBumper)
+        .whileTrue(new InstantCommand(() -> autofeedShooter()));
 
     new Trigger(() -> driverController.getRightTriggerAxis() > 0.1)
         .whileTrue(new InstantCommand(() -> AmpOuttakeOnCommand()));
