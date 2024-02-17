@@ -31,6 +31,7 @@ import frc.robot.subsystems.shooter.Shooter;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Shooter shooter = new Shooter();
 
   private final SendableChooser<Command> autoChooser;
 
@@ -119,11 +120,11 @@ public class RobotContainer {
     elevator.setHomePos();
   }
 
-  Shooter shooter = new Shooter();
+  // Shooter shooter = new Shooter();
 
-  private void autofeedShooter() {
-    shooter.shooterAutoOnCommand();
-  }
+  // private void autofeedShooter() {
+  //   shooter.shootCommand(6000);
+  // }
 
   ShootAngle shootAngle = new ShootAngle();
 
@@ -221,8 +222,7 @@ public class RobotContainer {
     new Trigger(driverController::getLeftBumperReleased)
         .onTrue(new InstantCommand(() -> homeShootAnglePos()));
 
-    new Trigger(driverController::getRightBumper)
-        .whileTrue(new InstantCommand(() -> autofeedShooter()));
+    new Trigger(driverController::getRightBumper).whileTrue(shooter.shootCommand(64));
 
     new Trigger(() -> driverController.getRightTriggerAxis() > 0.1)
         .whileTrue(new InstantCommand(() -> AmpOuttakeOnCommand()));
