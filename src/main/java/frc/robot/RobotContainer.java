@@ -9,9 +9,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.IntakeAutoOff;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -19,6 +21,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shootangle.ShootAngle;
 import frc.robot.subsystems.shooter.Shooter;
 
@@ -32,9 +35,9 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Shooter shooter = new Shooter();
+  private final Intake intake = new Intake();
 
   private final SendableChooser<Command> autoChooser;
-
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
   private final XboxController driverController = new XboxController(0);
@@ -42,32 +45,38 @@ public class RobotContainer {
   /* Controllers */
 
   // Dashboard inputs
-  private final TalonFX intake = new TalonFX(17);
-  private final TalonFX feedFront = new TalonFX(13);
-  private final TalonFX feedBack = new TalonFX(14);
+  // private final TalonFX intake = new TalonFX(17);
+  // private final TalonFX feedFront = new TalonFX(13);
+  // private final TalonFX feedBack = new TalonFX(14);
 
   private void intakeOnCommand() {
-    intake.set(1);
-    feedFront.set(-0.95);
-    feedBack.set(0.95);
+    intake.autoIntake();
+    // intakeon = new IntakeAutoOff();
+    // intake.set(1);
+    // feedFront.set(-0.95);
+    // feedBack.set(0.95);
   }
 
   private void intakeOffCommand() {
-    intake.set(0);
-    feedFront.set(0);
-    feedBack.set(0);
+    intake.intakeOff();
+    // intake.set(0);
+    // feedFront.set(0);
+    // feedBack.set(0);
   }
 
   void outtakeOnCommand() {
-    intake.set(-0.95);
-    feedFront.set(0.95);
-    feedBack.set(-0.95);
+    intake.outakeOnShoot();
+    System.out.println("running");
+    // intake.set(-0.95);
+    // feedFront.set(0.95);
+    // feedBack.set(-0.95);
   }
 
   private void outtakeOffCommand() {
-    intake.set(0);
-    feedFront.set(0);
-    feedBack.set(0);
+    intake.intakeOff();
+    // intake.set(0);
+    // feedFront.set(0);
+    // feedBack.set(0);
   }
 
   // private final CANSparkFlex shooterLeft =
@@ -198,9 +207,8 @@ public class RobotContainer {
             () -> -controller.getRightX()));
 
     new Trigger(driverController::getAButton)
-        .whileTrue(new InstantCommand(() -> intakeOnCommand()));
-    new Trigger(driverController::getAButtonReleased)
-        .onTrue(new InstantCommand(() -> intakeOffCommand()));
+        .whileTrue(new RepeatCommand(IntakeAutoOff.intakeAuto()))
+        .onFalse(new InstantCommand(() -> intakeOffCommand()));
 
     new Trigger(driverController::getYButton)
         .whileTrue(new InstantCommand(() -> outtakeOnCommand()));
