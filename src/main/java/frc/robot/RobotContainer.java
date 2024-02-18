@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -182,10 +183,14 @@ public class RobotContainer {
                 new ModuleIO() {});
         break;
     }
-
+    NamedCommands.registerCommand("shoot", shooter.shootCommand(70));
+    NamedCommands.registerCommand("shootoff", shooter.disableShooter());
+    NamedCommands.registerCommand("intake", IntakeAutoOff.intakeAuto());
+    NamedCommands.registerCommand("sensorshoot", shooter.shootCommandSensor(65));
     // Configure the button bindings
     configureButtonBindings();
     autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
+
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
@@ -230,7 +235,7 @@ public class RobotContainer {
     new Trigger(driverController::getLeftBumperReleased)
         .onTrue(new InstantCommand(() -> homeShootAnglePos()));
 
-    new Trigger(driverController::getRightBumper).whileTrue(shooter.shootCommand(64));
+    new Trigger(driverController::getRightBumper).whileTrue(shooter.teleshootCommand(70));
 
     new Trigger(() -> driverController.getRightTriggerAxis() > 0.1)
         .whileTrue(new InstantCommand(() -> AmpOuttakeOnCommand()));

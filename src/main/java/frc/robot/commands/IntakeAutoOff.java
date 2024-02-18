@@ -9,12 +9,39 @@ public class IntakeAutoOff {
   public static Command intakeAuto() {
     Intake intake = new Intake();
     return (Commands.run(
-        () -> {
-          if (!intake.frontSensorOut()) {
-            intake.intakeOnShoot();
-          } else {
-            intake.intakeOff();
-          }
-        }));
+            () -> {
+              if (!intake.backSensorOut()) {
+                intake.intakeOnShoot();
+              } else {
+                intake.intakeOff();
+              }
+            })
+        .until(intake::backSensorOut));
+  }
+
+  public static Command intakeAuton() {
+    Intake intake = new Intake();
+    return (Commands.run(
+            () -> {
+              if (!intake.backSensorOut()) {
+                intake.intakeOnShoot();
+              } else {
+                intake.intakeOff();
+              }
+            })
+        .withTimeout(1.5));
+  }
+
+  public static Command intakeAutonSensor() {
+    Intake intake = new Intake();
+    return (Commands.run(
+            () -> {
+              if (!intake.backSensorOut()) {
+                intake.intakeOnShoot();
+              } else {
+                intake.intakeOff();
+              }
+            })
+        .until(intake::frontSensorOut));
   }
 }

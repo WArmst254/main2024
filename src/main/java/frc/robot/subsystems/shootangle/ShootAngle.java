@@ -28,7 +28,7 @@ public class ShootAngle extends SubsystemBase {
     mm.MotionMagicJerk = 50;
 
     Slot0Configs slot0 = cfg.Slot0;
-    slot0.kP = 10;
+    slot0.kP = 11;
     slot0.kI = 0;
     slot0.kD = 0.1;
     slot0.kV = 0.12;

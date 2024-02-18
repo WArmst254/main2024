@@ -46,11 +46,15 @@ public class Intake extends SubsystemBase {
   }
 
   public boolean frontSensorOut() {
-    return (front_Sensor.getRange() < 375);
+    return (front_Sensor.getRange() < 300);
   }
 
   public boolean backSensorOut() {
-    return (shoot_Sensor.getRange() < 350);
+    return (shoot_Sensor.getRange() < 300);
+  }
+
+  public boolean invbackSensorOut() {
+    return !(shoot_Sensor.getRange() < 300);
   }
 
   public void autoIntake() {
