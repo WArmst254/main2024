@@ -9,12 +9,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.AmpAutoOff;
+import frc.robot.commands.AmpAuto;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.IntakeAutoOff;
+import frc.robot.commands.IntakeAuto;
+import frc.robot.commands.ShootAuto;
 import frc.robot.subsystems.amp.Amp;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -39,61 +39,20 @@ public class RobotContainer {
   private final Shooter shooter = new Shooter();
   private final Amp amp = new Amp();
   private final Intake intake = new Intake();
-
+  private final Elevator elevator = new Elevator();
+  private final GyroIOPigeon2 gyro = new GyroIOPigeon2(true);
+  private final ShootAngle shootAngle = new ShootAngle();
+  //Auto Chooser
   private final SendableChooser<Command> autoChooser;
-  // Controller
+  // Controllers
   private final CommandXboxController controller = new CommandXboxController(0);
   private final XboxController driverController = new XboxController(0);
-
-  /* Controllers */
-
-  // Dashboard inputs
-  // private final TalonFX intake = new TalonFX(17);
-  // private final TalonFX feedFront = new TalonFX(13);
-  // private final TalonFX feedBack = new TalonFX(14);
-
-  private void intakeOnCommand() {
-    intake.autoIntake();
-    // intakeon = new IntakeAutoOff();
-    // intake.set(1);
-    // feedFront.set(-0.95);
-    // feedBack.set(0.95);
-  }
-
-  private void intakeOffCommand() {
-    intake.intakeOff();
-  }
-
-  void outtakeOnCommand() {
-    intake.outakeOnShoot();
-    System.out.println("running");
-  }
-
-  private void outtakeOffCommand() {
-    intake.intakeOff();
-  }
-
-  ShootAngle shootPid = new ShootAngle();
-
-  // private final TalonFX AmpLeft = new TalonFX(18);
-  // private final TalonFX AmpRight = new TalonFX(19);
-
-  private void AmpOuttakeOnCommand() {
-    amp.AmpOuttakeOn();
-  }
-
-  private void AmpOuttakeOffCommand() {
-    amp.AmpOuttakeOff();
-  }
-
-  GyroIOPigeon2 gyro = new GyroIOPigeon2(true);
+  private final XboxController operatorController = new XboxController(1);
 
   private void zeroSwerveGyro() {
     gyro.zeroGyro();
   }
-
-  Elevator elevator = new Elevator();
-
+  
   private void setElevatorPos() {
     elevator.setElevatorPosition();
   }
@@ -103,16 +62,8 @@ public class RobotContainer {
   }
 
   private void setHomeposEle() {
-    elevator.setHomePos();
+    elevator.setElevatorHomePosition();
   }
-
-  // Shooter shooter = new Shooter();
-
-  // private void autofeedShooter() {
-  //   shooter.shootCommand(6000);
-  // }
-
-  ShootAngle shootAngle = new ShootAngle();
 
   private void setShootAnglePos() {
     shootAngle.setShootAnglePosition();
@@ -159,14 +110,14 @@ public class RobotContainer {
                 new ModuleIO() {});
         break;
     }
-    NamedCommands.registerCommand("shoot", shooter.shootCommand(70));
+    NamedCommands.registerCommand("shoot", ShootAuto.shootAuto());
     NamedCommands.registerCommand("shootoff", shooter.disableShooter());
-    NamedCommands.registerCommand("intakeshoot", IntakeAutoOff.intakeShootAuto());
+    NamedCommands.registerCommand("intakeshoot", IntakeAuto.intakeShootAuto());
     NamedCommands.registerCommand("elevatorup", elevator.autoAmpElevator());
     NamedCommands.registerCommand("elevatordown", elevator.autoHomeElevator());
-    NamedCommands.registerCommand("amp", AmpAutoOff.ampAuto());
+    NamedCommands.registerCommand("amp", AmpAuto.ampAuto());
     NamedCommands.registerCommand("ampoff", amp.disableAmp());
-    NamedCommands.registerCommand("intakeamp", IntakeAutoOff.intakeAmpAuto());
+    NamedCommands.registerCommand("intakeamp", IntakeAuto.intakeAmpAuto());
     NamedCommands.registerCommand("intakeoff", intake.disableIntake());
     // Configure the button bindings
     configureButtonBindings();
@@ -182,6 +133,11 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    Command intakeCommand = IntakeAuto.intakeShootAuto();
+    Command outakeCommand = IntakeAuto.outakeShootAuto();
+    Command scoringCommand = ShootAuto.shootAuto();
+    Command disableCommand = shooter.disableShooter();
+
     elevator.zeroElevatorPosition();
     shootAngle.zeroShootAnglePosition();
 
@@ -192,36 +148,39 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
+    if(operatorController.getYButtonPressed()) {
+      intakeCommand = IntakeAuto.intakeShootAuto();
+      outakeCommand = IntakeAuto.outakeShootAuto();
+      scoringCommand = ShootAuto.shootAuto();
+      disableCommand = shooter.disableShooter();
+    }
+
+    if(operatorController.getBButtonPressed()) {
+      intakeCommand = IntakeAuto.intakeAmpAuto();
+      outakeCommand = IntakeAuto.outakeAmpAuto();
+      scoringCommand = AmpAuto.ampAuto();
+      disableCommand = amp.disableAmp();
+    }
+
     new Trigger(driverController::getAButton)
-        .whileTrue(new RepeatCommand(IntakeAutoOff.intakeShootAuto()))
-        .onFalse(new InstantCommand(() -> intakeOffCommand()));
+        .whileTrue(intakeCommand);
+    new Trigger(driverController::getAButtonReleased)
+        .onTrue(new InstantCommand(() -> intake.disableIntake()));
 
     new Trigger(driverController::getYButton)
-        .whileTrue(new InstantCommand(() -> outtakeOnCommand()));
+        .whileTrue(outakeCommand);
     new Trigger(driverController::getYButtonReleased)
-        .onTrue(new InstantCommand(() -> outtakeOffCommand()));
+        .onTrue(new InstantCommand(() -> intake.disableIntake()));
 
-    // new Trigger(driverController::getXButton)
-    //     .whileTrue(new InstantCommand(() -> shooterOnCommand()));
-    // new Trigger(driverController::getXButtonReleased)
-    //     .onTrue(new InstantCommand(() -> shooterOffCommand()));
-
-    // new Trigger(driverController::getBButton)
-    //     .whileTrue(new InstantCommand(() -> shooterInCommand()));
-    // new Trigger(driverController::getBButtonReleased)
-    //     .onTrue(new InstantCommand(() -> shooterOffCommand()));
+    new Trigger(driverController::getBButton)
+        .whileTrue(scoringCommand);
+    new Trigger(driverController::getBButtonReleased)
+        .onTrue(disableCommand);
 
     new Trigger(driverController::getLeftBumper)
         .whileTrue(new InstantCommand(() -> setShootAnglePos()));
     new Trigger(driverController::getLeftBumperReleased)
         .onTrue(new InstantCommand(() -> homeShootAnglePos()));
-
-    new Trigger(driverController::getRightBumper).whileTrue(shooter.teleshootCommand(70));
-
-    new Trigger(() -> driverController.getRightTriggerAxis() > 0.1)
-        .whileTrue(new InstantCommand(() -> AmpOuttakeOnCommand()));
-    new Trigger(() -> driverController.getRightTriggerAxis() <= 0.1)
-        .onTrue(new InstantCommand(() -> AmpOuttakeOffCommand()));
 
     new Trigger(() -> driverController.getPOV() == 0)
         .onTrue(new InstantCommand(() -> setElevatorPos()));
@@ -235,8 +194,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    // Load the path you want to follow using its name in the GUI
-    // PathPlannerPath path = PathPlannerPath.fromPathFile("StraightPath");
 
     return new PathPlannerAuto("TwoPieceAmpB1");
   }

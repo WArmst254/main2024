@@ -24,8 +24,7 @@ public class ShootAngle extends SubsystemBase {
     MotionMagicConfigs mm = cfg.MotionMagic;
     mm.MotionMagicCruiseVelocity = 5; // 5 rotations per second cruise
     mm.MotionMagicAcceleration = 10; // Take approximately 0.5 seconds to reach max vel
-    // Take approximately 0.2 seconds to reach max accel
-    mm.MotionMagicJerk = 50;
+    mm.MotionMagicJerk = 50; // Take approximately 0.2 seconds to reach max accel
 
     Slot0Configs slot0 = cfg.Slot0;
     slot0.kP = 11;
@@ -48,8 +47,8 @@ public class ShootAngle extends SubsystemBase {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("Shoot Angle Pos: ", shootAngle.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("Shoot Angle Vel: ", shootAngle.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Shoot Angle Position: ", shootAngle.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Shoot Angle Velocity: ", shootAngle.getVelocity().getValueAsDouble());
     System.out.println();
   }
 

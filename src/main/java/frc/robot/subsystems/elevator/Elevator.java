@@ -23,8 +23,7 @@ public class Elevator extends SubsystemBase {
     MotionMagicConfigs mm = cfg.MotionMagic;
     mm.MotionMagicCruiseVelocity = 100; // 5 rotations per second cruise
     mm.MotionMagicAcceleration = 100; // Take approximately 0.5 seconds to reach max vel
-    // Take approximately 0.2 seconds to reach max accel
-    mm.MotionMagicJerk = 180;
+    mm.MotionMagicJerk = 180; // Take approximately 0.2 seconds to reach max accel
 
     Slot0Configs slot0 = cfg.Slot0;
     slot0.kP = 100;
@@ -47,11 +46,10 @@ public class Elevator extends SubsystemBase {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("Elevator Pos: ", elevator.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("Elevator Vel: ", elevator.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("ELEPWr", elevator.get());
-    SmartDashboard.putNumber("ele voltage", elevator.getMotorVoltage().getValueAsDouble());
-    System.out.println();
+    SmartDashboard.putNumber("Elevator Position: ", elevator.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Elevator Velocity: ", elevator.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Elevator Power:", elevator.get());
+    SmartDashboard.putNumber("Elevator Voltage:", elevator.getMotorVoltage().getValueAsDouble());
   }
 
   public void setElevatorPosition() {
@@ -64,6 +62,14 @@ public class Elevator extends SubsystemBase {
 
   public void zeroElevatorPosition() {
     elevator.setPosition(0);
+  }
+
+  public void setElevatorHomePosition() {
+    elevator.set(.2);
+    if (elevator.getMotorVoltage().getValueAsDouble() > .5) {
+      zeroElevatorPosition();
+      elevator.set(0);
+    }
   }
 
   public Command autoAmpElevator() {
@@ -81,14 +87,7 @@ public class Elevator extends SubsystemBase {
               elevator.setControl(m_mmReq.withPosition(0).withSlot(0));
             })
         .andThen(run(() -> {}).withTimeout(0.5))
-        .withName("lifted");
+        .withName("Elevator Lifted");
   }
 
-  public void setHomePos() {
-    elevator.set(.2);
-    if (elevator.getMotorVoltage().getValueAsDouble() > .5) {
-      zeroElevatorPosition();
-      elevator.set(0);
-    }
-  }
 }

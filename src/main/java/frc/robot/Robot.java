@@ -7,6 +7,8 @@ import frc.robot.subsystems.amp.Amp;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shootangle.ShootAngle;
+import frc.robot.subsystems.shooter.Shooter;
+
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -27,6 +29,7 @@ public class Robot extends LoggedRobot {
   private Intake m_intake;
   private Elevator m_elevator;
   private Amp m_amp;
+  private Shooter m_shooter;
   ShootAngle shootPid = new ShootAngle();
 
   /**
@@ -82,6 +85,7 @@ public class Robot extends LoggedRobot {
     m_intake = new Intake();
     m_elevator = new Elevator();
     m_amp = new Amp();
+    m_shooter = new Shooter();
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
 
@@ -90,10 +94,10 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
-    boolean backSensor = m_intake.backSensorOut();
-    SmartDashboard.putBoolean("back sensor", backSensor);
-    boolean frontSensor = m_intake.frontSensorOut();
-    SmartDashboard.putBoolean("front sensor", frontSensor);
+    boolean intakeSensor = m_intake.intakeSensorOut();
+    SmartDashboard.putBoolean("intake sensor", intakeSensor);
+    boolean shooterSensor = m_shooter.shooterSensorOut();
+    SmartDashboard.putBoolean("front sensor", shooterSensor);
     boolean ampSensor = m_amp.ampSensorOut();
     SmartDashboard.putBoolean("amp sensor", ampSensor);
     // Runs the Scheduler. This is responsible for polling buttons, adding
@@ -115,7 +119,6 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
     m_shootAngle.zeroShootAnglePosition();
     m_elevator.zeroElevatorPosition();

@@ -1,8 +1,7 @@
 package frc.robot.subsystems.shooter;
 
-import static edu.wpi.first.wpilibj2.command.Commands.*;
-
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.playingwithfusion.TimeOfFlight;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.RelativeEncoder;
@@ -12,11 +11,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
-  private final CANSparkFlex shooterLeft =
-      new CANSparkFlex(19, CANSparkLowLevel.MotorType.kBrushless);
-  private final CANSparkFlex shooterRight =
-      new CANSparkFlex(20, CANSparkLowLevel.MotorType.kBrushless);
-  private final TalonFX feedBack = new TalonFX(13);
+  private final CANSparkFlex shooterLeft = new CANSparkFlex(19, CANSparkLowLevel.MotorType.kBrushless);
+  private final CANSparkFlex shooterRight = new CANSparkFlex(20, CANSparkLowLevel.MotorType.kBrushless);
+  private final TalonFX backFeed = new TalonFX(13);
+  public final TimeOfFlight shooter_sensor = new TimeOfFlight(2);
   private RelativeEncoder m_leftencoder = shooterLeft.getEncoder();
 
   private final SimpleMotorFeedforward m_shooterFeedforward =
@@ -31,70 +29,45 @@ public class Shooter extends SubsystemBase {
     shooterRight.burnFlash();
     m_leftShooterFeedback.setTolerance(25);
 
-    // Set default command to turn off both the shooter and feeder motors, and then idle
     setDefaultCommand(
         runOnce(
                 () -> {
                   shooterLeft.disable();
-                  feedBack.disable();
+                  backFeed.disable();
                 })
             .andThen(run(() -> {}))
-            .withName("Idle"));
+            .withName("Shooter Idle"));
   }
 
-  public Command teleshootCommand(double setpointRotationsPerSecond) {
-    return parallel(
-            // Run the shooter at the desired setpoint using feedforward and feedback
-            run(
-                () ->
-                    shooterLeft.set(
-                        m_shooterFeedforward.calculate(setpointRotationsPerSecond)
-                            + m_leftShooterFeedback.calculate(
-                                m_leftencoder.getVelocity() / 60, setpointRotationsPerSecond))),
-            // Wait until shooter motor have reached the setpoint, and then run the feeder
-            waitUntil(m_leftShooterFeedback::atSetpoint).andThen(() -> feedBack.set(-0.45)))
-        .withName("Shoot");
+  public void shooterOn(double setpointRotationsPerSecond) {
+    shooterLeft.set(m_shooterFeedforward.calculate(setpointRotationsPerSecond)
+                      + m_leftShooterFeedback.calculate(
+                          m_leftencoder.getVelocity() / 60, setpointRotationsPerSecond));
   }
 
-  public Command shootCommand(double setpointRotationsPerSecond) {
-    return parallel(
-            // Run the shooter at the desired setpoint using feedforward and feedback
-            run(() ->
-                    shooterLeft.set(
-                        m_shooterFeedforward.calculate(setpointRotationsPerSecond)
-                            + m_leftShooterFeedback.calculate(
-                                m_leftencoder.getVelocity() / 60, setpointRotationsPerSecond)))
-                .withTimeout(1),
-            // Wait until shooter motor have reached the setpoint, and then run the feeder
-            waitUntil(m_leftShooterFeedback::atSetpoint)
-                .andThen(() -> feedBack.set(-0.45))
-                .withTimeout(1))
-        .withName("Shoot");
+  public void backFeedOn(){
+    backFeed.set(-0.45);
   }
 
-  // public Command shootCommandSensor(double setpointRotationsPerSecond) {
-  //   return parallel(
-  //           // Run the shooter at the desired setpoint using feedforward and feedback
-  //           run(() ->
-  //                   shooterLeft.set(
-  //                       m_shooterFeedforward.calculate(setpointRotationsPerSecond)
-  //                           + m_leftShooterFeedback.calculate(
-  //                               m_leftencoder.getVelocity() / 60, setpointRotationsPerSecond)))
-  //               .until(intake::invbackSensorOut),
-  //           // Wait until shooter motor have reached the setpoint, and then run the feeder
-  //           waitUntil(m_leftShooterFeedback::atSetpoint)
-  //               .andThen(() -> feedBack.set(-0.45))
-  //               .until(intake::invbackSensorOut))
-  //       .withName("Shoot");
-  // }
+  public boolean shooterSensorOut() {
+    return (shooter_sensor.getRange() < 300);
+  }
+
+  public boolean invShooterSensorOut() {
+    return !(shooter_sensor.getRange() < 300);
+  }
+
+  public boolean isShooterSet() {
+    return (m_leftShooterFeedback.atSetpoint());
+  }
 
   public Command disableShooter() {
     return runOnce(
             () -> {
               shooterLeft.disable();
-              feedBack.disable();
+              backFeed.disable();
             })
-        .andThen(run(() -> {}).withTimeout(0.05))
-        .withName("Idle");
+        .andThen(run(() -> {}).withTimeout(0.01))
+        .withName("Shooter Idle");
   }
 }
