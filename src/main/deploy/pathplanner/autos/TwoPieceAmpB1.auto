@@ -1,0 +1,143 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.43,
+      "y": 7.28
+    },
+    "rotation": -90.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "2NoteAmppt1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "elevatorup"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "amp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ampoff"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "2NoteAmpPt2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "elevatordown"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2NoteAmppt3"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intakeamp"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "MidPickup1"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2NoteAmpPt4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeoff"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "2NoteAmpPt5"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "elevatorup"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "amp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ampoff"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "elevatordown"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

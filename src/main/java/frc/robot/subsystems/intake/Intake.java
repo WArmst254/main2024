@@ -2,6 +2,7 @@ package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.playingwithfusion.TimeOfFlight;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
@@ -64,5 +65,16 @@ public class Intake extends SubsystemBase {
     } else {
       intakeOff();
     }
+  }
+
+  public Command disableIntake() {
+    return runOnce(
+            () -> {
+              intake.disable();
+              feedFront.disable();
+              feedBack.disable();
+            })
+        .andThen(run(() -> {}).withTimeout(0.03))
+        .withName("Idle");
   }
 }

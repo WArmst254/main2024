@@ -54,7 +54,7 @@ public class ShootAngle extends SubsystemBase {
   }
 
   public void setShootAnglePosition() {
-    shootAngle.setControl(m_mmReq.withPosition(0.24).withSlot(0));
+    shootAngle.setControl(m_mmReq.withPosition(0.18).withSlot(0));
   }
 
   public void homeShootAngle() {

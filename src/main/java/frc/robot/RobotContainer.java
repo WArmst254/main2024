@@ -1,6 +1,5 @@
 package frc.robot;
 
-import com.ctre.phoenix6.hardware.TalonFX;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -13,8 +12,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.AmpAutoOff;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IntakeAutoOff;
+import frc.robot.subsystems.amp.Amp;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -36,6 +37,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Shooter shooter = new Shooter();
+  private final Amp amp = new Amp();
   private final Intake intake = new Intake();
 
   private final SendableChooser<Command> autoChooser;
@@ -60,54 +62,28 @@ public class RobotContainer {
 
   private void intakeOffCommand() {
     intake.intakeOff();
-    // intake.set(0);
-    // feedFront.set(0);
-    // feedBack.set(0);
   }
 
   void outtakeOnCommand() {
     intake.outakeOnShoot();
     System.out.println("running");
-    // intake.set(-0.95);
-    // feedFront.set(0.95);
-    // feedBack.set(-0.95);
   }
 
   private void outtakeOffCommand() {
     intake.intakeOff();
-    // intake.set(0);
-    // feedFront.set(0);
-    // feedBack.set(0);
   }
-
-  // private final CANSparkFlex shooterLeft =
-  //     new CANSparkFlex(19, CANSparkLowLevel.MotorType.kBrushless);
-
-  // private void shooterOnCommand() {
-  //   shooterLeft.set(-.95);
-  // }
-
-  // private void shooterInCommand() {
-  //   shooterLeft.set(0.95);
-  // }
-
-  // private void shooterOffCommand() {
-  //   shooterLeft.set(0);
-  // }
 
   ShootAngle shootPid = new ShootAngle();
 
-  private final TalonFX AmpLeft = new TalonFX(18);
-  private final TalonFX AmpRight = new TalonFX(19);
+  // private final TalonFX AmpLeft = new TalonFX(18);
+  // private final TalonFX AmpRight = new TalonFX(19);
 
   private void AmpOuttakeOnCommand() {
-    AmpLeft.set(-.95);
-    AmpRight.set(-.95);
+    amp.AmpOuttakeOn();
   }
 
   private void AmpOuttakeOffCommand() {
-    AmpLeft.set(0);
-    AmpRight.set(0);
+    amp.AmpOuttakeOff();
   }
 
   GyroIOPigeon2 gyro = new GyroIOPigeon2(true);
@@ -185,8 +161,13 @@ public class RobotContainer {
     }
     NamedCommands.registerCommand("shoot", shooter.shootCommand(70));
     NamedCommands.registerCommand("shootoff", shooter.disableShooter());
-    NamedCommands.registerCommand("intake", IntakeAutoOff.intakeAuto());
-    NamedCommands.registerCommand("sensorshoot", shooter.shootCommandSensor(65));
+    NamedCommands.registerCommand("intakeshoot", IntakeAutoOff.intakeShootAuto());
+    NamedCommands.registerCommand("elevatorup", elevator.autoAmpElevator());
+    NamedCommands.registerCommand("elevatordown", elevator.autoHomeElevator());
+    NamedCommands.registerCommand("amp", AmpAutoOff.ampAuto());
+    NamedCommands.registerCommand("ampoff", amp.disableAmp());
+    NamedCommands.registerCommand("intakeamp", IntakeAutoOff.intakeAmpAuto());
+    NamedCommands.registerCommand("intakeoff", intake.disableIntake());
     // Configure the button bindings
     configureButtonBindings();
     autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
@@ -212,7 +193,7 @@ public class RobotContainer {
             () -> -controller.getRightX()));
 
     new Trigger(driverController::getAButton)
-        .whileTrue(new RepeatCommand(IntakeAutoOff.intakeAuto()))
+        .whileTrue(new RepeatCommand(IntakeAutoOff.intakeShootAuto()))
         .onFalse(new InstantCommand(() -> intakeOffCommand()));
 
     new Trigger(driverController::getYButton)
@@ -257,7 +238,7 @@ public class RobotContainer {
     // Load the path you want to follow using its name in the GUI
     // PathPlannerPath path = PathPlannerPath.fromPathFile("StraightPath");
 
-    return new PathPlannerAuto("StraightAuto");
+    return new PathPlannerAuto("TwoPieceAmpB1");
   }
 
   /**

@@ -3,6 +3,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.amp.Amp;
+import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shootangle.ShootAngle;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -23,6 +25,8 @@ public class Robot extends LoggedRobot {
   private RobotContainer m_robotContainer;
   private ShootAngle m_shootAngle;
   private Intake m_intake;
+  private Elevator m_elevator;
+  private Amp m_amp;
   ShootAngle shootPid = new ShootAngle();
 
   /**
@@ -76,6 +80,8 @@ public class Robot extends LoggedRobot {
     m_robotContainer = new RobotContainer();
     m_shootAngle = new ShootAngle();
     m_intake = new Intake();
+    m_elevator = new Elevator();
+    m_amp = new Amp();
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
 
@@ -88,6 +94,8 @@ public class Robot extends LoggedRobot {
     SmartDashboard.putBoolean("back sensor", backSensor);
     boolean frontSensor = m_intake.frontSensorOut();
     SmartDashboard.putBoolean("front sensor", frontSensor);
+    boolean ampSensor = m_amp.ampSensorOut();
+    SmartDashboard.putBoolean("amp sensor", ampSensor);
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing
     // finished or interrupted commands, and running subsystem periodic() methods.
@@ -110,6 +118,7 @@ public class Robot extends LoggedRobot {
 
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
     m_shootAngle.zeroShootAnglePosition();
+    m_elevator.zeroElevatorPosition();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
@@ -120,7 +129,6 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-
     m_shootAngle.homeShootAngle();
   }
 

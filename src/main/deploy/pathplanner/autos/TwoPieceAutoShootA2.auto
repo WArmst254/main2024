@@ -30,7 +30,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "StraightPath"
+                  "pathName": "ToNoteA2"
                 }
               },
               {
@@ -46,7 +46,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "Copy of StraightPath"
+                        "pathName": "WhileIntakingA2"
                       }
                     }
                   ]
@@ -55,7 +55,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Copy of Copy of StraightPath"
+                  "pathName": "ReturnToSpeaker"
                 }
               },
               {

@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Elevator extends SubsystemBase {
@@ -63,6 +64,24 @@ public class Elevator extends SubsystemBase {
 
   public void zeroElevatorPosition() {
     elevator.setPosition(0);
+  }
+
+  public Command autoAmpElevator() {
+    return runOnce(
+            () -> {
+              elevator.setControl(m_mmReq.withPosition(-0.8).withSlot(0));
+            })
+        .andThen(run(() -> {}).withTimeout(0.5))
+        .withName("lifted");
+  }
+
+  public Command autoHomeElevator() {
+    return runOnce(
+            () -> {
+              elevator.setControl(m_mmReq.withPosition(0).withSlot(0));
+            })
+        .andThen(run(() -> {}).withTimeout(0.5))
+        .withName("lifted");
   }
 
   public void setHomePos() {
