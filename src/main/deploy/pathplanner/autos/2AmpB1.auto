@@ -33,20 +33,13 @@
         {
           "type": "named",
           "data": {
-            "name": "ampoff"
+            "name": "ampOff"
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "2AmpB1Pt2"
-                }
-              }
-            ]
+            "pathName": "2AmpB1Pt2"
           }
         },
         {
@@ -62,7 +55,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "intakeamp"
+                  "name": "intakeAmp"
                 }
               },
               {
@@ -83,20 +76,13 @@
         {
           "type": "named",
           "data": {
-            "name": "intakeoff"
+            "name": "intakeOff"
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "2AmpB1Pt6"
-                }
-              }
-            ]
+            "pathName": "2AmpB1Pt6"
           }
         },
         {
@@ -108,7 +94,7 @@
         {
           "type": "named",
           "data": {
-            "name": "ampoff"
+            "name": "ampOff"
           }
         }
       ]

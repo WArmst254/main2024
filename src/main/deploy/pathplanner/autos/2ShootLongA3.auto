@@ -12,21 +12,58 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootOff"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "2ShootLongA3Pt1"
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "2ShootLongA3Pt2"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intakeShooter"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "2ShootLongA3Pt2"
+                }
+              }
+            ]
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "2ShootLongA3Pt3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootOff"
           }
         }
       ]

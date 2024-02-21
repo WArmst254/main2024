@@ -18,21 +18,64 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "amp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ampOff"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "2AmpA1Pt2"
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "2AmpA1Pt3"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intakeAmp"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "2AmpA1Pt3"
+                }
+              }
+            ]
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "2AmpA1Pt4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeOff"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "amp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ampOff"
           }
         }
       ]

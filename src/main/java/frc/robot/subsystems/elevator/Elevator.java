@@ -78,7 +78,7 @@ public class Elevator extends SubsystemBase {
               elevator.setControl(m_mmReq.withPosition(-0.8).withSlot(0));
             })
         .andThen(run(() -> {}).withTimeout(0.5))
-        .withName("lifted");
+        .withName("Elevator Lifted");
   }
 
   public Command autoHomeElevator() {

@@ -24,7 +24,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "shootoff"
+                  "name": "shootOff"
                 }
               },
               {
@@ -40,7 +40,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "intake"
+                        "name": "intakeShooter"
                       }
                     },
                     {
@@ -61,7 +61,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "intakeoff"
+                  "name": "intakeOff"
                 }
               },
               {
@@ -73,7 +73,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "shootoff"
+                  "name": "shootOff"
                 }
               }
             ]

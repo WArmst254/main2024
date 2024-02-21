@@ -12,16 +12,9 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "2AmpB1Pt1"
-                }
-              }
-            ]
+            "pathName": "2AmpB1Pt1"
           }
         },
         {
@@ -33,20 +26,13 @@
         {
           "type": "named",
           "data": {
-            "name": "ampoff"
+            "name": "ampOff"
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "2AmpB1Pt2"
-                }
-              }
-            ]
+            "pathName": "2AmpB1Pt2"
           }
         },
         {
@@ -62,7 +48,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "intakeamp"
+                  "name": "intakeAmp"
                 }
               },
               {
@@ -83,7 +69,7 @@
         {
           "type": "named",
           "data": {
-            "name": "intakeoff"
+            "name": "intakeOff"
           }
         },
         {
@@ -108,7 +94,7 @@
         {
           "type": "named",
           "data": {
-            "name": "ampoff"
+            "name": "ampOff"
           }
         },
         {
@@ -118,15 +104,40 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "3AmpB1ShootA1Pt2"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intakeShooter"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "3AmpB1ShootA1Pt2"
+                }
+              }
+            ]
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "3AmpB1ShootA1Pt3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootOff"
           }
         }
       ]

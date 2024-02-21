@@ -110,14 +110,14 @@ public class RobotContainer {
         break;
     }
     NamedCommands.registerCommand("shoot", ShootAuto.shootAuto());
-    NamedCommands.registerCommand("shootoff", shooter.disableShooter());
-    NamedCommands.registerCommand("intakeshoot", IntakeAuto.intakeShootAuto());
-    NamedCommands.registerCommand("elevatorup", elevator.autoAmpElevator());
-    NamedCommands.registerCommand("elevatordown", elevator.autoHomeElevator());
+    NamedCommands.registerCommand("shootOff", shooter.disableShooter());
+    NamedCommands.registerCommand("intakeShooter", IntakeAuto.intakeShootAuto());
+    NamedCommands.registerCommand("elevatorUp", elevator.autoAmpElevator());
+    NamedCommands.registerCommand("elevatorDown", elevator.autoHomeElevator());
     NamedCommands.registerCommand("amp", AmpAuto.ampAuto());
-    NamedCommands.registerCommand("ampoff", amp.disableAmp());
-    NamedCommands.registerCommand("intakeamp", IntakeAuto.intakeAmpAuto());
-    NamedCommands.registerCommand("intakeoff", intake.disableIntake());
+    NamedCommands.registerCommand("ampOff", amp.disableAmp());
+    NamedCommands.registerCommand("intakeAmp", IntakeAuto.intakeAmpAuto());
+    NamedCommands.registerCommand("intakeOff", intake.disableIntake());
     // Configure the button bindings
     configureButtonBindings();
     autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
@@ -150,13 +150,13 @@ public class RobotContainer {
       intakeCommand = IntakeAuto.intakeShootAuto();
       outakeCommand = IntakeAuto.outakeShootAuto();
       scoringCommand = ShootAuto.shootAuto();
-      // disableCommand = shooter.disableShooter();
+      disableCommand = shooter.disableShooter();
     }
 
     if (operatorController.getBButtonPressed()) {
       intakeCommand = IntakeAuto.intakeAmpAuto();
       outakeCommand = IntakeAuto.outakeAmpAuto();
-      scoringCommand = AmpAuto.ampAuto();
+      scoringCommand = AmpAuto.ampTele();
       disableCommand = amp.disableAmp();
     }
 
@@ -189,7 +189,7 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
 
-    return new PathPlannerAuto("TwoPieceAmpB1");
+    return new PathPlannerAuto("2AmpB1");
   }
 
   /**
