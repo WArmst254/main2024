@@ -3,11 +3,24 @@
   "robotLength": 1.0,
   "holonomicMode": true,
   "pathFolders": [
-    "New Folder"
+    "2AmpA1",
+    "2AmpB1",
+    "2ShootLongA3",
+    "2ShootLongB5",
+    "2ShootSubA2",
+    "3AmpB1ShootA1",
+    "ExitAmp",
+    "ExitLong",
+    "ExitSub",
+    "3AmpB1AmpA1"
   ],
-  "autoFolders": [],
-  "defaultMaxVel": 4.0,
-  "defaultMaxAccel": 2.0,
+  "autoFolders": [
+    "Starting_Amp",
+    "Starting_Long",
+    "Starting_Sub"
+  ],
+  "defaultMaxVel": 5.0,
+  "defaultMaxAccel": 5.0,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
   "maxModuleSpeed": 4.5

@@ -1,0 +1,37 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.76,
+      "y": 4.37
+    },
+    "rotation": -60.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2ShootLongB5Pt1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2ShootLongB5Pt2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2ShootLongB5Pt3"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "Starting_Long",
+  "choreoAuto": false
+}

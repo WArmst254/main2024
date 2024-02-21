@@ -22,7 +22,7 @@ public class Intake extends SubsystemBase {
             .andThen(run(() -> {}))
             .withName("Intake Idle"));
   }
- 
+
   public void intakeOnShoot() {
     intake.set(1);
     frontFeed.set(-0.95);

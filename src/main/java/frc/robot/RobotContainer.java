@@ -42,7 +42,7 @@ public class RobotContainer {
   private final Elevator elevator = new Elevator();
   private final GyroIOPigeon2 gyro = new GyroIOPigeon2(true);
   private final ShootAngle shootAngle = new ShootAngle();
-  //Auto Chooser
+  // Auto Chooser
   private final SendableChooser<Command> autoChooser;
   // Controllers
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -52,7 +52,7 @@ public class RobotContainer {
   private void zeroSwerveGyro() {
     gyro.zeroGyro();
   }
-  
+
   private void setElevatorPos() {
     elevator.setElevatorPosition();
   }
@@ -78,7 +78,6 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-
         drive =
             new Drive(
                 new GyroIOPigeon2(true),
@@ -122,7 +121,6 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
     autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
-
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
@@ -148,34 +146,30 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    if(operatorController.getYButtonPressed()) {
+    if (operatorController.getYButtonPressed()) {
       intakeCommand = IntakeAuto.intakeShootAuto();
       outakeCommand = IntakeAuto.outakeShootAuto();
       scoringCommand = ShootAuto.shootAuto();
-      disableCommand = shooter.disableShooter();
+      // disableCommand = shooter.disableShooter();
     }
 
-    if(operatorController.getBButtonPressed()) {
+    if (operatorController.getBButtonPressed()) {
       intakeCommand = IntakeAuto.intakeAmpAuto();
       outakeCommand = IntakeAuto.outakeAmpAuto();
       scoringCommand = AmpAuto.ampAuto();
       disableCommand = amp.disableAmp();
     }
 
-    new Trigger(driverController::getAButton)
-        .whileTrue(intakeCommand);
+    new Trigger(driverController::getAButton).whileTrue(intakeCommand);
     new Trigger(driverController::getAButtonReleased)
         .onTrue(new InstantCommand(() -> intake.disableIntake()));
 
-    new Trigger(driverController::getYButton)
-        .whileTrue(outakeCommand);
+    new Trigger(driverController::getYButton).whileTrue(outakeCommand);
     new Trigger(driverController::getYButtonReleased)
         .onTrue(new InstantCommand(() -> intake.disableIntake()));
 
-    new Trigger(driverController::getBButton)
-        .whileTrue(scoringCommand);
-    new Trigger(driverController::getBButtonReleased)
-        .onTrue(disableCommand);
+    new Trigger(driverController::getBButton).whileTrue(scoringCommand);
+    new Trigger(driverController::getBButtonReleased).onTrue(disableCommand);
 
     new Trigger(driverController::getLeftBumper)
         .whileTrue(new InstantCommand(() -> setShootAnglePos()));

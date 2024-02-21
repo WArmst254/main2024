@@ -89,5 +89,4 @@ public class Elevator extends SubsystemBase {
         .andThen(run(() -> {}).withTimeout(0.5))
         .withName("Elevator Lifted");
   }
-
 }

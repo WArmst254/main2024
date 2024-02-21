@@ -18,13 +18,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "2NoteAmppt1"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "elevatorup"
+                  "pathName": "2AmpB1Pt1"
                 }
               }
             ]
@@ -49,13 +43,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "2NoteAmpPt2"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "elevatordown"
+                  "pathName": "2AmpB1Pt2"
                 }
               }
             ]
@@ -64,7 +52,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "2NoteAmppt3"
+            "pathName": "2AmpB1Pt3"
           }
         },
         {
@@ -80,7 +68,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "MidPickup1"
+                  "pathName": "2AmpB1Pt4"
                 }
               }
             ]
@@ -89,7 +77,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "2NoteAmpPt4"
+            "pathName": "2AmpB1Pt5"
           }
         },
         {
@@ -105,13 +93,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "2NoteAmpPt5"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "elevatorup"
+                  "pathName": "2AmpB1Pt6"
                 }
               }
             ]
@@ -130,14 +112,26 @@
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "elevatordown"
+            "pathName": "3AmpB1ShootA1Pt1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3AmpB1ShootA1Pt2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3AmpB1ShootA1Pt3"
           }
         }
       ]
     }
   },
-  "folder": null,
+  "folder": "Starting_Amp",
   "choreoAuto": false
 }

@@ -11,8 +11,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
-  private final CANSparkFlex shooterLeft = new CANSparkFlex(19, CANSparkLowLevel.MotorType.kBrushless);
-  private final CANSparkFlex shooterRight = new CANSparkFlex(20, CANSparkLowLevel.MotorType.kBrushless);
+  private final CANSparkFlex shooterLeft =
+      new CANSparkFlex(19, CANSparkLowLevel.MotorType.kBrushless);
+  private final CANSparkFlex shooterRight =
+      new CANSparkFlex(20, CANSparkLowLevel.MotorType.kBrushless);
   private final TalonFX backFeed = new TalonFX(13);
   public final TimeOfFlight shooter_sensor = new TimeOfFlight(2);
   private RelativeEncoder m_leftencoder = shooterLeft.getEncoder();
@@ -40,12 +42,13 @@ public class Shooter extends SubsystemBase {
   }
 
   public void shooterOn(double setpointRotationsPerSecond) {
-    shooterLeft.set(m_shooterFeedforward.calculate(setpointRotationsPerSecond)
-                      + m_leftShooterFeedback.calculate(
-                          m_leftencoder.getVelocity() / 60, setpointRotationsPerSecond));
+    shooterLeft.set(
+        m_shooterFeedforward.calculate(setpointRotationsPerSecond)
+            + m_leftShooterFeedback.calculate(
+                m_leftencoder.getVelocity() / 60, setpointRotationsPerSecond));
   }
 
-  public void backFeedOn(){
+  public void backFeedOn() {
     backFeed.set(-0.45);
   }
 

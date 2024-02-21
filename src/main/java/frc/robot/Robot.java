@@ -8,7 +8,6 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shootangle.ShootAngle;
 import frc.robot.subsystems.shooter.Shooter;
-
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -30,7 +29,6 @@ public class Robot extends LoggedRobot {
   private Elevator m_elevator;
   private Amp m_amp;
   private Shooter m_shooter;
-  ShootAngle shootPid = new ShootAngle();
 
   /**
    * This function is run when the robot is first started up and should be used for any

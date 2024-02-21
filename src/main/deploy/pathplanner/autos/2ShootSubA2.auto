@@ -30,7 +30,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "ToNoteA2"
+                  "pathName": "2ShootSubA2Pt1"
                 }
               },
               {
@@ -46,7 +46,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "WhileIntakingA2"
+                        "pathName": "2ShootSubA2Pt2"
                       }
                     }
                   ]
@@ -55,7 +55,13 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "ReturnToSpeaker"
+                  "pathName": "2ShootSubA2Pt3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "intakeoff"
                 }
               },
               {
@@ -76,6 +82,6 @@
       ]
     }
   },
-  "folder": null,
+  "folder": "Starting_Sub",
   "choreoAuto": false
 }

@@ -1,0 +1,43 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.43,
+      "y": 7.28
+    },
+    "rotation": -90.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2AmpA1Pt1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2AmpA1Pt2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2AmpA1Pt3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2AmpA1Pt4"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "Starting_Amp",
+  "choreoAuto": false
+}
