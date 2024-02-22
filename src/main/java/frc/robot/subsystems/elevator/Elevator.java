@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Elevator extends SubsystemBase {
 
-  private final TalonFX elevator = new TalonFX(20);
+  private final TalonFX elevator = new TalonFX(15);
   private final MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
 
   public Elevator() {

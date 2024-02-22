@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AmpAuto;
@@ -75,6 +76,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -109,9 +111,9 @@ public class RobotContainer {
                 new ModuleIO() {});
         break;
     }
-    NamedCommands.registerCommand("shoot", ShootAuto.shootAuto());
+    NamedCommands.registerCommand("shoot", ShootAuto.shootAuto(shooter));
     NamedCommands.registerCommand("shootOff", shooter.disableShooter());
-    NamedCommands.registerCommand("intakeShooter", IntakeAuto.intakeShootAuto());
+    NamedCommands.registerCommand("intakeShooter", IntakeAuto.intakeShootAuto(shooter));
     NamedCommands.registerCommand("elevatorUp", elevator.autoAmpElevator());
     NamedCommands.registerCommand("elevatorDown", elevator.autoHomeElevator());
     NamedCommands.registerCommand("amp", AmpAuto.ampAuto());
@@ -131,9 +133,9 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    Command intakeCommand = IntakeAuto.intakeShootAuto();
-    Command outakeCommand = IntakeAuto.outakeShootAuto();
-    Command scoringCommand = ShootAuto.shootAuto();
+    Command intakeCommand = IntakeAuto.intakeShootAuto(shooter);
+    Command outakeCommand = new RepeatCommand(IntakeAuto.outakeShootAuto());
+    Command scoringCommand = new RepeatCommand(ShootAuto.shootAuto(shooter));
     Command disableCommand = shooter.disableShooter();
 
     elevator.zeroElevatorPosition();
@@ -147,9 +149,9 @@ public class RobotContainer {
             () -> -controller.getRightX()));
 
     if (operatorController.getYButtonPressed()) {
-      intakeCommand = IntakeAuto.intakeShootAuto();
-      outakeCommand = IntakeAuto.outakeShootAuto();
-      scoringCommand = ShootAuto.shootAuto();
+      intakeCommand = IntakeAuto.intakeShootAuto(shooter);
+      outakeCommand = new RepeatCommand(IntakeAuto.outakeShootAuto());
+      scoringCommand = new RepeatCommand(ShootAuto.shootAuto(shooter));
       disableCommand = shooter.disableShooter();
     }
 
@@ -189,7 +191,7 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
 
-    return new PathPlannerAuto("2AmpB1");
+    return new PathPlannerAuto("2ShootSubA2");
   }
 
   /**
