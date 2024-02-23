@@ -7,7 +7,6 @@ import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
@@ -47,7 +46,7 @@ public class Shooter extends SubsystemBase {
             + m_leftShooterFeedback.calculate(
                 m_leftencoder.getVelocity() / 60, setpointRotationsPerSecond));
   }
-  
+
   public void backFeedOn() {
     backFeed.set(-0.45);
   }
@@ -63,7 +62,7 @@ public class Shooter extends SubsystemBase {
     shooterLeft.set(-0.4);
   }
 
-  public void shooterOff() {
+  public void disableShooter() {
     shooterLeft.set(0);
     backFeed.set(0);
   }
@@ -78,15 +77,5 @@ public class Shooter extends SubsystemBase {
 
   public boolean isShooterSet() {
     return (m_leftShooterFeedback.atSetpoint());
-  }
-
-  public Command disableShooter() {
-    return runOnce(
-            () -> {
-              shooterLeft.set(0);
-              backFeed.set(0);
-            })
-        .andThen(run(() -> {}).withTimeout(0.01))
-        .withName("Shooter Idle");
   }
 }

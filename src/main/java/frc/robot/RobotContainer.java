@@ -107,14 +107,16 @@ public class RobotContainer {
     }
 
     NamedCommands.registerCommand("shoot", ShooterCommands.shootSensorCommand(shooter));
-    NamedCommands.registerCommand("shootOff", shooter.disableShooter());
-    NamedCommands.registerCommand("intakeShooter", IntakeCommands.intakeToShooterSensorCommand(intake, shooter, shootAngle));
+    NamedCommands.registerCommand("shootOff", new InstantCommand(() -> shooter.disableShooter()));
+    NamedCommands.registerCommand(
+        "intakeShooter", IntakeCommands.intakeToShooterSensorCommand(intake, shooter, shootAngle));
     NamedCommands.registerCommand("elevatorUp", elevator.ampElevatorCommand());
     NamedCommands.registerCommand("elevatorDown", elevator.stowElevatorCommand());
     NamedCommands.registerCommand("amp", AmpCommands.ampAutonomousCommand(amp, elevator));
-    NamedCommands.registerCommand("ampOff", amp.disableAmp());
-    NamedCommands.registerCommand("intakeAmp", IntakeCommands.intakeToAmpSensorCommand(intake, amp));
-    NamedCommands.registerCommand("intakeOff", intake.disableIntake());
+    NamedCommands.registerCommand("ampOff", new InstantCommand(() -> amp.disableAmp()));
+    NamedCommands.registerCommand(
+        "intakeAmp", IntakeCommands.intakeToAmpSensorCommand(intake, amp));
+    NamedCommands.registerCommand("intakeOff", new InstantCommand(() -> intake.disableIntake()));
 
     zeroSuperstructure();
     configureAutos();
@@ -133,7 +135,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    TeleOpMode mode = TeleOpMode.MANUAL_AMP;
+    TeleOpMode mode = TeleOpMode.MANUAL_SPEAKER;
 
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -158,47 +160,21 @@ public class RobotContainer {
     switch (mode) {
       case AUTO_SPEAKER:
         driverController
-        .a()
-            .whileTrue(
-                IntakeCommands.intakeToShooterSensorCommand(intake, shooter, shootAngle)
-            );
-        driverController
-        .a()
-          .onFalse(
-            new InstantCommand(() -> intake.disableIntake())
-            );
-        driverController
-        .x()
-          .whileTrue(IntakeCommands.outakeFromShooterSensorCommand(intake));
-        driverController
-        .x()
-          .onFalse(new InstantCommand(() -> intake.disableIntake()));
-        driverController
-        .y()
-          .whileTrue(ShooterCommands.shootSensorCommand(shooter));
-        driverController
-        .y()
-          .onFalse(new InstantCommand(() -> shooter.shooterOff()));
+            .a()
+            .whileTrue(IntakeCommands.intakeToShooterSensorCommand(intake, shooter, shootAngle));
+        driverController.a().onFalse(new InstantCommand(() -> intake.disableIntake()));
+        driverController.x().whileTrue(IntakeCommands.outakeFromShooterSensorCommand(intake));
+        driverController.x().onFalse(new InstantCommand(() -> intake.disableIntake()));
+        driverController.y().whileTrue(ShooterCommands.shootSensorCommand(shooter));
+        driverController.y().onFalse(new InstantCommand(() -> shooter.disableShooter()));
         break;
       case AUTO_AMP:
-        driverController
-          .a()
-            .whileTrue(IntakeCommands.intakeToAmpSensorCommand(intake, amp));
-        driverController
-          .a()
-            .onFalse(new InstantCommand(() -> intake.disableIntake()));
-        driverController
-          .x()
-            .whileTrue(IntakeCommands.outakeFromAmpSensorCommand(intake));
-        driverController
-          .x()
-            .onFalse(new InstantCommand(() -> intake.disableIntake()));
-        driverController
-          .y()
-            .whileTrue(AmpCommands.ampTeleopCommand(amp));
-        driverController
-          .y()
-            .onFalse(new InstantCommand(() -> amp.disableAmp()));
+        driverController.a().whileTrue(IntakeCommands.intakeToAmpSensorCommand(intake, amp));
+        driverController.a().onFalse(new InstantCommand(() -> intake.disableIntake()));
+        driverController.x().whileTrue(IntakeCommands.outakeFromAmpSensorCommand(intake));
+        driverController.x().onFalse(new InstantCommand(() -> intake.disableIntake()));
+        driverController.y().whileTrue(AmpCommands.ampTeleopCommand(amp));
+        driverController.y().onFalse(new InstantCommand(() -> amp.disableAmp()));
         break;
       case MANUAL_SPEAKER:
         driverController
@@ -222,7 +198,7 @@ public class RobotContainer {
                 new InstantCommand(() -> intake.disableIntake())
                     .alongWith(new InstantCommand(() -> shootAngle.stowShootAngle())));
         driverController.y().whileTrue(ShooterCommands.shootManualCommand(shooter));
-        driverController.y().onFalse(new InstantCommand(() -> shooter.shooterOff()));
+        driverController.y().onFalse(new InstantCommand(() -> shooter.disableShooter()));
         break;
       case MANUAL_AMP:
         driverController
@@ -235,21 +211,18 @@ public class RobotContainer {
             .onFalse(
                 new InstantCommand(() -> intake.disableIntake())
                     .alongWith(new InstantCommand(() -> amp.disableAmp())));
-        driverController
-            .x()
-            .whileTrue(
-                new InstantCommand(() -> intake.outakeFromAmp()));
-        driverController
-            .x()
-            .onFalse(
-                new InstantCommand(() -> intake.disableIntake()));
+        driverController.x().whileTrue(new InstantCommand(() -> intake.outakeFromAmp()));
+        driverController.x().onFalse(new InstantCommand(() -> intake.disableIntake()));
         driverController.y().whileTrue(new InstantCommand(() -> amp.ampOuttakeOn()));
         driverController.y().onFalse(new InstantCommand(() -> amp.disableAmp()));
         break;
     }
 
+    driverController.leftBumper().whileTrue(new InstantCommand(() -> shootAngle.lowerShootAngle()));
+    driverController.leftBumper().onFalse(new InstantCommand(() -> shootAngle.stowShootAngle()));
+
     operatorController.leftBumper().whileTrue(new InstantCommand(() -> shooter.intakeHP()));
-    operatorController.leftBumper().onFalse(new InstantCommand(() -> shooter.shooterOff()));
+    operatorController.leftBumper().onFalse(new InstantCommand(() -> shooter.disableShooter()));
 
     driverController.povUp().onTrue(new InstantCommand(() -> elevator.ampExtendElevator()));
     driverController.povDown().onTrue(new InstantCommand(() -> elevator.stowElevator()));

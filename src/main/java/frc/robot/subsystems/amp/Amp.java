@@ -2,8 +2,6 @@ package frc.robot.subsystems.amp;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.playingwithfusion.TimeOfFlight;
-
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Amp extends SubsystemBase {
@@ -32,14 +30,9 @@ public class Amp extends SubsystemBase {
     ampRight.set(-.95);
   }
 
-
-   public Command disableAmp() {
-    return runOnce(
-            () -> {
-              ampLeft.set(0);
-              ampRight.set(0);
-            })
-        .withName("Amp Idle");
+  public void disableAmp() {
+    ampLeft.set(0);
+    ampRight.set(0);
   }
 
   public boolean ampSensorOut() {
@@ -53,5 +46,4 @@ public class Amp extends SubsystemBase {
   public boolean invAmpSensorOut() {
     return !(amp_sensor.getRange() < 200);
   }
-
 }

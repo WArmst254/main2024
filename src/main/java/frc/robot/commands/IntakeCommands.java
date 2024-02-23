@@ -9,7 +9,8 @@ import frc.robot.subsystems.shooter.Shooter;
 
 public class IntakeCommands {
 
-  public static Command intakeToShooterSensorCommand(Intake intake, Shooter shooter, ShootAngle shootAngle) {
+  public static Command intakeToShooterSensorCommand(
+      Intake intake, Shooter shooter, ShootAngle shootAngle) {
     return (Commands.run(
             () -> {
               if (!shooter.shooterSensorOut()) {
@@ -57,7 +58,8 @@ public class IntakeCommands {
                 intake.disableIntake(); // outtake motors off
               }
             })
-        .until(intake::invIntakeSensorOut)); // cancel the command when the intake sensor is no longer
+        .until(
+            intake::invIntakeSensorOut)); // cancel the command when the intake sensor is no longer
     // triggered
   }
 

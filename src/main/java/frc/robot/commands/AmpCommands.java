@@ -9,7 +9,8 @@ public class AmpCommands {
 
   public static Command ampAutonomousCommand(Amp amp, Elevator elevator) {
 
-    return (Commands.run(() -> elevator.ampElevatorCommand()) // raise elevator to amp scoring position
+    return (Commands.run(
+            () -> elevator.ampElevatorCommand()) // raise elevator to amp scoring position
         .andThen(
             () -> {
               if (amp.ampSensorOut()) {
