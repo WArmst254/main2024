@@ -2,6 +2,8 @@ package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.playingwithfusion.TimeOfFlight;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
@@ -52,8 +54,16 @@ public class Intake extends SubsystemBase {
     backFeed.set(0);
   }
 
+  public void disableBackFeed() {
+    backFeed.set(0);
+  }
+
   public void intakeOn() {
     intake.set(1);
+  }
+
+  public void backFeedOn() {
+    backFeed.set(-0.5);
   }
 
   public double intakeSensor() {
@@ -66,5 +76,11 @@ public class Intake extends SubsystemBase {
 
   public boolean invIntakeSensorOut() {
     return !(intake_sensor.getRange() < 300);
+  }
+
+  public void periodic() {
+    SmartDashboard.putNumber("Intake Power: ", intake.get());
+    SmartDashboard.putNumber("Front Feed Power: ", frontFeed.get());
+    SmartDashboard.putNumber("Back Feed Power:", backFeed.get());
   }
 }

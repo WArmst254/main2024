@@ -24,10 +24,13 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.shootangle.ShootAngle;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.util.Alert;
 import frc.robot.util.Alert.AlertType;
+import frc.robot.util.rotation.AprilTagLock;
+import frc.robot.util.rotation.Joystick;
+import frc.robot.util.rotation.RotationSource;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -40,17 +43,16 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Shooter shooter = new Shooter();
-
   private final Amp amp = new Amp();
   private final Intake intake = new Intake();
   private final Elevator elevator = new Elevator();
   private final GyroIOPigeon2 gyro = new GyroIOPigeon2(true);
-  private final ShootAngle shootAngle = new ShootAngle();
 
   // Controllers
   private final XboxController operatorConditions = new XboxController(1);
-  private final CommandXboxController driverController = new CommandXboxController(0);
+  public static CommandXboxController driverController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
+
   private final Alert driverDisconnected =
       new Alert("Driver controller disconnected (port 0).", AlertType.WARNING);
   private final Alert operatorDisconnected =
@@ -59,10 +61,11 @@ public class RobotContainer {
   // Auto Chooser
   private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
+  private RotationSource summonRotation = new Joystick();
   // Use Initial Setpoints for Position Control
    void zeroSuperstructure() {
     elevator.zeroElevatorPosition();
-    shootAngle.zeroShootAngle();
+    shooter.zeroShootAngle();
   }
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -103,9 +106,9 @@ public class RobotContainer {
         break;
     }
 
-    NamedCommands.registerCommand("shoot", ShooterCommands.shootSensorCommand(shooter));
-    NamedCommands.registerCommand("shootOff", new InstantCommand(() -> shooter.disableShooter()));
-    NamedCommands.registerCommand("intakeShooter", IntakeCommands.intakeToShooterSensorCommand(intake, shooter, shootAngle));
+    NamedCommands.registerCommand("shoot", ShooterCommands.shootSensorCommand(shooter, intake));
+    NamedCommands.registerCommand("shootOff", new InstantCommand(() -> shooter.disableShooter()).alongWith(new InstantCommand(() -> intake.disableBackFeed())));
+    NamedCommands.registerCommand("intakeShooter", IntakeCommands.intakeToShooterSensorCommand(intake, shooter));
     NamedCommands.registerCommand("elevatorUp", elevator.ampElevatorCommand());
     NamedCommands.registerCommand("elevatorDown", elevator.stowElevatorCommand());
     NamedCommands.registerCommand("amp", AmpCommands.ampAutonomousCommand(amp, elevator));
@@ -148,7 +151,7 @@ public class RobotContainer {
             drive,
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
-            () -> -driverController.getRightX()));
+            () -> summonRotation.getR()));
 
     // Sensor-Enabled Shooter Scoring Mode
     if (operatorConditions.getYButtonPressed()) {
@@ -177,7 +180,7 @@ public class RobotContainer {
         driverController
           .a()
           .whileTrue(
-            IntakeCommands.intakeToShooterSensorCommand(intake, shooter, shootAngle));
+            IntakeCommands.intakeToShooterSensorCommand(intake, shooter));
         driverController
           .a()
           .onFalse(
@@ -197,11 +200,12 @@ public class RobotContainer {
         driverController
           .y()
           .whileTrue(
-            ShooterCommands.shootSensorCommand(shooter));
+            ShooterCommands.shootSensorCommand(shooter, intake));
         driverController
           .y()
           .onFalse(
-            new InstantCommand(() -> shooter.disableShooter()));
+            new InstantCommand(() -> shooter.disableShooter())
+            .alongWith(new InstantCommand(() -> intake.disableBackFeed())));
       }
       case AUTO_AMP -> {
 
@@ -242,34 +246,35 @@ public class RobotContainer {
           .a()
           .whileTrue(
             new InstantCommand(() -> intake.intakeToShooter())
-            .alongWith(new InstantCommand(() -> shootAngle.lowerShootAngle())));
+            .alongWith(new InstantCommand(() -> shooter.lowerShootAngle())));
         driverController
           .a()
           .onFalse(
             new InstantCommand(() -> intake.disableIntake())
-            .alongWith(new InstantCommand(() -> shootAngle.stowShootAngle())));
+            .alongWith(new InstantCommand(() -> shooter.stowShootAngle())));
 
         // Ground Outtake
         driverController
           .x()
           .whileTrue(
             new InstantCommand(() -> intake.outakeFromShooter())
-            .alongWith(new InstantCommand(() -> shootAngle.lowerShootAngle())));
+            .alongWith(new InstantCommand(() -> shooter.lowerShootAngle())));
         driverController
           .x()
           .onFalse(
             new InstantCommand(() -> intake.disableIntake())
-            .alongWith(new InstantCommand(() -> shootAngle.stowShootAngle())));
+            .alongWith(new InstantCommand(() -> shooter.stowShootAngle())));
 
         // Shooter Scoring
         driverController
           .y()
           .whileTrue(
-            ShooterCommands.shootManualCommand(shooter));
+            ShooterCommands.shootManualCommand(shooter, intake));
         driverController
           .y()
           .onFalse(
-            new InstantCommand(() -> shooter.disableShooter()));
+            new InstantCommand(() -> shooter.disableShooter())
+            .alongWith(new InstantCommand(() -> intake.disableBackFeed())));
       }
       case MANUAL_AMP -> {
 
@@ -311,13 +316,23 @@ public class RobotContainer {
     driverController
       .leftBumper()
       .whileTrue(
-        new InstantCommand(() -> shootAngle.lowerShootAngle()));
+        new InstantCommand(() -> shooter.lowerShootAngle()));
 
     // Stow(Raise) Shooter Angle
     driverController
       .leftBumper()
       .onFalse(
-        new InstantCommand(() -> shootAngle.stowShootAngle()));
+        new InstantCommand(() -> shooter.stowShootAngle()));
+
+    // April Tag Lock
+    driverController
+      .rightBumper()
+      .onTrue(new InstantCommand(() -> summonRotation = new AprilTagLock()));
+
+    // Defer to Joystick
+    driverController
+      .rightBumper()
+      .onFalse(new InstantCommand(() -> summonRotation = new Joystick()));
 
     // Extend Elevator to Amp Scoring Position
     driverController
@@ -356,22 +371,22 @@ public class RobotContainer {
   public void checkSensors() {
     boolean intakeSensor = intake.intakeSensorOut();
     double intakeSensorRange = intake.intakeSensor();
-    SmartDashboard.putBoolean("Intake Sensor", intakeSensor);
-    SmartDashboard.putNumber("Intake Sensor Range", intakeSensorRange);
+    SmartDashboard.putBoolean("Intake Sensor: ", intakeSensor);
+    SmartDashboard.putNumber("Intake Sensor Range: ", intakeSensorRange);
     
     boolean shooterSensor = shooter.shooterSensorOut();
     double shooterSensorRange = shooter.shooterSensor();
-    SmartDashboard.putBoolean("Shooter Sensor", shooterSensor);
-    SmartDashboard.putNumber("Shooter Sensor Range", shooterSensorRange);
+    SmartDashboard.putBoolean("Shooter Sensor: ", shooterSensor);
+    SmartDashboard.putNumber("Shooter Sensor Range: ", shooterSensorRange);
 
     boolean ampSensor = amp.ampSensorOut();
     double ampSensorRange = amp.ampSensor();
-    SmartDashboard.putBoolean("Amp Sensor", ampSensor);
-    SmartDashboard.putNumber("Amp Sensor Range", ampSensorRange);
+    SmartDashboard.putBoolean("Amp Sensor: ", ampSensor);
+    SmartDashboard.putNumber("Amp Sensor Range: ", ampSensorRange);
   }
 
   public void stowShooterAngle() {
-    shootAngle.stowShootAngle();
+    shooter.stowShootAngle();
   }
 
   public Command getAutonomousCommand() {

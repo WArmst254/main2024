@@ -4,22 +4,21 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.amp.Amp;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.shootangle.ShootAngle;
 import frc.robot.subsystems.shooter.Shooter;
 
 public class IntakeCommands {
 
   public static Command intakeToShooterSensorCommand(
-      Intake intake, Shooter shooter, ShootAngle shootAngle) {
+      Intake intake, Shooter shooter) {
     return (Commands.run(
             () -> {
               if (!shooter.shooterSensorOut()) {
                 // if the shooter sensor is not triggered shooterSensorOut will return false, indicating that the note has not yet reached the shooter mechanism
                 intake.intakeToShooter(); // intake and feed to shooter mechanism
-                shootAngle.lowerShootAngle();
+                shooter.lowerShootAngle();
               } else {
                 intake.intakeToShooter(); // intake and feed motors off
-                shootAngle.lowerShootAngle();
+                shooter.lowerShootAngle();
               }
             })
         .until(

@@ -38,7 +38,6 @@ public class AmpCommands {
                 amp.disableAmp(); // outtake motor off
               }
             })
-        .until(
-            amp::invAmpSensorOut)); // cancel the command when the amp sensor is no longer triggered
+        .until(amp::invAmpSensorOut)); // cancel the command when the amp sensor is no longer triggered
   }
 }

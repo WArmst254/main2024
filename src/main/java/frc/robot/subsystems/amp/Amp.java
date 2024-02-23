@@ -2,6 +2,8 @@ package frc.robot.subsystems.amp;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.playingwithfusion.TimeOfFlight;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Amp extends SubsystemBase {
@@ -45,5 +47,10 @@ public class Amp extends SubsystemBase {
 
   public boolean invAmpSensorOut() {
     return !(amp_sensor.getRange() < 200);
+  }
+
+  public void periodic() {
+    SmartDashboard.putNumber("Amp Left Power: ", ampLeft.get());
+    SmartDashboard.putNumber("Amp Right Power: ", ampRight.get());
   }
 }
