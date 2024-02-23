@@ -1,12 +1,7 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.amp.Amp;
-import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.shootangle.ShootAngle;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -23,10 +18,6 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
   private RobotContainer m_robotContainer;
-  private ShootAngle m_shootAngle;
-  private Intake m_intake;
-  private Elevator m_elevator;
-  private Amp m_amp;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -76,11 +67,6 @@ public class Robot extends LoggedRobot {
 
     // Start AdvantageKit logger
     Logger.start();
-    m_robotContainer = new RobotContainer();
-    m_shootAngle = new ShootAngle();
-    m_intake = new Intake();
-    m_elevator = new Elevator();
-    m_amp = new Amp();
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
 
@@ -89,11 +75,9 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
-    boolean intakeSensor = m_intake.intakeSensorOut();
-    SmartDashboard.putBoolean("intake sensor", intakeSensor);
 
-    boolean ampSensor = m_amp.ampSensorOut();
-    SmartDashboard.putBoolean("amp sensor", ampSensor);
+    m_robotContainer.checkControllers();
+    m_robotContainer.checkSensors();
 
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing
@@ -115,8 +99,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-    m_shootAngle.zeroShootAnglePosition();
-    m_elevator.zeroElevatorPosition();
+    m_robotContainer.zeroSuperstructure();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
@@ -127,7 +110,7 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    m_shootAngle.homeShootAngle();
+    m_robotContainer.homeShootAnglePosition();
   }
 
   /** This function is called once when teleop is enabled. */

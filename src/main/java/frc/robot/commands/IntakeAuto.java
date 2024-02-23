@@ -8,10 +8,7 @@ import frc.robot.subsystems.shooter.Shooter;
 
 public class IntakeAuto {
 
-  public static Command intakeShootAuto(Shooter shooter) {
-    // subsystems
-    Intake intake = new Intake();
-
+  public static Command intakeShootAuto(Intake intake, Shooter shooter) {
     return (Commands.run(
             () -> {
                 if (!shooter.shooterSensorOut()) {
@@ -26,10 +23,7 @@ public class IntakeAuto {
             shooter::shooterSensorOut)); // cancel the command when the shooter sensor is triggered
   }
 
-  public static Command intakeAmpAuto() {
-    // subsystems
-    Intake intake = new Intake();
-    Amp amp = new Amp();
+  public static Command intakeAmpAuto(Intake intake, Amp amp) {
 
     return (Commands.run(
         () -> {
@@ -46,9 +40,7 @@ public class IntakeAuto {
         .until(amp::ampSensorOut)); // cancel the command when the amp sensor is triggered
   }
 
-  public static Command outakeShootAuto() {
-    // subsytems
-    Intake intake = new Intake();
+  public static Command outakeShootAuto(Intake intake) {
 
     return (Commands.run(
         () -> {
@@ -66,9 +58,7 @@ public class IntakeAuto {
     // triggered
   }
 
-  public static Command outakeAmpAuto() {
-    // subsystems
-    Intake intake = new Intake();
+  public static Command outakeAmpAuto(Intake intake) {
 
     return (Commands.run(
         () -> {

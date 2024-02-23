@@ -1,17 +1,18 @@
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AmpAuto;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IntakeAuto;
@@ -27,6 +28,8 @@ import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shootangle.ShootAngle;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.util.Alert;
+import frc.robot.util.Alert.AlertType;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -43,35 +46,26 @@ public class RobotContainer {
   private final Elevator elevator = new Elevator();
   private final GyroIOPigeon2 gyro = new GyroIOPigeon2(true);
   private final ShootAngle shootAngle = new ShootAngle();
-  // Auto Chooser
-  private final SendableChooser<Command> autoChooser;
+
   // Controllers
-  private final CommandXboxController controller = new CommandXboxController(0);
-  private final XboxController driverController = new XboxController(0);
-  private final XboxController operatorController = new XboxController(1);
+  private final CommandXboxController driverController = new CommandXboxController(0);
+  private final CommandXboxController operatorController = new CommandXboxController(1);
+  private final Alert driverDisconnected =
+      new Alert("Driver controller disconnected (port 0).", AlertType.WARNING);
+  private final Alert operatorDisconnected =
+      new Alert("Operator controller disconnected (port 1).", AlertType.INFO);
 
-  private void zeroSwerveGyro() {
-    gyro.zeroGyro();
+  //Auto Chooser
+    private final LoggedDashboardChooser<Command> autoChooser =
+      new LoggedDashboardChooser<>("Auto Choices");
+
+  public void homeShootAnglePosition() {
+     shootAngle.homeShootAngle();
   }
 
-  private void setElevatorPos() {
-    elevator.setElevatorPosition();
-  }
-
-  private void homeElevatorPos() {
-    elevator.homeElevator();
-  }
-
-  private void setHomeposEle() {
-    elevator.setElevatorHomePosition();
-  }
-
-  private void setShootAnglePos() {
-    shootAngle.setShootAnglePosition();
-  }
-
-  private void homeShootAnglePos() {
-    shootAngle.homeShootAngle();
+  public void zeroSuperstructure() {
+    elevator.zeroElevatorPosition();
+    shootAngle.zeroShootAnglePosition();
   }
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -111,19 +105,25 @@ public class RobotContainer {
                 new ModuleIO() {});
         break;
     }
+
     NamedCommands.registerCommand("shoot", ShootAuto.shootAuto(shooter));
     NamedCommands.registerCommand("shootOff", shooter.disableShooter());
-    NamedCommands.registerCommand("intakeShooter", IntakeAuto.intakeShootAuto(shooter));
+    NamedCommands.registerCommand("intakeShooter", IntakeAuto.intakeShootAuto(intake, shooter));
     NamedCommands.registerCommand("elevatorUp", elevator.autoAmpElevator());
     NamedCommands.registerCommand("elevatorDown", elevator.autoHomeElevator());
-    NamedCommands.registerCommand("amp", AmpAuto.ampAuto());
+    NamedCommands.registerCommand("amp", AmpAuto.ampAuto(amp, elevator));
     NamedCommands.registerCommand("ampOff", amp.disableAmp());
-    NamedCommands.registerCommand("intakeAmp", IntakeAuto.intakeAmpAuto());
+    NamedCommands.registerCommand("intakeAmp", IntakeAuto.intakeAmpAuto(intake, amp));
     NamedCommands.registerCommand("intakeOff", intake.disableIntake());
-    // Configure the button bindings
+
+    zeroSuperstructure();
+    configureAutos();
     configureButtonBindings();
-    autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
-    SmartDashboard.putData("Auto Mode", autoChooser);
+  }
+
+  private void configureAutos() {
+    autoChooser.addDefaultOption("Do Nothing", Commands.none());
+    autoChooser.addOption("Two Piece A2 Starting Sub", new PathPlannerAuto("2ShootSubA2"));
   }
 
   /**
@@ -133,60 +133,71 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    Command intakeCommand = IntakeAuto.intakeShootAuto(shooter);
-    Command outakeCommand = new RepeatCommand(IntakeAuto.outakeShootAuto());
-    Command scoringCommand = new RepeatCommand(ShootAuto.shootAuto(shooter));
+    Command intakeCommand = IntakeAuto.intakeShootAuto(intake, shooter);
+    Command outakeCommand = IntakeAuto.outakeShootAuto(intake);
+    Command scoringCommand = ShootAuto.shootAuto(shooter);
     Command disableCommand = shooter.disableShooter();
-
-    elevator.zeroElevatorPosition();
-    shootAngle.zeroShootAnglePosition();
 
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> -driverController.getRightX()));
 
-    if (operatorController.getYButtonPressed()) {
-      intakeCommand = IntakeAuto.intakeShootAuto(shooter);
-      outakeCommand = new RepeatCommand(IntakeAuto.outakeShootAuto());
-      scoringCommand = new RepeatCommand(ShootAuto.shootAuto(shooter));
-      disableCommand = shooter.disableShooter();
-    }
 
-    if (operatorController.getBButtonPressed()) {
-      intakeCommand = IntakeAuto.intakeAmpAuto();
-      outakeCommand = IntakeAuto.outakeAmpAuto();
-      scoringCommand = AmpAuto.ampTele();
-      disableCommand = amp.disableAmp();
-    }
 
-    new Trigger(driverController::getAButton).whileTrue(intakeCommand);
-    new Trigger(driverController::getAButtonReleased)
-        .onTrue(new InstantCommand(() -> intake.disableIntake()));
+    // if (operatorController.getYButtonPressed()) {
+    //   intakeCommand = IntakeAuto.intakeShootAuto(intake, shooter);
+    //   outakeCommand = IntakeAuto.outakeShootAuto(intake);
+    //   scoringCommand = ShootAuto.shootAuto(shooter);
+    //   disableCommand = shooter.disableShooter();
+    // }
 
-    new Trigger(driverController::getYButton).whileTrue(outakeCommand);
-    new Trigger(driverController::getYButtonReleased)
-        .onTrue(new InstantCommand(() -> intake.disableIntake()));
+    // if (operatorController.getBButtonPressed()) {
+    //   intakeCommand = IntakeAuto.intakeAmpAuto(intake, amp);
+    //   outakeCommand = IntakeAuto.outakeAmpAuto(intake);
+    //   scoringCommand = AmpAuto.ampTele(amp);
+    //   disableCommand = amp.disableAmp();
+    // }
 
-    new Trigger(driverController::getBButton).whileTrue(scoringCommand);
-    new Trigger(driverController::getBButtonReleased).onTrue(disableCommand);
+  
 
-    new Trigger(driverController::getLeftBumper)
-        .whileTrue(new InstantCommand(() -> setShootAnglePos()));
-    new Trigger(driverController::getLeftBumperReleased)
-        .onTrue(new InstantCommand(() -> homeShootAnglePos()));
+    driverController.a().whileTrue(intakeCommand);
+    driverController.a().onFalse(new InstantCommand(() -> intake.disableIntake()));
 
-    new Trigger(() -> driverController.getPOV() == 0)
-        .onTrue(new InstantCommand(() -> setElevatorPos()));
-    new Trigger(() -> driverController.getPOV() == 90)
-        .onTrue(new InstantCommand(() -> homeElevatorPos()));
-    new Trigger(() -> driverController.getPOV() == 270)
-        .onTrue(new InstantCommand(() -> setHomeposEle()));
+    driverController.y().whileTrue(outakeCommand);
+    driverController.a().onFalse(new InstantCommand(() -> intake.disableIntake()));
 
-    new Trigger(() -> driverController.getBackButton() || driverController.getStartButton())
-        .onTrue(new InstantCommand(() -> zeroSwerveGyro()));
+    driverController.b().whileTrue(scoringCommand);
+    driverController.b().onFalse(disableCommand);
+
+    driverController.leftBumper().whileTrue(new InstantCommand(() -> shootAngle.setShootAnglePosition()));
+    driverController.leftBumper().onFalse(new InstantCommand(() -> shootAngle.homeShootAngle()));
+
+    driverController.povUp().onTrue(new InstantCommand(() -> elevator.setElevatorPosition()));
+    driverController.povDown().onTrue(new InstantCommand(() -> elevator.homeElevator()));
+    driverController.povRight().onTrue(new InstantCommand(() -> elevator.setElevatorHomePosition()));
+
+    driverController.start().onTrue(new InstantCommand(() -> gyro.zeroGyro()));
+  }
+
+    public void checkControllers() {
+    driverDisconnected.set(
+        !DriverStation.isJoystickConnected(driverController.getHID().getPort())
+            || !DriverStation.getJoystickIsXbox(driverController.getHID().getPort()));
+    operatorDisconnected.set(
+        !DriverStation.isJoystickConnected(operatorController.getHID().getPort())
+            || !DriverStation.getJoystickIsXbox(operatorController.getHID().getPort()));
+  }
+
+  public void checkSensors() {
+    boolean intakeSensor = intake.intakeSensorOut();
+    SmartDashboard.putBoolean("intake sensor", intakeSensor);
+    boolean shooterSensor = shooter.shooterSensorOut();
+    SmartDashboard.putBoolean("shooter sensor", shooterSensor);
+    boolean ampSensor = amp.ampSensorOut();
+    SmartDashboard.putBoolean("amp sensor", ampSensor);
   }
 
   public Command getAutonomousCommand() {

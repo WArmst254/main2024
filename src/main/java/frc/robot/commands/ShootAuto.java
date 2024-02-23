@@ -6,8 +6,6 @@ import frc.robot.subsystems.shooter.Shooter;
 
 public class ShootAuto {
   public static Command shootAuto(Shooter shooter) {
-    // subsystems
-
     // the parallel command type will run both of these command threads simultaneously
     return Commands.parallel(
             Commands.run(

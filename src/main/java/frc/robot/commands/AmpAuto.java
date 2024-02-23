@@ -7,10 +7,7 @@ import frc.robot.subsystems.elevator.Elevator;
 
 public class AmpAuto {
 
-  public static Command ampAuto() {
-    // Subsystems
-    Amp amp = new Amp();
-    Elevator elevator = new Elevator();
+  public static Command ampAuto(Amp amp, Elevator elevator) {
 
     return (Commands.run(() -> elevator.autoAmpElevator()) // raise elevator to amp scoring position
         .andThen(
@@ -29,10 +26,8 @@ public class AmpAuto {
         .andThen(elevator.autoHomeElevator())); // return elevator to home position
   }
 
-  public static Command ampTele() {
-    // Subsystems
-    Amp amp = new Amp();
-
+  public static Command ampTele(Amp amp) {
+    
     return (Commands.run(
             () -> {
               if (amp.ampSensorOut()) {

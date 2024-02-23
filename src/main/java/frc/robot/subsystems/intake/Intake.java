@@ -72,7 +72,6 @@ public class Intake extends SubsystemBase {
               frontFeed.disable();
               backFeed.disable();
             })
-        .andThen(run(() -> {}).withTimeout(0.01))
         .withName("Intake Idle");
   }
 }
