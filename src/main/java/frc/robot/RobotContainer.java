@@ -59,7 +59,7 @@ public class RobotContainer {
   // Auto Chooser
   private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
-  //Use Initial Setpoints for Position Controlf
+  //Use Initial Setpoints for Position Control
    void zeroSuperstructure() {
     elevator.zeroElevatorPosition();
     shootAngle.zeroShootAngle();
