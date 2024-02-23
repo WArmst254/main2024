@@ -59,7 +59,7 @@ public class RobotContainer {
   // Auto Chooser
   private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
-  //Use Initial Setpoints for Position Control
+  // Use Initial Setpoints for Position Control
    void zeroSuperstructure() {
     elevator.zeroElevatorPosition();
     shootAngle.zeroShootAngle();
@@ -139,10 +139,10 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    //Default TeleOperated Mode -- Sensor-Enabled Shooter Scoring Mode
+    // Default TeleOperated Mode -- Sensor-Enabled Shooter Scoring Mode
     TeleOpMode teleMode = TeleOpMode.MANUAL_SPEAKER;
 
-    //Drive Controls
+    // Drive Controls
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
@@ -150,22 +150,22 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
 
-    //Sensor-Enabled Shooter Scoring Mode
+    // Sensor-Enabled Shooter Scoring Mode
     if (operatorConditions.getYButtonPressed()) {
       teleMode = TeleOpMode.AUTO_SPEAKER;
     }
 
-    //Sensor-Enabled Amp Scoring Mode
+    // Sensor-Enabled Amp Scoring Mode
     if (operatorConditions.getAButtonPressed()) {
       teleMode = TeleOpMode.AUTO_AMP;
     }
 
-    //Manual Shooter Scoring Mode
+    // Manual Shooter Scoring Mode
     if (operatorConditions.getXButtonPressed()) {
       teleMode = TeleOpMode.MANUAL_SPEAKER;
     }
     
-    //Manual Amp Scoring Mode
+    // Manual Amp Scoring Mode
     if (operatorConditions.getBButtonPressed()) {
       teleMode = TeleOpMode.MANUAL_AMP;
     }
@@ -173,7 +173,7 @@ public class RobotContainer {
     switch (teleMode) {
       case AUTO_SPEAKER -> {
 
-        //Ground Intake
+        // Ground Intake
         driverController
           .a()
           .whileTrue(
@@ -183,7 +183,7 @@ public class RobotContainer {
           .onFalse(
             new InstantCommand(() -> intake.disableIntake()));
 
-        //Ground Outtake
+        // Ground Outtake
         driverController
           .x()
           .whileTrue(
@@ -193,7 +193,7 @@ public class RobotContainer {
           .onFalse(
             new InstantCommand(() -> intake.disableIntake()));
         
-        //Shooter Scoring
+        // Shooter Scoring
         driverController
           .y()
           .whileTrue(
@@ -205,7 +205,7 @@ public class RobotContainer {
       }
       case AUTO_AMP -> {
 
-        //Ground Intake
+        // Ground Intake
         driverController
           .a()
           .whileTrue(
@@ -215,7 +215,7 @@ public class RobotContainer {
           .onFalse(
             new InstantCommand(() -> intake.disableIntake()));
 
-        //Ground Outtake
+        // Ground Outtake
         driverController
           .x()
           .whileTrue(
@@ -225,7 +225,7 @@ public class RobotContainer {
           .onFalse(
             new InstantCommand(() -> intake.disableIntake()));
 
-        //Amp Scoring
+        // Amp Scoring
         driverController
           .y()
           .whileTrue(
@@ -237,7 +237,7 @@ public class RobotContainer {
       }
       case MANUAL_SPEAKER -> {
 
-        //Ground Intake
+        // Ground Intake
         driverController
           .a()
           .whileTrue(
@@ -249,7 +249,7 @@ public class RobotContainer {
             new InstantCommand(() -> intake.disableIntake())
             .alongWith(new InstantCommand(() -> shootAngle.stowShootAngle())));
 
-        //Ground Outtake
+        // Ground Outtake
         driverController
           .x()
           .whileTrue(
@@ -261,7 +261,7 @@ public class RobotContainer {
             new InstantCommand(() -> intake.disableIntake())
             .alongWith(new InstantCommand(() -> shootAngle.stowShootAngle())));
 
-        //Shooter Scoring
+        // Shooter Scoring
         driverController
           .y()
           .whileTrue(
@@ -273,7 +273,7 @@ public class RobotContainer {
       }
       case MANUAL_AMP -> {
 
-        //Ground Intake
+        // Ground Intake
         driverController
           .a()
           .whileTrue(
@@ -285,7 +285,7 @@ public class RobotContainer {
             new InstantCommand(() -> intake.disableIntake())
             .alongWith(new InstantCommand(() -> amp.disableAmp())));
 
-        //Ground Outtake
+        // Ground Outtake
         driverController
           .x()
           .whileTrue(
@@ -295,7 +295,7 @@ public class RobotContainer {
           .onFalse(
             new InstantCommand(() -> intake.disableIntake()));
 
-        //Amp Scoring
+        // Amp Scoring
         driverController
           .y()
           .whileTrue(
@@ -307,41 +307,41 @@ public class RobotContainer {
       }
     }
 
-    //Lower Shooter Angle
-    driverController.
-    leftBumper()
-    .whileTrue(
-      new InstantCommand(() -> shootAngle.lowerShootAngle()));
-
-    //Stow(Raise) Shooter Angle
+    // Lower Shooter Angle
     driverController
-    .leftBumper()
-    .onFalse(
-      new InstantCommand(() -> shootAngle.stowShootAngle()));
+      .leftBumper()
+      .whileTrue(
+        new InstantCommand(() -> shootAngle.lowerShootAngle()));
 
-    //Extend Elevator to Amp Scoring Position
+    // Stow(Raise) Shooter Angle
     driverController
-    .povUp()
-    .onTrue(
-      new InstantCommand(() -> elevator.ampExtendElevator()));
+      .leftBumper()
+      .onFalse(
+        new InstantCommand(() -> shootAngle.stowShootAngle()));
 
-    //Stow(Detract) Elevator
+    // Extend Elevator to Amp Scoring Position
     driverController
-    .povDown()
-    .onTrue(
-      new InstantCommand(() -> elevator.stowElevator()));
+      .povUp()
+      .onTrue(
+        new InstantCommand(() -> elevator.ampExtendElevator()));
 
-    //Reset Stowed Position
+    // Stow(Detract) Elevator
     driverController
-        .povRight()
-        .onTrue(
-          new InstantCommand(() -> elevator.setElevatorStowPosition()));
+      .povDown()
+      .onTrue(
+        new InstantCommand(() -> elevator.stowElevator()));
 
-    //Zero Gyro Yaw
+    // Reset Stowed Position
     driverController
-    .start()
-    .onTrue(
-      new InstantCommand(() -> gyro.zeroGyro()));
+      .povRight()
+      .onTrue(
+        new InstantCommand(() -> elevator.setElevatorStowPosition()));
+
+    // Zero Gyro Yaw
+    driverController
+      .start()
+      .onTrue(
+        new InstantCommand(() -> gyro.zeroGyro()));
   }
 
   public void checkControllers() {

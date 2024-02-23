@@ -14,8 +14,7 @@ public class AmpCommands {
         .andThen(
             () -> {
               if (amp.ampSensorOut()) {
-                // if the amp sensor is triggered ampSensorOut will return true, indicating that a
-                // note is within the amp mechanism
+                // if the amp sensor is triggered ampSensorOut will return true, indicating that anote is within the amp mechanism
                 amp.ampOuttakeOn(); // outtake
               } else {
                 // if the amp sensor returns false, the note has successfully amp outtaked
@@ -32,8 +31,7 @@ public class AmpCommands {
     return (Commands.run(
             () -> {
               if (amp.ampSensorOut()) {
-                // if the amp sensor is triggered ampSensorOut will return true, indicating that a
-                // note is within the amp mechanism
+                // if the amp sensor is triggered ampSensorOut will return true, indicating that a note is within the amp mechanism
                 amp.ampOuttakeOn(); // outtake
               } else {
                 // if the amp sensor returns false, the note has successfully amp outtaked

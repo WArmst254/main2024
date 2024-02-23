@@ -14,8 +14,7 @@ public class ShooterCommands {
                 .until(shooter::invShooterSensorOut), // cancel command when the note has been shot
             Commands.waitUntil(
                     shooter
-                        ::isShooterSet) // second command thread that begins once target velocity is
-                // achieved
+                        ::isShooterSet) // second command thread that begins once target velocity is achieved
                 .andThen(() -> shooter.backFeedOn()) // activates feed to shoot note
                 .until(shooter::invShooterSensorOut)) // cancel command when the note has been shot
         .withName("Shoot");
@@ -28,8 +27,7 @@ public class ShooterCommands {
                 shooter.shooterOn(70)), // activates shooter velocity closed-loop
             Commands.waitUntil(
                     shooter
-                        ::isShooterSet) // second command thread that begins once target velocity is
-                // achieved
+                        ::isShooterSet) // second command thread that begins once target velocity is achieved
                 .andThen(() -> shooter.backFeedOn())) // activates feed to shoot note
         .withName("Shoot");
   }

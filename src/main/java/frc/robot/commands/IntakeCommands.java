@@ -14,9 +14,7 @@ public class IntakeCommands {
     return (Commands.run(
             () -> {
               if (!shooter.shooterSensorOut()) {
-                // if the shooter sensor is not triggered shooterSensorOut will return false,
-                // indicating that the note has not yet reached the shooter mechanism
-
+                // if the shooter sensor is not triggered shooterSensorOut will return false, indicating that the note has not yet reached the shooter mechanism
                 intake.intakeToShooter(); // intake and feed to shooter mechanism
                 shootAngle.lowerShootAngle();
               } else {
@@ -33,8 +31,7 @@ public class IntakeCommands {
     return (Commands.run(
             () -> {
               if (!amp.ampSensorOut()) {
-                // if the amp sensor is not triggered, ampSensorOut will return false, indicating
-                // that the note has not yet reached the amp mechanism
+                // if the amp sensor is not triggered, ampSensorOut will return false, indicating that the note has not yet reached the amp mechanism
                 intake.intakeToAmp(); // intake and feed to amp mechanism
                 amp.ampOuttakeOn(); // run amp motors
               } else {
@@ -50,8 +47,7 @@ public class IntakeCommands {
     return (Commands.run(
             () -> {
               if (intake.intakeSensorOut()) {
-                // if the intake sensor is triggered intakeSensorOut will return true, indicating
-                // that a note is within the intake mechanism
+                // if the intake sensor is triggered intakeSensorOut will return true, indicating that a note is within the intake mechanism
                 intake.outakeFromShooter(); // outtake through shooter/back feeds
               } else {
                 // if the intake sensor returns false, the note has successfully outtaked
@@ -59,8 +55,7 @@ public class IntakeCommands {
               }
             })
         .until(
-            intake::invIntakeSensorOut)); // cancel the command when the intake sensor is no longer
-    // triggered
+            intake::invIntakeSensorOut)); // cancel the command when the intake sensor is no longer triggered
   }
 
   public static Command outakeFromAmpSensorCommand(Intake intake) {
@@ -68,15 +63,13 @@ public class IntakeCommands {
     return (Commands.run(
             () -> {
               if (!intake.intakeSensorOut()) {
-                // if the intake sensor is triggered intakeSensorOut will return true, indicating
-                // that a note is within the intake mechanism
+                // if the intake sensor is triggered intakeSensorOut will return true, indicating that a note is within the intake mechanism
                 intake.outakeFromAmp(); // outtake through amp feeds
               } else {
                 // if the intake sensor returns false, the note has successfully outtaked
                 intake.disableIntake(); // outtake motors off
               }
             })
-        .until(intake::intakeSensorOut)); // cancel the command when the intake sensor is no longer
-    // triggered
+        .until(intake::intakeSensorOut)); // cancel the command when the intake sensor is no longer triggered
   }
 }
