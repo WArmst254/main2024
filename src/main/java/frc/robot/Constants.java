@@ -21,4 +21,11 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
+
+  public enum TeleOpMode {
+    AUTO_SPEAKER,
+    AUTO_AMP,
+    MANUAL_SPEAKER,
+    MANUAL_AMP
+  }
 }

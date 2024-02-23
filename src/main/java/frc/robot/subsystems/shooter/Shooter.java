@@ -34,11 +34,22 @@ public class Shooter extends SubsystemBase {
     setDefaultCommand(
         runOnce(
                 () -> {
-                  shooterLeft.disable();
-                  backFeed.disable();
+                  shooterLeft.set(0);
+                  backFeed.set(0);
                 })
             .andThen(run(() -> {}))
             .withName("Shooter Idle"));
+  }
+
+  public void revShooterWheels(double setpointRotationsPerSecond) {
+    shooterLeft.set(
+        m_shooterFeedforward.calculate(setpointRotationsPerSecond)
+            + m_leftShooterFeedback.calculate(
+                m_leftencoder.getVelocity() / 60, setpointRotationsPerSecond));
+  }
+  
+  public void backFeedOn() {
+    backFeed.set(-0.45);
   }
 
   public void shooterOn(double setpointRotationsPerSecond) {
@@ -48,8 +59,13 @@ public class Shooter extends SubsystemBase {
                 m_leftencoder.getVelocity() / 60, setpointRotationsPerSecond));
   }
 
-  public void backFeedOn() {
-    backFeed.set(-0.45);
+  public void intakeHP() {
+    shooterLeft.set(-0.4);
+  }
+
+  public void shooterOff() {
+    shooterLeft.set(0);
+    backFeed.set(0);
   }
 
   public boolean shooterSensorOut() {
@@ -67,8 +83,8 @@ public class Shooter extends SubsystemBase {
   public Command disableShooter() {
     return runOnce(
             () -> {
-              shooterLeft.disable();
-              backFeed.disable();
+              shooterLeft.set(0);
+              backFeed.set(0);
             })
         .andThen(run(() -> {}).withTimeout(0.01))
         .withName("Shooter Idle");

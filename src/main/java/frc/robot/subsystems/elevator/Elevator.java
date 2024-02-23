@@ -52,11 +52,15 @@ public class Elevator extends SubsystemBase {
     SmartDashboard.putNumber("Elevator Voltage:", elevator.getMotorVoltage().getValueAsDouble());
   }
 
-  public void setElevatorPosition() {
+  public void fullExtendElevator() {
     elevator.setControl(m_mmReq.withPosition(-1).withSlot(0));
   }
 
-  public void homeElevator() {
+  public void ampExtendElevator() {
+    elevator.setControl(m_mmReq.withPosition(-0.8).withSlot(0));
+  }
+
+  public void stowElevator() {
     elevator.setControl(m_mmReq.withPosition(0).withSlot(0));
   }
 
@@ -64,7 +68,7 @@ public class Elevator extends SubsystemBase {
     elevator.setPosition(0);
   }
 
-  public void setElevatorHomePosition() {
+  public void setElevatorStowPosition() {
     elevator.set(.2);
     if (elevator.getMotorVoltage().getValueAsDouble() > .5) {
       zeroElevatorPosition();
@@ -72,7 +76,7 @@ public class Elevator extends SubsystemBase {
     }
   }
 
-  public Command autoAmpElevator() {
+  public Command ampElevatorCommand() {
     return runOnce(
             () -> {
               elevator.setControl(m_mmReq.withPosition(-0.8).withSlot(0));
@@ -81,7 +85,7 @@ public class Elevator extends SubsystemBase {
         .withName("Elevator Lifted");
   }
 
-  public Command autoHomeElevator() {
+  public Command stowElevatorCommand() {
     return runOnce(
             () -> {
               elevator.setControl(m_mmReq.withPosition(0).withSlot(0));

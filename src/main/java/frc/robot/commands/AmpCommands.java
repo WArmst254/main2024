@@ -5,38 +5,38 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.amp.Amp;
 import frc.robot.subsystems.elevator.Elevator;
 
-public class AmpAuto {
+public class AmpCommands {
 
-  public static Command ampAuto(Amp amp, Elevator elevator) {
+  public static Command ampAutonomousCommand(Amp amp, Elevator elevator) {
 
-    return (Commands.run(() -> elevator.autoAmpElevator()) // raise elevator to amp scoring position
+    return (Commands.run(() -> elevator.ampElevatorCommand()) // raise elevator to amp scoring position
         .andThen(
             () -> {
               if (amp.ampSensorOut()) {
                 // if the amp sensor is triggered ampSensorOut will return true, indicating that a
                 // note is within the amp mechanism
-                amp.AmpOuttakeOn(); // outtake
+                amp.ampOuttakeOn(); // outtake
               } else {
                 // if the amp sensor returns false, the note has successfully amp outtaked
-                amp.AmpOuttakeOff(); // outtake motor off
+                amp.disableAmp(); // outtake motor off
               }
             })
         .until(
             amp::invAmpSensorOut) // cancel the command when the amp sensor is no longer triggered
-        .andThen(elevator.autoHomeElevator())); // return elevator to home position
+        .andThen(elevator.stowElevatorCommand())); // return elevator to home position
   }
 
-  public static Command ampTele(Amp amp) {
+  public static Command ampTeleopCommand(Amp amp) {
 
     return (Commands.run(
             () -> {
               if (amp.ampSensorOut()) {
                 // if the amp sensor is triggered ampSensorOut will return true, indicating that a
                 // note is within the amp mechanism
-                amp.AmpOuttakeOn(); // outtake
+                amp.ampOuttakeOn(); // outtake
               } else {
                 // if the amp sensor returns false, the note has successfully amp outtaked
-                amp.AmpOuttakeOff(); // outtake motor off
+                amp.disableAmp(); // outtake motor off
               }
             })
         .until(

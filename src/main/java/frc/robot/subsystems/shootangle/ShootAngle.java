@@ -22,13 +22,13 @@ public class ShootAngle extends SubsystemBase {
 
     /* Configure current limits */
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.MotionMagicCruiseVelocity = 5; // 5 rotations per second cruise
+    mm.MotionMagicCruiseVelocity = 10; // 5 rotations per second cruise
     mm.MotionMagicAcceleration = 10; // Take approximately 0.5 seconds to reach max vel
     mm.MotionMagicJerk = 50; // Take approximately 0.2 seconds to reach max accel
 
     Slot0Configs slot0 = cfg.Slot0;
     slot0.kP = 11;
-    slot0.kI = 0;
+    slot0.kI = 0.1;
     slot0.kD = 0.1;
     slot0.kV = 0.12;
     slot0.kS = 0.25; // Approximately 0.25V to get the mechanism moving
@@ -52,15 +52,15 @@ public class ShootAngle extends SubsystemBase {
     System.out.println();
   }
 
-  public void setShootAnglePosition() {
+  public void lowerShootAngle() {
     shootAngle.setControl(m_mmReq.withPosition(0.18).withSlot(0));
   }
 
-  public void homeShootAngle() {
+  public void stowShootAngle() {
     shootAngle.setControl(m_mmReq.withPosition(0).withSlot(0));
   }
 
-  public void zeroShootAnglePosition() {
+  public void zeroShootAngle() {
     shootAngle.setPosition(0);
   }
 }

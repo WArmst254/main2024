@@ -15,33 +15,33 @@ public class Intake extends SubsystemBase {
     setDefaultCommand(
         runOnce(
                 () -> {
-                  intake.disable();
-                  frontFeed.disable();
-                  backFeed.disable();
+                  intake.set(0);
+                  frontFeed.set(0);
+                  backFeed.set(0);
                 })
             .andThen(run(() -> {}))
             .withName("Intake Idle"));
   }
 
-  public void intakeOnShoot() {
+  public void intakeToShooter() {
     intake.set(1);
     frontFeed.set(-0.95);
     backFeed.set(0.95);
   }
 
-  public void intakeOnAmp() {
+  public void intakeToAmp() {
     intake.set(1);
     frontFeed.set(-0.95);
     backFeed.set(-0.95);
   }
 
-  public void outakeOnShoot() {
+  public void outakeFromShooter() {
     intake.set(-1);
     frontFeed.set(0.95);
     backFeed.set(-0.95);
   }
 
-  public void outakeOnAmp() {
+  public void outakeFromAmp() {
     intake.set(-1);
     frontFeed.set(0.95);
     backFeed.set(0.95);
@@ -49,12 +49,6 @@ public class Intake extends SubsystemBase {
 
   public void intakeOn() {
     intake.set(1);
-  }
-
-  public void intakeOff() {
-    intake.set(0);
-    frontFeed.set(0);
-    backFeed.set(0);
   }
 
   public boolean intakeSensorOut() {
@@ -68,9 +62,9 @@ public class Intake extends SubsystemBase {
   public Command disableIntake() {
     return runOnce(
             () -> {
-              intake.disable();
-              frontFeed.disable();
-              backFeed.disable();
+              intake.set(0);
+              frontFeed.set(0);
+              backFeed.set(0);
             })
         .withName("Intake Idle");
   }
