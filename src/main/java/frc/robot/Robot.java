@@ -67,16 +67,14 @@ public class Robot extends LoggedRobot {
 
     // Start AdvantageKit logger
     Logger.start();
-    m_robotContainer = new RobotContainer();
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
-
+    m_robotContainer = new RobotContainer();
   }
 
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
-
     m_robotContainer.checkControllers();
     m_robotContainer.checkSensors();
 
@@ -111,7 +109,7 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    m_robotContainer.homeShootAnglePosition();
+    m_robotContainer.stowShooterAngle();
   }
 
   /** This function is called once when teleop is enabled. */

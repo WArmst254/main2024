@@ -40,7 +40,7 @@ public class Shooter extends SubsystemBase {
             .withName("Shooter Idle"));
   }
 
-  public void revShooterWheels(double setpointRotationsPerSecond) {
+  public void shooterOn(double setpointRotationsPerSecond) {
     shooterLeft.set(
         m_shooterFeedforward.calculate(setpointRotationsPerSecond)
             + m_leftShooterFeedback.calculate(
@@ -51,13 +51,6 @@ public class Shooter extends SubsystemBase {
     backFeed.set(-0.45);
   }
 
-  public void shooterOn(double setpointRotationsPerSecond) {
-    shooterLeft.set(
-        m_shooterFeedforward.calculate(setpointRotationsPerSecond)
-            + m_leftShooterFeedback.calculate(
-                m_leftencoder.getVelocity() / 60, setpointRotationsPerSecond));
-  }
-
   public void intakeHP() {
     shooterLeft.set(-0.4);
   }
@@ -65,6 +58,10 @@ public class Shooter extends SubsystemBase {
   public void disableShooter() {
     shooterLeft.set(0);
     backFeed.set(0);
+  }
+
+  public double shooterSensor() {
+    return shooter_sensor.getRange();
   }
 
   public boolean shooterSensorOut() {

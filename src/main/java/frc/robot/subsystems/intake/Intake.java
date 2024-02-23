@@ -56,6 +56,10 @@ public class Intake extends SubsystemBase {
     intake.set(1);
   }
 
+  public double intakeSensor() {
+    return intake_sensor.getRange();
+  }
+
   public boolean intakeSensorOut() {
     return (intake_sensor.getRange() < 300);
   }

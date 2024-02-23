@@ -22,10 +22,17 @@ public final class Constants {
     REPLAY
   }
 
-  public enum TeleOpMode {
+  public static enum TeleOpMode {
+    // Sensor-Enabled Shooter Scoring Mode
     AUTO_SPEAKER,
+
+    // Sensor-Enabled Amp Scoring Mode
     AUTO_AMP,
+
+    // Manual Shooter Scoring Mode
     MANUAL_SPEAKER,
+
+    // Manual Amp Scoring Mode
     MANUAL_AMP
   }
 }

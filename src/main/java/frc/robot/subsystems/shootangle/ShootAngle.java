@@ -22,16 +22,16 @@ public class ShootAngle extends SubsystemBase {
 
     /* Configure current limits */
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.MotionMagicCruiseVelocity = 10; // 5 rotations per second cruise
-    mm.MotionMagicAcceleration = 10; // Take approximately 0.5 seconds to reach max vel
-    mm.MotionMagicJerk = 50; // Take approximately 0.2 seconds to reach max accel
+    mm.MotionMagicCruiseVelocity = 10;
+    mm.MotionMagicAcceleration = 10;
+    mm.MotionMagicJerk = 50;
 
     Slot0Configs slot0 = cfg.Slot0;
     slot0.kP = 11;
     slot0.kI = 0.1;
     slot0.kD = 0.1;
     slot0.kV = 0.12;
-    slot0.kS = 0.25; // Approximately 0.25V to get the mechanism moving
+    slot0.kS = 0.25;
 
     FeedbackConfigs fdb = cfg.Feedback;
     fdb.SensorToMechanismRatio = 12.8;
@@ -49,7 +49,9 @@ public class ShootAngle extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber("Shoot Angle Position: ", shootAngle.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("Shoot Angle Velocity: ", shootAngle.getVelocity().getValueAsDouble());
-    System.out.println();
+    SmartDashboard.putNumber("Shoot Angle Power:", shootAngle.get());
+    SmartDashboard.putNumber(
+        "Shoot Angle Voltage:", shootAngle.getMotorVoltage().getValueAsDouble());
   }
 
   public void lowerShootAngle() {

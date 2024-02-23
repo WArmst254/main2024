@@ -21,16 +21,16 @@ public class Elevator extends SubsystemBase {
 
     /* Configure current limits */
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.MotionMagicCruiseVelocity = 100; // 5 rotations per second cruise
-    mm.MotionMagicAcceleration = 100; // Take approximately 0.5 seconds to reach max vel
-    mm.MotionMagicJerk = 180; // Take approximately 0.2 seconds to reach max accel
+    mm.MotionMagicCruiseVelocity = 100;
+    mm.MotionMagicAcceleration = 100;
+    mm.MotionMagicJerk = 180;
 
     Slot0Configs slot0 = cfg.Slot0;
     slot0.kP = 100;
     slot0.kI = .2;
     slot0.kD = 0.4;
     slot0.kV = 1.2;
-    slot0.kS = 1; // Approximately 0.25V to get the mechanism moving
+    slot0.kS = 1;
 
     FeedbackConfigs fdb = cfg.Feedback;
     fdb.SensorToMechanismRatio = 52;
@@ -91,6 +91,6 @@ public class Elevator extends SubsystemBase {
               elevator.setControl(m_mmReq.withPosition(0).withSlot(0));
             })
         .andThen(run(() -> {}).withTimeout(0.5))
-        .withName("Elevator Lifted");
+        .withName("Elevator Stowed");
   }
 }
