@@ -12,22 +12,22 @@ public class AmpAuto {
     return (Commands.run(() -> elevator.autoAmpElevator()) // raise elevator to amp scoring position
         .andThen(
             () -> {
-                if (amp.ampSensorOut()) {
+              if (amp.ampSensorOut()) {
                 // if the amp sensor is triggered ampSensorOut will return true, indicating that a
                 // note is within the amp mechanism
                 amp.AmpOuttakeOn(); // outtake
-            } else {
-            // if the amp sensor returns false, the note has successfully amp outtaked
-            amp.AmpOuttakeOff(); // outtake motor off
-            }
+              } else {
+                // if the amp sensor returns false, the note has successfully amp outtaked
+                amp.AmpOuttakeOff(); // outtake motor off
+              }
             })
         .until(
-        amp::invAmpSensorOut) // cancel the command when the amp sensor is no longer triggered
+            amp::invAmpSensorOut) // cancel the command when the amp sensor is no longer triggered
         .andThen(elevator.autoHomeElevator())); // return elevator to home position
   }
 
   public static Command ampTele(Amp amp) {
-    
+
     return (Commands.run(
             () -> {
               if (amp.ampSensorOut()) {

@@ -1,10 +1,7 @@
 package frc.robot;
 
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -30,6 +27,7 @@ import frc.robot.subsystems.shootangle.ShootAngle;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.util.Alert;
 import frc.robot.util.Alert.AlertType;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -48,6 +46,7 @@ public class RobotContainer {
   private final ShootAngle shootAngle = new ShootAngle();
 
   // Controllers
+  private final XboxController operatorConditions = new XboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
   private final Alert driverDisconnected =
@@ -55,12 +54,12 @@ public class RobotContainer {
   private final Alert operatorDisconnected =
       new Alert("Operator controller disconnected (port 1).", AlertType.INFO);
 
-  //Auto Chooser
-    private final LoggedDashboardChooser<Command> autoChooser =
+  // Auto Chooser
+  private final LoggedDashboardChooser<Command> autoChooser =
       new LoggedDashboardChooser<>("Auto Choices");
 
   public void homeShootAnglePosition() {
-     shootAngle.homeShootAngle();
+    shootAngle.homeShootAngle();
   }
 
   public void zeroSuperstructure() {
@@ -145,44 +144,44 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
 
+    if (operatorConditions.getYButtonPressed()) {
+      intakeCommand = IntakeAuto.intakeShootAuto(intake, shooter);
+      outakeCommand = IntakeAuto.outakeShootAuto(intake);
+      scoringCommand = ShootAuto.shootAuto(shooter);
+      disableCommand = shooter.disableShooter();
+    }
 
-
-    // if (operatorController.getYButtonPressed()) {
-    //   intakeCommand = IntakeAuto.intakeShootAuto(intake, shooter);
-    //   outakeCommand = IntakeAuto.outakeShootAuto(intake);
-    //   scoringCommand = ShootAuto.shootAuto(shooter);
-    //   disableCommand = shooter.disableShooter();
-    // }
-
-    // if (operatorController.getBButtonPressed()) {
-    //   intakeCommand = IntakeAuto.intakeAmpAuto(intake, amp);
-    //   outakeCommand = IntakeAuto.outakeAmpAuto(intake);
-    //   scoringCommand = AmpAuto.ampTele(amp);
-    //   disableCommand = amp.disableAmp();
-    // }
-
-  
+    if (operatorConditions.getBButtonPressed()) {
+      intakeCommand = IntakeAuto.intakeAmpAuto(intake, amp);                      
+      outakeCommand = IntakeAuto.outakeAmpAuto(intake);
+      scoringCommand = AmpAuto.ampTele(amp);
+      disableCommand = amp.disableAmp();
+    }
 
     driverController.a().whileTrue(intakeCommand);
-    driverController.a().onFalse(new InstantCommand(() -> intake.disableIntake()));
+    driverController.a().onFalse(new InstantCommand(() -> intake.intakeOff()));
 
     driverController.y().whileTrue(outakeCommand);
-    driverController.a().onFalse(new InstantCommand(() -> intake.disableIntake()));
+    driverController.y().onFalse(new InstantCommand(() -> intake.disableIntake()));
 
     driverController.b().whileTrue(scoringCommand);
     driverController.b().onFalse(disableCommand);
 
-    driverController.leftBumper().whileTrue(new InstantCommand(() -> shootAngle.setShootAnglePosition()));
+    driverController
+        .leftBumper()
+        .whileTrue(new InstantCommand(() -> shootAngle.setShootAnglePosition()));
     driverController.leftBumper().onFalse(new InstantCommand(() -> shootAngle.homeShootAngle()));
 
     driverController.povUp().onTrue(new InstantCommand(() -> elevator.setElevatorPosition()));
     driverController.povDown().onTrue(new InstantCommand(() -> elevator.homeElevator()));
-    driverController.povRight().onTrue(new InstantCommand(() -> elevator.setElevatorHomePosition()));
+    driverController
+        .povRight()
+        .onTrue(new InstantCommand(() -> elevator.setElevatorHomePosition()));
 
     driverController.start().onTrue(new InstantCommand(() -> gyro.zeroGyro()));
   }
 
-    public void checkControllers() {
+  public void checkControllers() {
     driverDisconnected.set(
         !DriverStation.isJoystickConnected(driverController.getHID().getPort())
             || !DriverStation.getJoystickIsXbox(driverController.getHID().getPort()));
