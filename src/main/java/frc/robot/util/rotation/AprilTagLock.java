@@ -9,7 +9,7 @@ public class AprilTagLock implements RotationSource {
     NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
     public static PIDController rotationPID = createPIDController();
     private static PIDController createPIDController() {
-        PIDController pid = new PIDController(.01, .02, .001); //TODO: Tune
+        PIDController pid = new PIDController(0.0275, 0, 0); //TODO: Tune
         pid.setTolerance(.25); //TODO: Tune
         pid.enableContinuousInput(0, 360);
         pid.setSetpoint(0); //TODO: Change? 0 = apriltag angle
