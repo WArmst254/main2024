@@ -9,16 +9,16 @@ import frc.robot.subsystems.shooter.Shooter;
 public class IntakeCommands {
 
   public static Command intakeToShooterSensorCommand(
-      Intake intake, Shooter shooter) {
+      Intake intake, Shooter shooter, double lowerAngle) {
     return (Commands.run(
             () -> {
               if (!shooter.shooterSensorOut()) {
                 // if the shooter sensor is not triggered shooterSensorOut will return false, indicating that the note has not yet reached the shooter mechanism
                 intake.intakeToShooter(); // intake and feed to shooter mechanism
-                shooter.lowerShootAngle();
+                shooter.lowerShootAngle(lowerAngle);
               } else {
-                intake.intakeToShooter(); // intake and feed motors off
-                shooter.lowerShootAngle();
+                intake.disableIntake(); // intake and feed motors off
+                shooter.stowShootAngle();
               }
             })
         .until(
@@ -34,7 +34,7 @@ public class IntakeCommands {
                 intake.intakeToAmp(); // intake and feed to amp mechanism
                 amp.ampOuttakeOn(); // run amp motors
               } else {
-                intake.intakeToAmp(); // intake and feed motors off
+                intake.disableIntake(); // intake and feed motors off
                 amp.disableAmp(); // amp motors off
               }
             })

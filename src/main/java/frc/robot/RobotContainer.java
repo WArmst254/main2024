@@ -25,7 +25,9 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.led.LED;
+import frc.robot.subsystems.led.LED.LEDState;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.Alert;
 import frc.robot.util.Alert.AlertType;
 import frc.robot.util.rotation.AprilTagLock;
@@ -48,6 +50,7 @@ public class RobotContainer {
   private final Intake intake = new Intake();
   private final Elevator elevator = new Elevator();
   private final GyroIOPigeon2 gyro = new GyroIOPigeon2(true);
+  private final Vision vision = new Vision();
   public static LED led = new LED();
 
   // Controllers
@@ -108,9 +111,9 @@ public class RobotContainer {
         break;
     }
 
-    NamedCommands.registerCommand("shoot", ShooterCommands.shootSensorCommand(shooter, intake, 70));
+    NamedCommands.registerCommand("shoot", ShooterCommands.shootSensorCommand(shooter, intake, 0, 70));
     NamedCommands.registerCommand("shootOff", new InstantCommand(() -> shooter.disableShooter()).alongWith(new InstantCommand(() -> intake.disableBackFeed())));
-    NamedCommands.registerCommand("intakeShooter", IntakeCommands.intakeToShooterSensorCommand(intake, shooter));
+    NamedCommands.registerCommand("intakeShooter", IntakeCommands.intakeToShooterSensorCommand(intake, shooter, 0.2));
     NamedCommands.registerCommand("elevatorUp", elevator.ampElevatorCommand());
     NamedCommands.registerCommand("elevatorDown", elevator.stowElevatorCommand());
     NamedCommands.registerCommand("amp", AmpCommands.ampAutonomousCommand(amp, elevator));
@@ -153,7 +156,7 @@ public class RobotContainer {
             drive,
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
-            () -> -driverController.getRightX()));
+            () -> summonRotation.getR()));
 
     // Sensor-Enabled Shooter Scoring Mode
     if (operatorConditions.getYButtonPressed()) {
@@ -182,7 +185,7 @@ public class RobotContainer {
         driverController
           .a()
           .whileTrue(
-            IntakeCommands.intakeToShooterSensorCommand(intake, shooter));
+            IntakeCommands.intakeToShooterSensorCommand(intake, shooter, 0.2));
         driverController
           .a()
           .onFalse(
@@ -202,12 +205,22 @@ public class RobotContainer {
         driverController
           .y()
           .whileTrue(
-            ShooterCommands.shootSensorCommand(shooter, intake, 70));
+            ShooterCommands.shootSensorCommand(shooter, intake, 0, 70));
         driverController
           .y()
           .onFalse(
             new InstantCommand(() -> shooter.disableShooter())
             .alongWith(new InstantCommand(() -> intake.disableBackFeed())));
+
+        // Human Player Intake
+        operatorController
+          .leftBumper()
+          .whileTrue(
+            new InstantCommand(() -> shooter.intakeHP()));
+        operatorController
+          .leftBumper()
+          .onFalse(
+            new InstantCommand(() -> shooter.disableShooter()));
       }
       case AUTO_AMP -> {
 
@@ -240,6 +253,18 @@ public class RobotContainer {
           .y()
           .onFalse(
             new InstantCommand(() -> amp.disableAmp()));
+
+        // Human Player Intake
+        operatorController
+          .leftBumper()
+          .whileTrue(
+           ShooterCommands.HPintakeToAmpSensorCommand(intake, amp, shooter));
+        operatorController
+          .leftBumper()
+          .onFalse(
+            new InstantCommand(() -> shooter.disableShooter())
+            .alongWith(new InstantCommand(() -> intake.disableFeeds()))
+            .alongWith(new InstantCommand(() -> amp.disableAmp())));
       }
       case MANUAL_SPEAKER -> {
 
@@ -248,7 +273,7 @@ public class RobotContainer {
           .a()
           .whileTrue(
             new InstantCommand(() -> intake.intakeToShooter())
-            .alongWith(new InstantCommand(() -> shooter.lowerShootAngle())));
+            .alongWith(new InstantCommand(() -> shooter.lowerShootAngle(0.18))));
         driverController
           .a()
           .onFalse(
@@ -260,7 +285,7 @@ public class RobotContainer {
           .x()
           .whileTrue(
             new InstantCommand(() -> intake.outakeFromShooter())
-            .alongWith(new InstantCommand(() -> shooter.lowerShootAngle())));
+            .alongWith(new InstantCommand(() -> shooter.lowerShootAngle(0.18))));
         driverController
           .x()
           .onFalse(
@@ -271,12 +296,21 @@ public class RobotContainer {
         driverController
           .y()
           .whileTrue(
-            ShooterCommands.shootManualCommand(shooter, intake, 70));
+            ShooterCommands.shootManualCommand(shooter, intake, 0, 70)); //CHANGE THESE VALUES FOR DATA COLLECTION AND REFER TO SMARTDASHBOARD LL-DISTANCE
         driverController
           .y()
           .onFalse(
             new InstantCommand(() -> shooter.disableShooter())
             .alongWith(new InstantCommand(() -> intake.disableBackFeed())));
+        // Human Player Intake
+        operatorController
+          .leftBumper()
+          .whileTrue(
+            new InstantCommand(() -> shooter.intakeHP()));
+        operatorController
+          .leftBumper()
+          .onFalse(
+            new InstantCommand(() -> shooter.disableShooter()));
       }
       case MANUAL_AMP -> {
 
@@ -311,20 +345,30 @@ public class RobotContainer {
           .y()
           .onFalse(
             new InstantCommand(() -> amp.disableAmp()));
+
+        // Human Player Intake
+        operatorController
+          .leftBumper()
+          .whileTrue(
+            new InstantCommand(() -> shooter.intakeHP())
+            .alongWith(new InstantCommand(() -> intake.feedHPIntakeToAmp()))
+            .alongWith(new InstantCommand(() -> amp.ampOuttakeOn())));
+        operatorController
+          .leftBumper()
+          .onFalse(
+            new InstantCommand(() -> shooter.disableShooter())
+            .alongWith(new InstantCommand(() -> intake.disableFeeds()))
+            .alongWith(new InstantCommand(() -> amp.disableAmp())));
       }
     }
 
-     // Human Player Intake
-     operatorController
-     .leftBumper()
-     .whileTrue(
-       new InstantCommand(() -> shooter.intakeHP()));
+
 
     // Lower Shooter Angle
     driverController
       .leftBumper()
       .whileTrue(
-        new InstantCommand(() -> shooter.lowerShootAngle()));
+        new InstantCommand(() -> shooter.lowerShootAngle(0.18)));
 
     // Stow(Raise) Shooter Angle
     driverController
@@ -366,15 +410,24 @@ public class RobotContainer {
       .onTrue(
         new InstantCommand(() -> gyro.zeroGyro()));
 
-    // driverController
-    //   .back()
-    //   .whileTrue(
-    //     ShooterCommands.interpolatedShootCommand(shooter, intake, shooter.getAutomaticState(vision))
-    //   );
-      driverController
+    driverController //TODO: TEST INTERPOLATE METHOD
+      .back()
+      .whileTrue(
+        ShooterCommands.interpolatedShootManualCommand(shooter, intake, shooter.getAutomaticState(vision)));
+      
+    driverController
       .back()
       .onFalse(
         new InstantCommand(() -> shooter.disableShooter()));
+
+    operatorController
+      .rightTrigger()
+      .toggleOnTrue(
+        new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.HP_AMPLIFY)));
+    operatorController
+      .leftTrigger()
+      .toggleOnTrue(
+        new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.HP_COOPERTITION)));
   }
 
   public void checkControllers() {

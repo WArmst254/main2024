@@ -5,11 +5,12 @@ import com.playingwithfusion.TimeOfFlight;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Amp extends SubsystemBase {
-  private final TalonFX ampLeft = new TalonFX(18);
-  private final TalonFX ampRight = new TalonFX(19);
-  public final TimeOfFlight amp_sensor = new TimeOfFlight(3);
+  private final TalonFX ampLeft = new TalonFX(Constants.IDs.ampleft);
+  private final TalonFX ampRight = new TalonFX(Constants.IDs.ampright);
+  public final TimeOfFlight amp_sensor = new TimeOfFlight(Constants.IDs.ampsensor);
 
   public Amp() {
     setDefaultCommand(

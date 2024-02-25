@@ -5,12 +5,13 @@ import com.playingwithfusion.TimeOfFlight;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
-  private final TalonFX intake = new TalonFX(17);
-  private final TalonFX frontFeed = new TalonFX(13);
-  private final TalonFX backFeed = new TalonFX(14);
-  public final TimeOfFlight intake_sensor = new TimeOfFlight(1);
+  private final TalonFX intake = new TalonFX(Constants.IDs.intake);
+  private final TalonFX frontFeed = new TalonFX(Constants.IDs.frontFeed);
+  private final TalonFX backFeed = new TalonFX(Constants.IDs.backFeed);
+  public final TimeOfFlight intake_sensor = new TimeOfFlight(Constants.IDs.intakesensor);
 
   public Intake() {
     setDefaultCommand(
@@ -25,13 +26,18 @@ public class Intake extends SubsystemBase {
   }
 
   public void intakeToShooter() {
-    intake.set(0.5);
+    intake.set(0.5); //TODO: Probably Change
     frontFeed.set(-0.5);
     backFeed.set(0.5);
   }
 
   public void intakeToAmp() {
     intake.set(1);
+    frontFeed.set(-0.95);
+    backFeed.set(-0.95);
+  }
+
+  public void feedHPIntakeToAmp() {
     frontFeed.set(-0.95);
     backFeed.set(-0.95);
   }
@@ -55,6 +61,10 @@ public class Intake extends SubsystemBase {
   }
 
   public void disableBackFeed() {
+    backFeed.set(0);
+  }
+
+  public void disableFeeds() {
     backFeed.set(0);
   }
 

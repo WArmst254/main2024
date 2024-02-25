@@ -5,7 +5,7 @@
       "x": 0.77,
       "y": 4.377
     },
-    "rotation": -60.0
+    "rotation": 120.0
   },
   "command": {
     "type": "sequential",
@@ -52,6 +52,12 @@
           "type": "path",
           "data": {
             "pathName": "2ShootLongA3Pt3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeOff"
           }
         },
         {

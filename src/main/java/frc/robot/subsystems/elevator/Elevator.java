@@ -10,10 +10,11 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Elevator extends SubsystemBase {
 
-  private final TalonFX elevator = new TalonFX(15);
+  private final TalonFX elevator = new TalonFX(Constants.IDs.elevator);
   private final MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
 
   public Elevator() {

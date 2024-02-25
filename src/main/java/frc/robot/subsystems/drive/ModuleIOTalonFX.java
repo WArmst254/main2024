@@ -12,6 +12,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import frc.robot.Constants;
+
 import java.util.Queue;
 
 /**
@@ -53,27 +55,27 @@ public class ModuleIOTalonFX implements ModuleIO {
   public ModuleIOTalonFX(int index) {
     switch (index) {
       case 0:
-        driveTalon = new TalonFX(1, "CAN0");
-        turnTalon = new TalonFX(2, "CAN0");
-        cancoder = new CANcoder(9, "CAN0");
+        driveTalon = new TalonFX(Constants.IDs.swerveDriveTalon0, "CAN0");
+        turnTalon = new TalonFX(Constants.IDs.swerveTurnTalon0, "CAN0");
+        cancoder = new CANcoder(Constants.IDs.swerveCANcoder0, "CAN0");
         absoluteEncoderOffset = new Rotation2d(-3.034); // MUST BE CALIBRATED
         break;
       case 1:
-        driveTalon = new TalonFX(3, "CAN0");
-        turnTalon = new TalonFX(4, "CAN0");
-        cancoder = new CANcoder(10, "CAN0");
+        driveTalon = new TalonFX(Constants.IDs.swerveDriveTalon1, "CAN0");
+        turnTalon = new TalonFX(Constants.IDs.swerveTurnTalon1, "CAN0");
+        cancoder = new CANcoder(Constants.IDs.swerveCANcoder1, "CAN0");
         absoluteEncoderOffset = new Rotation2d(-2.089); // MUST BE CALIBRATED
         break;
       case 2:
-        driveTalon = new TalonFX(5, "CAN0");
-        turnTalon = new TalonFX(6, "CAN0");
-        cancoder = new CANcoder(11, "CAN0");
+        driveTalon = new TalonFX(Constants.IDs.swerveDriveTalon2, "CAN0");
+        turnTalon = new TalonFX(Constants.IDs.swerveTurnTalon2, "CAN0");
+        cancoder = new CANcoder(Constants.IDs.swerveCANcoder2, "CAN0");
         absoluteEncoderOffset = new Rotation2d(2.523); // MUST BE CALIBRATED
         break;
       case 3:
-        driveTalon = new TalonFX(7, "CAN0");
-        turnTalon = new TalonFX(8, "CAN0");
-        cancoder = new CANcoder(12, "CAN0");
+        driveTalon = new TalonFX(Constants.IDs.swerveDriveTalon2, "CAN0");
+        turnTalon = new TalonFX(Constants.IDs.swerveTurnTalon2, "CAN0");
+        cancoder = new CANcoder(Constants.IDs.swerveCANcoder2, "CAN0");
         absoluteEncoderOffset = new Rotation2d(-2.582); // MUST BE CALIBRATED
         break;
       default:

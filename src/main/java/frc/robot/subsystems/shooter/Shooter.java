@@ -32,11 +32,11 @@ import frc.robot.subsystems.vision.Vision;
 
 public class Shooter extends SubsystemBase {
   
-  private final TalonFX shootAngle = new TalonFX(16);
+  private final TalonFX shootAngle = new TalonFX(Constants.IDs.shootangle);
   private final MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
-  private final CANSparkFlex shooterLeft = new CANSparkFlex(19, CANSparkLowLevel.MotorType.kBrushless);
-  private final CANSparkFlex shooterRight = new CANSparkFlex(20, CANSparkLowLevel.MotorType.kBrushless);
-  public final TimeOfFlight shooter_sensor = new TimeOfFlight(2);
+  private final CANSparkFlex shooterLeft = new CANSparkFlex(Constants.IDs.shooterleft, CANSparkLowLevel.MotorType.kBrushless);
+  private final CANSparkFlex shooterRight = new CANSparkFlex(Constants.IDs.shooterright, CANSparkLowLevel.MotorType.kBrushless);
+  public final TimeOfFlight shooter_sensor = new TimeOfFlight(Constants.IDs.shootersensor);
   private RelativeEncoder m_leftencoder = shooterLeft.getEncoder();
 
   private static final SplineInterpolator SPLINE_INTERPOLATOR = new SplineInterpolator();
@@ -113,7 +113,7 @@ public class Shooter extends SubsystemBase {
     m_shootAngleCurve = SPLINE_INTERPOLATOR.interpolate(distances, angles);
   }
 
-  private State getAutomaticState(Vision vision) {
+  public State getAutomaticState(Vision vision) {
   var targetDistance = getTargetDistance(vision);
   var shooterSpeed = m_shooterCurve.value(targetDistance.in(Units.Meters));
   var angle = m_shootAngleCurve.value(targetDistance.in(Units.Meters));
@@ -131,7 +131,7 @@ public class Shooter extends SubsystemBase {
     );
   }
 
-  public void shooterOn(double setpointRotationsPerSecond) { //TODO: GATHER DATA FOR INTERPOLATE 1678 METHOD
+  public void shooterOn(double setpointRotationsPerSecond) {
     shooterLeft.set(
         m_shooterFeedforward.calculate(setpointRotationsPerSecond)
             + m_leftShooterFeedback.calculate(
@@ -146,11 +146,11 @@ public class Shooter extends SubsystemBase {
     shooterLeft.set(0);
   }
 
-  public void lowerShootAngle() {
-    shootAngle.setControl(m_mmReq.withPosition(0.18).withSlot(0)); // TODO: TUNE FOR INTERPOLATE 1678 METHOD
+  public void lowerShootAngle(double angle) {
+    shootAngle.setControl(m_mmReq.withPosition(angle).withSlot(0));
   }
 
-    public void interpolatedShooterOn(State state) {
+    public void interpolatedShooterVelocity(State state) {
     shooterLeft.set(
         m_shooterFeedforward.calculate(state.speed)
             + m_leftShooterFeedback.calculate(
@@ -161,9 +161,6 @@ public class Shooter extends SubsystemBase {
     shootAngle.setControl(m_mmReq.withPosition(state.angle).withSlot(0));
   }
 
-  
-
- 
   public void stowShootAngle() {
     shootAngle.setControl(m_mmReq.withPosition(0).withSlot(0));
   }
@@ -193,7 +190,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isShooterSet() {
-    return (m_mmReq.Position == shootAngle.getPosition().getValueAsDouble() && m_leftShooterFeedback.atSetpoint());
+    return ((m_mmReq.Position <= (shootAngle.getPosition().getValueAsDouble()+0.005) && m_mmReq.Position >= (shootAngle.getPosition().getValueAsDouble()-0.005))  && m_leftShooterFeedback.atSetpoint());
   }
 
   public void periodic() {

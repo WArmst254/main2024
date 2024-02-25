@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 0.8108009573139007,
-        "y": 4.479568626994526
+        "x": 0.76,
+        "y": 4.37
       },
       "prevControl": {
-        "x": 0.8108009573139006,
-        "y": 3.479568626994526
+        "x": 0.7599999999999999,
+        "y": 3.37
       },
       "nextControl": null,
       "isLocked": false,
@@ -39,13 +39,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -60.0,
+    "rotation": 120.0,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "2ShootLongB5",
+  "folder": "L2ShootLongB5",
   "previewStartingState": {
-    "rotation": 0,
+    "rotation": 180.0,
     "velocity": 0
   },
   "useDefaultConstraints": true

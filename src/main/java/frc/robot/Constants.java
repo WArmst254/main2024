@@ -19,6 +19,40 @@ import frc.robot.subsystems.shooter.Shooter.State;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final class IDs {
+    // Tuner X
+    public static final int pigeon = 0;
+    public static final int swerveDriveTalon0 = 1;
+    public static final int swerveTurnTalon0 = 2;
+    public static final int swerveDriveTalon1 = 3;
+    public static final int swerveTurnTalon1 = 4;
+    public static final int swerveDriveTalon2 = 5;
+    public static final int swerveTurnTalon2 = 6;
+    public static final int swerveDriveTalon3 = 7;
+    public static final int swerveTurnTalon3 = 8;
+    public static final int swerveCANcoder0 = 9;
+    public static final int swerveCANcoder1 = 10;
+    public static final int swerveCANcoder2 = 11;
+    public static final int swerveCANcoder3 = 12;
+    public static final int frontFeed = 13;
+    public static final int backFeed = 14;
+    public static final int elevator = 15;
+    public static final int shootangle = 16;
+    public static final int intake = 17;
+    public static final int ampleft = 18;
+    public static final int ampright = 19;
+    public static final int led = 20;
+
+    // REV Hardware Client
+    public static final int shooterleft = 19;
+    public static final int shooterright = 20;
+    
+    //PWF Config Page 10.49.44.2:5812
+    public static final int intakesensor = 1;
+    public static final int shootersensor = 2;
+    public static final int ampsensor = 3;
+    
+  }
   public static final Mode currentMode = Mode.REAL;
 
   public static enum Mode {
@@ -43,7 +77,7 @@ public final class Constants {
     MANUAL_SPEAKER,
 
     // Manual Amp Scoring Mode
-    MANUAL_AMP,
+    MANUAL_AMP
   }
   public static final List<Entry<Measure<Distance>,State>> SHOOTER_MAP = Arrays.asList(
       Map.entry(Units.Meters.of(0.0), new State(0.2, 3.3)),

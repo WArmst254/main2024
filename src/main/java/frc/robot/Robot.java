@@ -3,6 +3,9 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.led.LED;
+import frc.robot.subsystems.led.LED.LEDState;
+
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -71,6 +74,7 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+    LED.getInstance().changeLedState(LEDState.PREMATCH);
   }
 
   /** This function is called periodically during all modes. */
@@ -85,17 +89,17 @@ public class Robot extends LoggedRobot {
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    LED.getInstance().periodic();
   }
 
   /** This function is called once when the robot is disabled. */
   @Override
   public void disabledInit() {
-    if (DriverStation.isDisabled()){
-      //Pink snake animation
-      RobotContainer.led.rainbowAnimation(0.9, 0.8, 40);
-    } else {
-      RobotContainer.led.rainbowAnimation(0.5, 0.5, 40);
-    }
+      if(!DriverStation.isJoystickConnected(0) || (!DriverStation.isJoystickConnected(1))) {
+        LED.getInstance().changeLedState(LEDState.DISABLED_NO_CONTROLLERS);
+      } else {
+        LED.getInstance().changeLedState(LEDState.DISABLED_CONTROLLERS);
+      }
   }
 
   /** This function is called periodically when disabled. */
@@ -112,6 +116,7 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+    LED.getInstance().changeLedState(LEDState.AUTON);
   }
 
   /** This function is called periodically during autonomous. */
@@ -130,6 +135,7 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    LED.getInstance().changeLedState(LEDState.IDLE);
   }
 
   /** This function is called periodically during operator control. */
