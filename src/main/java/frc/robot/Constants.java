@@ -43,7 +43,7 @@ public final class Constants {
     MANUAL_SPEAKER,
 
     // Manual Amp Scoring Mode
-    MANUAL_AMP
+    MANUAL_AMP,
   }
   public static final List<Entry<Measure<Distance>,State>> SHOOTER_MAP = Arrays.asList(
       Map.entry(Units.Meters.of(0.0), new State(0.2, 3.3)),

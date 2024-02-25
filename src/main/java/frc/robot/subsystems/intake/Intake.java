@@ -25,9 +25,9 @@ public class Intake extends SubsystemBase {
   }
 
   public void intakeToShooter() {
-    intake.set(1);
-    frontFeed.set(-0.95);
-    backFeed.set(0.95);
+    intake.set(0.5);
+    frontFeed.set(-0.5);
+    backFeed.set(0.5);
   }
 
   public void intakeToAmp() {
@@ -37,9 +37,9 @@ public class Intake extends SubsystemBase {
   }
 
   public void outakeFromShooter() {
-    intake.set(-1);
-    frontFeed.set(0.95);
-    backFeed.set(-0.95);
+    intake.set(-.5);
+    frontFeed.set(0.5);
+    backFeed.set(-0.5);
   }
 
   public void outakeFromAmp() {

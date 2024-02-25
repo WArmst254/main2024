@@ -41,15 +41,17 @@ public class IntakeCommands {
         .until(amp::invAmpSensorOut)); // cancel the command when the amp sensor is triggered
   }
 
-  public static Command outakeFromShooterSensorCommand(Intake intake) {
+  public static Command outakeFromShooterSensorCommand(Intake intake, Shooter shooter) {
 
     return (Commands.run(
             () -> {
               if (intake.intakeSensorOut()) {
                 // if the intake sensor is triggered intakeSensorOut will return true, indicating that a note is within the intake mechanism
+                shooter.intakeHP();
                 intake.outakeFromShooter(); // outtake through shooter/back feeds
               } else {
                 // if the intake sensor returns false, the note has successfully outtaked
+                shooter.disableShooter();
                 intake.disableIntake(); // outtake motors off
               }
             })
@@ -57,15 +59,17 @@ public class IntakeCommands {
             intake::invIntakeSensorOut)); // cancel the command when the intake sensor is no longer triggered
   }
 
-  public static Command outakeFromAmpSensorCommand(Intake intake) {
+  public static Command outakeFromAmpSensorCommand(Intake intake, Amp amp) {
 
     return (Commands.run(
             () -> {
               if (!intake.intakeSensorOut()) {
                 // if the intake sensor is triggered intakeSensorOut will return true, indicating that a note is within the intake mechanism
+                amp.ampOuttakeOn();
                 intake.outakeFromAmp(); // outtake through amp feeds
               } else {
                 // if the intake sensor returns false, the note has successfully outtaked
+                amp.disableAmp();
                 intake.disableIntake(); // outtake motors off
               }
             })

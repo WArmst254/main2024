@@ -24,6 +24,7 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.util.Alert;
 import frc.robot.util.Alert.AlertType;
@@ -47,6 +48,7 @@ public class RobotContainer {
   private final Intake intake = new Intake();
   private final Elevator elevator = new Elevator();
   private final GyroIOPigeon2 gyro = new GyroIOPigeon2(true);
+  public static LED led = new LED();
 
   // Controllers
   private final XboxController operatorConditions = new XboxController(1);
@@ -106,7 +108,7 @@ public class RobotContainer {
         break;
     }
 
-    NamedCommands.registerCommand("shoot", ShooterCommands.shootSensorCommand(shooter, intake));
+    NamedCommands.registerCommand("shoot", ShooterCommands.shootSensorCommand(shooter, intake, 70));
     NamedCommands.registerCommand("shootOff", new InstantCommand(() -> shooter.disableShooter()).alongWith(new InstantCommand(() -> intake.disableBackFeed())));
     NamedCommands.registerCommand("intakeShooter", IntakeCommands.intakeToShooterSensorCommand(intake, shooter));
     NamedCommands.registerCommand("elevatorUp", elevator.ampElevatorCommand());
@@ -151,7 +153,7 @@ public class RobotContainer {
             drive,
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
-            () -> summonRotation.getR()));
+            () -> -driverController.getRightX()));
 
     // Sensor-Enabled Shooter Scoring Mode
     if (operatorConditions.getYButtonPressed()) {
@@ -190,7 +192,7 @@ public class RobotContainer {
         driverController
           .x()
           .whileTrue(
-            IntakeCommands.outakeFromShooterSensorCommand(intake));
+            IntakeCommands.outakeFromShooterSensorCommand(intake, shooter));
         driverController
           .x()
           .onFalse(
@@ -200,7 +202,7 @@ public class RobotContainer {
         driverController
           .y()
           .whileTrue(
-            ShooterCommands.shootSensorCommand(shooter, intake));
+            ShooterCommands.shootSensorCommand(shooter, intake, 70));
         driverController
           .y()
           .onFalse(
@@ -223,7 +225,7 @@ public class RobotContainer {
         driverController
           .x()
           .whileTrue(
-            IntakeCommands.outakeFromAmpSensorCommand(intake));
+            IntakeCommands.outakeFromAmpSensorCommand(intake, amp));
         driverController
           .x()
           .onFalse(
@@ -233,7 +235,7 @@ public class RobotContainer {
         driverController
           .y()
           .whileTrue(
-            AmpCommands.ampTeleopCommand(amp));
+            new InstantCommand(() -> amp.ampOuttakeOn()));
         driverController
           .y()
           .onFalse(
@@ -269,7 +271,7 @@ public class RobotContainer {
         driverController
           .y()
           .whileTrue(
-            ShooterCommands.shootManualCommand(shooter, intake));
+            ShooterCommands.shootManualCommand(shooter, intake, 70));
         driverController
           .y()
           .onFalse(
@@ -312,6 +314,12 @@ public class RobotContainer {
       }
     }
 
+     // Human Player Intake
+     operatorController
+     .leftBumper()
+     .whileTrue(
+       new InstantCommand(() -> shooter.intakeHP()));
+
     // Lower Shooter Angle
     driverController
       .leftBumper()
@@ -326,13 +334,13 @@ public class RobotContainer {
 
     // April Tag Lock
     driverController
-      .rightBumper()
-      .onTrue(new InstantCommand(() -> summonRotation = new AprilTagLock()));
+    .rightBumper()
+    .onTrue(new InstantCommand(() -> summonRotation = new AprilTagLock()));
 
     // Defer to Joystick
     driverController
-      .rightBumper()
-      .onFalse(new InstantCommand(() -> summonRotation = new Joystick()));
+    .rightBumper()
+    .onFalse(new InstantCommand(() -> summonRotation = new Joystick()));
 
     // Extend Elevator to Amp Scoring Position
     driverController
@@ -357,6 +365,16 @@ public class RobotContainer {
       .start()
       .onTrue(
         new InstantCommand(() -> gyro.zeroGyro()));
+
+    // driverController
+    //   .back()
+    //   .whileTrue(
+    //     ShooterCommands.interpolatedShootCommand(shooter, intake, shooter.getAutomaticState(vision))
+    //   );
+      driverController
+      .back()
+      .onFalse(
+        new InstantCommand(() -> shooter.disableShooter()));
   }
 
   public void checkControllers() {

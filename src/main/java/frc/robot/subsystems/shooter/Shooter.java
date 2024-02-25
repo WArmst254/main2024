@@ -26,7 +26,6 @@ import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.vision.Vision;
@@ -56,15 +55,15 @@ public class Shooter extends SubsystemBase {
     shooterRight.restoreFactoryDefaults();
     shooterRight.follow(shooterLeft);
     shooterRight.burnFlash();
-    m_leftShooterFeedback.setTolerance(25);
+    m_leftShooterFeedback.setTolerance(10);
 
     TalonFXConfiguration cfg = new TalonFXConfiguration();
     shootAngle.setNeutralMode(NeutralModeValue.Brake);
 
     /* Configure current limits */
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.MotionMagicCruiseVelocity = 10;
-    mm.MotionMagicAcceleration = 10;
+    mm.MotionMagicCruiseVelocity = 20;
+    mm.MotionMagicAcceleration = 20;
     mm.MotionMagicJerk = 50;
 
     Slot0Configs slot0 = cfg.Slot0;
@@ -93,8 +92,8 @@ public class Shooter extends SubsystemBase {
     public final double speed;
     public final double angle;
 
-    public State(double speed, double angle) {
-      this.speed = speed;
+    public State(double shooterSpeed, double angle) {
+      this.speed = shooterSpeed;
       this.angle = angle;
     }
   }
@@ -115,20 +114,20 @@ public class Shooter extends SubsystemBase {
   }
 
   private State getAutomaticState(Vision vision) {
-    var targetDistance = getTargetDistance(vision);
-    var shooterSpeed = m_shooterCurve.value(targetDistance.in(Units.Meters));
-    var angle = m_shootAngleCurve.value(targetDistance.in(Units.Meters));
+  var targetDistance = getTargetDistance(vision);
+  var shooterSpeed = m_shooterCurve.value(targetDistance.in(Units.Meters));
+  var angle = m_shootAngleCurve.value(targetDistance.in(Units.Meters));
 
-    return new State(shooterSpeed, angle);
+  return new State(shooterSpeed, angle);
   }
 
   private Measure<Distance> getTargetDistance(Vision vision) {
-    return Units.Meters.of(
-      MathUtil.clamp(
-        vision.getDistance(),
-        MIN_SHOOTING_DISTANCE.in(Units.Meters),
-        MAX_SHOOTING_DISTANCE.in(Units.Meters)
-      )
+  return Units.Meters.of(
+  MathUtil.clamp(
+  vision.getDistance(),
+  MIN_SHOOTING_DISTANCE.in(Units.Meters),
+  MAX_SHOOTING_DISTANCE.in(Units.Meters)
+  )
     );
   }
 
@@ -162,19 +161,9 @@ public class Shooter extends SubsystemBase {
     shootAngle.setControl(m_mmReq.withPosition(state.angle).withSlot(0));
   }
 
-  public Command interpolatedShootAngleCommand(Vision vision) {
-    return runEnd(
-      () -> {interpolatedShootAngle(getAutomaticState(vision));},
-      () -> {stowShootAngle();});
+  
 
-  }
-
-  public Command interpolatedShooterOnCommand(Vision vision) {
-    return runEnd(
-      () -> {interpolatedShooterOn(getAutomaticState(vision));},
-      () -> {disableShooter();});
-  }
-
+ 
   public void stowShootAngle() {
     shootAngle.setControl(m_mmReq.withPosition(0).withSlot(0));
   }
@@ -195,12 +184,16 @@ public class Shooter extends SubsystemBase {
     return !(shooter_sensor.getRange() < 300);
   }
 
-  public boolean isShooterSet() {
+  public boolean isVelocitySet() {
     return (m_leftShooterFeedback.atSetpoint());
   }
 
-  public boolean isAngleSet(Vision vision) {
-    return (shootAngle.getPosition().getValueAsDouble()==getAutomaticState(vision).angle);
+  public boolean isAngleSet() {
+    return (m_mmReq.Position == shootAngle.getPosition().getValueAsDouble() );
+  }
+
+  public boolean isShooterSet() {
+    return (m_mmReq.Position == shootAngle.getPosition().getValueAsDouble() && m_leftShooterFeedback.atSetpoint());
   }
 
   public void periodic() {
@@ -210,7 +203,9 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("Shoot Angle Voltage:", shootAngle.getMotorVoltage().getValueAsDouble());
     SmartDashboard.putNumber("Shooter Velocity: ", m_leftencoder.getVelocity());
     SmartDashboard.putNumber("Shooter Power:", shooterLeft.get());
-    SmartDashboard.putBoolean("Shooter Velocity Setpoint Reached: ", m_leftShooterFeedback.atSetpoint());
+    SmartDashboard.putBoolean("Shooter Velocity Setpoint Reached: ", isVelocitySet());
+    SmartDashboard.putBoolean("Shooter Angle Setpoint Reached: ", isAngleSet());
+    SmartDashboard.putBoolean("Shooter Setpoints Reached: ", isShooterSet());
   }
 
 }
