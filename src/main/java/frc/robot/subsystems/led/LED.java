@@ -29,8 +29,7 @@ public class LED extends SubsystemBase {
 
     public enum LEDState {
       IDLE, 
-      DISABLED_NO_CONTROLLERS, 
-      DISABLED_CONTROLLERS,
+      DISABLED,
       PREMATCH,
       AUTON,
       OFF,
@@ -67,25 +66,19 @@ public class LED extends SubsystemBase {
         for (int i = 0; i < 10; ++i) {
             candle.clearAnimation(i);
         }
-        candle.setLEDs(0, 0, 0, 0, 8, 128);
+        candle.setLEDs(0, 0, 0, 0, 8, 48);
 
         switch (state) {
             case IDLE:
-              candle.animate(new TwinkleAnimation(0, 0, 0, 255, 0.5, 48, TwinklePercent.Percent30));
+              candle.animate(new SingleFadeAnimation(255,255,255,255,0.9,48,8));
               currentState = LEDState.IDLE;
             
             break;
 
-            case DISABLED_NO_CONTROLLERS:
-            candle.animate(new SingleFadeAnimation(255,180,155,0,.7, 48, 8));
-
-                currentState = LEDState.DISABLED_NO_CONTROLLERS;
-                break;
-
-            case DISABLED_CONTROLLERS:
-                candle.animate(new RainbowAnimation(0.7, 0.8, 48, false,8));
+            case DISABLED:
+                candle.animate(new RainbowAnimation(0.7, 0.9, 48, false,8));
     
-                    currentState = LEDState.DISABLED_CONTROLLERS;
+                    currentState = LEDState.DISABLED;
                     break;
 
             case PREMATCH:
@@ -106,50 +99,58 @@ public class LED extends SubsystemBase {
                 break;
 
             case AUTO_SPEAKER:
-                candle.setLEDs(255,0,255);
+                candle.setLEDs(255,0,255, 0, 8, 48);
                 currentState = LEDState.AUTO_SPEAKER;
 
                 break;
 
             case AUTO_AMP:
-              candle.setLEDs(255,160,0);
+              candle.setLEDs(255,160,0, 0, 8, 48);
               currentState = LEDState.AUTO_AMP;
 
               break;
 
             case MANUAL_AMP:
-              candle.setLEDs(255,0,0);
+              candle.setLEDs(255,0,0, 0, 8, 48);
               currentState = LEDState.MANUAL_AMP;
 
               break;
 
             case HP_AMPLIFY:
-              candle.animate(new StrobeAnimation(0,255,0,0,.7, 48, 8));
+              candle.animate(new StrobeAnimation(0,0,255,0,.5, 48, 8));
               currentState = LEDState.HP_AMPLIFY;
 
               break;
 
             case HP_COOPERTITION:
-              candle.animate(new StrobeAnimation(255,255,0,0,.7, 48, 8));
+              candle.animate(new StrobeAnimation(255,255,0,0,.5, 48, 8));
               currentState = LEDState.HP_COOPERTITION;
 
               break;
 
             case GROUND_INTAKE_DETECTED:
-              candle.setLEDs(0,255,0,0,8, 20);
+              candle.setLEDs(0,255,0,0,8, 48);
               currentState = LEDState.GROUND_INTAKE_DETECTED;
               break;
 
             case HP_INTAKE_DETECTED:
-              candle.setLEDs(0,255,0,0,28,20);
+              candle.setLEDs(0,255,0,0,28,48);
               currentState = LEDState.HP_INTAKE_DETECTED;
 
               break;
+
         }
     }
 
     public void periodic() {
       alliance = DriverStation.getAlliance();
+      if(!DriverStation.isJoystickConnected(0) || !DriverStation.isJoystickConnected(1)) {
+        candle.animate(new TwinkleAnimation(255, 0, 178, 255, 0.9, 48, TwinklePercent.Percent64,8));
+      }
+      if(DriverStation.isEStopped()) {
+        candle.animate(new StrobeAnimation(255,0,0,0,.5, 48, 8));
+
+      }
       if (currentState == LEDState.PREMATCH) {
 
           if (NetworkTableInstance.getDefault().isConnected()) {

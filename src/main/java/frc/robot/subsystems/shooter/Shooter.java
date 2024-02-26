@@ -46,7 +46,7 @@ public class Shooter extends SubsystemBase {
   private final Measure<Distance> MAX_SHOOTING_DISTANCE;
 
   private final SimpleMotorFeedforward m_shooterFeedforward =
-      new SimpleMotorFeedforward(0.05, 12 / 6000);
+      new SimpleMotorFeedforward(0.05, 12 / 6784);
 
   private final PIDController m_leftShooterFeedback = new PIDController(0.09, 0.0, 0.0);
 
@@ -186,7 +186,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isAngleSet() {
-    return (m_mmReq.Position == shootAngle.getPosition().getValueAsDouble() );
+    return (m_mmReq.Position <= (shootAngle.getPosition().getValueAsDouble()+0.005) && m_mmReq.Position >= (shootAngle.getPosition().getValueAsDouble()-0.005));
   }
 
   public boolean isShooterSet() {

@@ -1,0 +1,80 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.55,
+      "y": 7.3
+    },
+    "rotation": -90.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "A2AmpPLAmpA1_1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "amp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ampOff"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "A2AmpPLAmpA1_2"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intakeAmp"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "A2AmpPLAmpA1_3"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "A2AmpPLAmpA1_4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "amp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ampOff"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "Start Amp",
+  "choreoAuto": false
+}

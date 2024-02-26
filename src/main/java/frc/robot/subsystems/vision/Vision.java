@@ -23,7 +23,7 @@ public class Vision extends SubsystemBase {
     public void periodic() {
         table.getEntry("pipeline").setDouble(1);
         SmartDashboard.putBoolean("limelight target detected", isValidTarget());
-        SmartDashboard.putNumber("LL target distance", getDistance());
+        SmartDashboard.putNumber("LL target distance METERS", getDistance());
     }
 
     public double getDistance() {
