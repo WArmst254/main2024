@@ -66,19 +66,6 @@ public final class Constants {
     REPLAY
   }
 
-  public static enum TeleOpMode {
-    // Sensor-Enabled Shooter Scoring Mode
-    AUTO_SPEAKER,
-
-    // Sensor-Enabled Amp Scoring Mode
-    AUTO_AMP,
-
-    // Manual Shooter Scoring Mode
-    MANUAL_SPEAKER,
-
-    // Manual Amp Scoring Mode
-    MANUAL_AMP
-  }
   public static final List<Entry<Measure<Distance>,State>> SHOOTER_MAP = Arrays.asList(
       Map.entry(Units.Meters.of(0.0), new State(0.2, 3.3)),
       Map.entry(Units.Meters.of(1.0), new State(0.4,3.6)),

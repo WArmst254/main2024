@@ -48,14 +48,14 @@ public class Shooter extends SubsystemBase {
   private final SimpleMotorFeedforward m_shooterFeedforward =
       new SimpleMotorFeedforward(0.05, 12 / 6784);
 
-  private final PIDController m_leftShooterFeedback = new PIDController(0.09, 0.0, 0.0);
+  private final PIDController m_leftShooterFeedback = new PIDController(0.05, 0.0, 0.0);
 
   public Shooter() {
     shooterLeft.restoreFactoryDefaults();
     shooterRight.restoreFactoryDefaults();
     shooterRight.follow(shooterLeft);
     shooterRight.burnFlash();
-    m_leftShooterFeedback.setTolerance(10);
+    m_leftShooterFeedback.setTolerance(20);
 
     TalonFXConfiguration cfg = new TalonFXConfiguration();
     shootAngle.setNeutralMode(NeutralModeValue.Brake);
@@ -139,7 +139,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void intakeHP() {
-    shooterLeft.set(-0.4);
+    shooterLeft.set(-0.2);
   }
 
   public void disableShooter() {

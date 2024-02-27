@@ -26,9 +26,9 @@ public class Intake extends SubsystemBase {
   }
 
   public void intakeToShooter() {
-    intake.set(0.5); //TODO: Probably Change
-    frontFeed.set(-0.5);
-    backFeed.set(0.5);
+    intake.set(1); //TODO: Probably Change
+    frontFeed.set(-0.95);
+    backFeed.set(0.95);
   }
 
   public void intakeToAmp() {
@@ -43,9 +43,9 @@ public class Intake extends SubsystemBase {
   }
 
   public void outakeFromShooter() {
-    intake.set(-.5);
-    frontFeed.set(0.5);
-    backFeed.set(-0.5);
+    intake.set(-.95);
+    frontFeed.set(0.95);
+    backFeed.set(-0.95);
   }
 
   public void outakeFromAmp() {

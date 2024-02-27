@@ -24,13 +24,13 @@ public class Amp extends SubsystemBase {
   }
 
   public void ampOuttakeOn() {
-    ampLeft.set(.95);
-    ampRight.set(.95);
+    ampLeft.set(1);
+    ampRight.set(1);
   }
 
   public void ampIntakeOn() {
-    ampLeft.set(-.95);
-    ampRight.set(-.95);
+    ampLeft.set(-.99);
+    ampRight.set(-.99);
   }
 
   public void disableAmp() {

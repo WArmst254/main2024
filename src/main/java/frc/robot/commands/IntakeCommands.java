@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.amp.Amp;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -45,18 +46,11 @@ public class IntakeCommands {
 
     return (Commands.run(
             () -> {
-              if (intake.intakeSensorOut()) {
-                // if the intake sensor is triggered intakeSensorOut will return true, indicating that a note is within the intake mechanism
                 shooter.intakeHP();
                 intake.outakeFromShooter(); // outtake through shooter/back feeds
-              } else {
-                // if the intake sensor returns false, the note has successfully outtaked
-                shooter.disableShooter();
-                intake.disableIntake(); // outtake motors off
-              }
             })
         .until(
-            intake::invIntakeSensorOut)); // cancel the command when the intake sensor is no longer triggered
+            intake::intakeSensorOut).andThen(new InstantCommand(() -> shooter.disableShooter())));
   }
 
   public static Command outakeFromAmpSensorCommand(Intake intake, Amp amp) {
