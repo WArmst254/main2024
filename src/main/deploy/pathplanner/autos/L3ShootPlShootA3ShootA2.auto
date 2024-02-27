@@ -1,0 +1,129 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.7,
+      "y": 4.4
+    },
+    "rotation": 120.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootOff"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L3ShootPLShootA3ShootA2_1"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intakeShooter"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "L3ShootPLShootA3ShootA2_2"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L3ShootPLShootA3ShootA2_3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeOff"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootOff"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L3ShootPlShootA3ShootA2_4"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intakeShooter"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "L3ShootPlShootA3ShootA2_5"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L3ShootPlShootA3ShootA2_6"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeOff"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootOff"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "Start Long",
+  "choreoAuto": false
+}
