@@ -77,6 +77,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    double shooterCloseSpeed = 2500*Math.PI;
 
     switch (Constants.currentMode) {
       case REAL:
@@ -113,19 +114,19 @@ public class RobotContainer {
         break;
     }
 
-    NamedCommands.registerCommand("shoot", ShooterCommands.shootSensorCommand(shooter, intake, 0, 65));
+    NamedCommands.registerCommand("shoot", ShooterCommands.shootSensorCommand(shooter, intake, 0, shooterCloseSpeed));
     NamedCommands.registerCommand("shootOff", new InstantCommand(() -> shooter.disableShooter()).alongWith(new InstantCommand(() -> intake.disableBackFeed())));
     NamedCommands.registerCommand("intakeShooter", IntakeCommands.intakeToShooterSensorCommand(intake, shooter, 0.2));
     NamedCommands.registerCommand("elevatorUp", elevator.ampElevatorCommand());
     NamedCommands.registerCommand("elevatorDown", elevator.stowElevatorCommand());
     NamedCommands.registerCommand("amp", AmpCommands.ampAutonomousCommand(amp, elevator));
-    NamedCommands.registerCommand("ampOff", new InstantCommand(() -> amp.disableAmp()));
+    NamedCommands.registerCommand("ampOff", new InstantCommand(() -> amp.disableAmp()).alongWith(elevator.stowElevatorCommand()));
     NamedCommands.registerCommand("intakeAmp", IntakeCommands.intakeToAmpSensorCommand(intake, amp));
-    NamedCommands.registerCommand("intakeOff", new InstantCommand(() -> intake.disableIntake()));
+    NamedCommands.registerCommand("intakeOff", new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShootAngle())).alongWith(new InstantCommand(() -> amp.disableAmp())));
 
     zeroSuperstructure();
     configureAutos();
-    configureButtonBindings();
+    configureButtonBindings(shooterCloseSpeed);
   }
 
   private void configureAutos() {
@@ -145,8 +146,8 @@ public class RobotContainer {
     autoChooser.addOption("Starting LONG, Shoot PL/Shoot A3/ShootA2 (4)", new PathPlannerAuto("L3ShootPLShootA3ShootA2ShootA1"));
   }
 
-  public void configureButtonBindings() {
-    double shooterCloseSpeed = 2500*Math.PI;
+  public void configureButtonBindings(double shooterCloseSpeed) {
+  
 
     // Drive Controls
     drive.setDefaultCommand(
