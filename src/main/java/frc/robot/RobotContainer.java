@@ -58,11 +58,14 @@ public class RobotContainer {
   // Controllers
   public static CommandXboxController driverController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
+  private final CommandXboxController manualController = new CommandXboxController(2);
 
   private final Alert driverDisconnected =
       new Alert("Driver controller disconnected (port 0).", AlertType.WARNING);
   private final Alert operatorDisconnected =
       new Alert("Operator controller disconnected (port 1).", AlertType.WARNING);
+      private final Alert manualDisconnected =
+      new Alert("Manual controller disconnected (port 2).", AlertType.WARNING);
 
   // Auto Chooser
   private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -129,7 +132,7 @@ public class RobotContainer {
 
   private void configureAutos() {
     autoChooser.addDefaultOption("Do Nothing", Commands.none());
-    autoChooser.addOption("Exit Amp", new PathPlannerAuto("ExitAmp"));
+    autoChooser.addOption("Exit Amp", new PathPlannerAuto("A1AmpPL"));
     autoChooser.addOption("Exit Sub", new PathPlannerAuto("ExitSub"));
     autoChooser.addOption("Exit Long", new PathPlannerAuto("ExitLong"));
     autoChooser.addOption("Amp Both Two Piece (A1) Starting Amp", new PathPlannerAuto("2AmpA1"));
@@ -161,22 +164,22 @@ public class RobotContainer {
 
             
       Command intakeShooterAutoCommand = IntakeCommands.intakeToShooterSensorCommand(intake, shooter, 0.2);
-      Command disableIntakeShooterAutoCommand = new InstantCommand(() -> intake.disableIntake());
+      Command disableIntakeShooterAutoCommand = (new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShootAngle())));
        Command outakeShooterAutoCommand = IntakeCommands.outakeFromShooterSensorCommand(intake, shooter);
        Command disableOutakeShooterAutoCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.disableShooter()));
-       Command scoreShooterAutoCommand = ShooterCommands.shootSensorCommand(shooter, intake, 0, 50);
+       Command scoreShooterAutoCommand = ShooterCommands.shootSensorCommand(shooter, intake, 0, 2500*Math.PI);
        Command disableScoreShooterAutoCommand = new InstantCommand(() -> shooter.disableShooter()).alongWith(new InstantCommand(() -> intake.disableBackFeed()));
 
        Command intakeAmpAutoCommand = IntakeCommands.intakeToAmpSensorCommand(intake, amp);
        Command disableIntakeAmpAutoCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp()));
        Command outakeAmpAutoCommand = IntakeCommands.outakeFromAmpSensorCommand(intake, amp);
-       Command disableOutakeAmpAutoCommand = new InstantCommand(() -> intake.disableIntake());
+       Command disableOutakeAmpAutoCommand = (new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp())));
        Command scoreAmpAutoCommand = new InstantCommand(() -> amp.ampOuttakeOn());
        Command disableScoreAmpAutoCommand =  new InstantCommand(() -> amp.disableAmp());
        
 
       Command intakeShooterManualCommand = new InstantCommand(() -> intake.intakeToShooter()).alongWith(new InstantCommand(() -> shooter.lowerShootAngle(0.18)));
-      Command disableIntakeShooterManualCommand = new InstantCommand(() -> intake.disableIntake());
+      Command disableIntakeShooterManualCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShootAngle()));
       Command outakeShooterManualCommand = new InstantCommand(() -> intake.outakeFromShooter()).alongWith(new InstantCommand(() -> shooter.lowerShootAngle(0.18)));
        Command disableOutakeShooterManualCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShootAngle()));
        Command scoreShooterManualCommand = ShooterCommands.shootManualCommand(shooter, intake, 0, 65);
@@ -207,7 +210,7 @@ public class RobotContainer {
       .b()
       .whileTrue(intakeAmpAutoCommand);
     driverController
-      .a()
+      .b()
       .onFalse(disableIntakeAmpAutoCommand);
 
     // Ground Outtake
@@ -240,47 +243,46 @@ public class RobotContainer {
       .leftTrigger()
       .onFalse(disableScoreAmpAutoCommand);
 
-      operatorController
+      manualController
       .a()
       .whileTrue(intakeShooterManualCommand);
-    operatorController
+    manualController
       .a()
       .onFalse(disableIntakeShooterManualCommand);
 
-      operatorController
+      manualController
       .b()
       .whileTrue(intakeAmpManualCommand);
-    operatorController
-      .a()
+    manualController
+      .b()
       .onFalse(disableIntakeAmpManualCommand);
 
     // Ground Outtake
-    operatorController
+    manualController
       .x()
       .whileTrue(outakeShooterManualCommand);
-    operatorController
+    manualController
       .x()
       .onFalse(disableOutakeShooterManualCommand);
-    
-    // Shooter Scoring
-    operatorController
+
+    manualController
       .y()
       .whileTrue(outakeAmpManualCommand);
-    operatorController
+    manualController
       .y()
       .onFalse(disableOutakeAmpManualCommand);
 
-      operatorController
+      manualController
       .rightTrigger()
       .whileTrue(scoreShooterManualCommand);
-    operatorController
+    manualController
       .rightTrigger()
       .onFalse(disableScoreShooterManualCommand);
 
-      operatorController
+      manualController
       .leftTrigger()
       .whileTrue(scoreAmpManualCommand);
-    operatorController
+    manualController
       .leftTrigger()
       .onFalse(disableScoreAmpManualCommand);
 
@@ -359,18 +361,15 @@ public class RobotContainer {
     //     new InstantCommand(() -> shooter.disableShooter()));
 
     operatorController
-      .povRight()
+      .rightTrigger()
       .whileTrue(
         new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.HP_AMPLIFY)));
     operatorController
-      .povLeft()
+      .leftTrigger()
       .whileTrue(
         new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.HP_COOPERTITION)));
   }
 
-  public void teleopPeriodic() {
-
-  }
 
   public void checkControllers() {
     driverDisconnected.set(
@@ -379,6 +378,9 @@ public class RobotContainer {
     operatorDisconnected.set(
         !DriverStation.isJoystickConnected(operatorController.getHID().getPort())
             || !DriverStation.getJoystickIsXbox(operatorController.getHID().getPort()));
+    manualDisconnected.set(
+        !DriverStation.isJoystickConnected(manualController.getHID().getPort())
+              || !DriverStation.getJoystickIsXbox(manualController.getHID().getPort()));
   }
 
   public void checkSensors() {

@@ -9,7 +9,6 @@ import frc.robot.Constants;
 
 public class Amp extends SubsystemBase {
   private final TalonFX ampLeft = new TalonFX(Constants.IDs.ampleft);
-  private final TalonFX ampRight = new TalonFX(Constants.IDs.ampright);
   public final TimeOfFlight amp_sensor = new TimeOfFlight(Constants.IDs.ampsensor);
 
   public Amp() {
@@ -17,25 +16,21 @@ public class Amp extends SubsystemBase {
         runOnce(
                 () -> {
                   ampLeft.set(0);
-                  ampRight.set(0);
                 })
             .andThen(run(() -> {}))
             .withName("Amp Idle"));
   }
 
   public void ampOuttakeOn() {
-    ampLeft.set(1);
-    ampRight.set(1);
+    ampLeft.set(0.9);
   }
 
   public void ampIntakeOn() {
-    ampLeft.set(-.99);
-    ampRight.set(-.99);
+    ampLeft.set(-.9);
   }
 
   public void disableAmp() {
     ampLeft.set(0);
-    ampRight.set(0);
   }
 
   public boolean ampSensorOut() {
@@ -52,6 +47,5 @@ public class Amp extends SubsystemBase {
 
   public void periodic() {
     SmartDashboard.putNumber("Amp Left Power: ", ampLeft.get());
-    SmartDashboard.putNumber("Amp Right Power: ", ampRight.get());
   }
 }

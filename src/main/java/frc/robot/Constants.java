@@ -40,7 +40,6 @@ public final class Constants {
     public static final int shootangle = 16;
     public static final int intake = 17;
     public static final int ampleft = 18;
-    public static final int ampright = 19;
     public static final int led = 20;
 
     // REV Hardware Client

@@ -38,7 +38,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void feedHPIntakeToAmp() {
-    frontFeed.set(-0.95);
+    frontFeed.set(0.95);
     backFeed.set(-0.95);
   }
 
@@ -61,11 +61,12 @@ public class Intake extends SubsystemBase {
   }
 
   public void disableBackFeed() {
-    backFeed.set(0);
+    frontFeed.set(0);
   }
 
   public void disableFeeds() {
     backFeed.set(0);
+    frontFeed.set(0);
   }
 
   public void intakeOn() {
@@ -73,7 +74,8 @@ public class Intake extends SubsystemBase {
   }
 
   public void backFeedOn() {
-    backFeed.set(-0.5);
+    frontFeed.set(-0.5);
+
   }
 
   public double intakeSensor() {

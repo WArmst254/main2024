@@ -8,17 +8,15 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.Shooter.State;
 
 public class ShooterCommands {
-  public static Command shootSensorCommand(Shooter shooter, Intake intake, double angle, double setpointRotationsPerSecond) {
+  public static Command shootSensorCommand(Shooter shooter, Intake intake, double angle, double setpointRotationsPerMinute) {
     // the parallel command type will run both of these command threads simultaneously
     return Commands.parallel(
-        Commands.parallel(
-            Commands.run(() -> shooter.lowerShootAngle(angle)),
-            Commands.run(() -> shooter.shooterOn(setpointRotationsPerSecond)))
-                .until(shooter::invShooterSensorOut), // cancel command when the note has been shot
+            Commands.run(() -> shooter.shooterOn(setpointRotationsPerMinute))
+      , // cancel command when the note has been shot
             Commands.waitUntil(
-                    shooter::isShooterSet) // second command thread that begins once target velocity is achieved
+                    shooter::isVelocitySet) // second command thread that begins once target velocity is achieved
                 .andThen(() -> intake.backFeedOn()) // activates feed to shoot note
-                .until(shooter::invShooterSensorOut)) // cancel command when the note has been shot
+                ) // cancel command when the note has been shot
         .withName("Shoot");
   }
 

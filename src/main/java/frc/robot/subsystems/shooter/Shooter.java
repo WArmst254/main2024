@@ -17,11 +17,11 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.playingwithfusion.TimeOfFlight;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel;
+import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkPIDController;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
@@ -37,7 +37,10 @@ public class Shooter extends SubsystemBase {
   private final CANSparkFlex shooterLeft = new CANSparkFlex(Constants.IDs.shooterleft, CANSparkLowLevel.MotorType.kBrushless);
   private final CANSparkFlex shooterRight = new CANSparkFlex(Constants.IDs.shooterright, CANSparkLowLevel.MotorType.kBrushless);
   public final TimeOfFlight shooter_sensor = new TimeOfFlight(Constants.IDs.shootersensor);
-  private RelativeEncoder m_leftencoder = shooterLeft.getEncoder();
+  private RelativeEncoder m_encoder = shooterLeft.getEncoder();
+
+   private SparkPIDController m_pidController = shooterLeft.getPIDController();
+  public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
 
   private static final SplineInterpolator SPLINE_INTERPOLATOR = new SplineInterpolator();
   private PolynomialSplineFunction m_shootAngleCurve;
@@ -45,17 +48,30 @@ public class Shooter extends SubsystemBase {
   private final Measure<Distance> MIN_SHOOTING_DISTANCE = Units.Meters.of(0.0);
   private final Measure<Distance> MAX_SHOOTING_DISTANCE;
 
-  private final SimpleMotorFeedforward m_shooterFeedforward =
-      new SimpleMotorFeedforward(0.05, 12 / 6784);
-
-  private final PIDController m_leftShooterFeedback = new PIDController(0.05, 0.0, 0.0);
-
   public Shooter() {
     shooterLeft.restoreFactoryDefaults();
     shooterRight.restoreFactoryDefaults();
     shooterRight.follow(shooterLeft);
     shooterRight.burnFlash();
-    m_leftShooterFeedback.setTolerance(20);
+  
+
+    // PID coefficients
+    kP = 6e-5; 
+    kI = 0;
+    kD = 0; 
+    kIz = 0; 
+    kFF = 0.000015; 
+    kMaxOutput = 1; 
+    kMinOutput = -1;
+    maxRPM = 5700;
+
+    // set PID coefficients
+    m_pidController.setP(kP);
+    m_pidController.setI(kI);
+    m_pidController.setD(kD);
+    m_pidController.setIZone(kIz);
+    m_pidController.setFF(kFF);
+    m_pidController.setOutputRange(kMinOutput, kMaxOutput);
 
     TalonFXConfiguration cfg = new TalonFXConfiguration();
     shootAngle.setNeutralMode(NeutralModeValue.Brake);
@@ -131,11 +147,8 @@ public class Shooter extends SubsystemBase {
     );
   }
 
-  public void shooterOn(double setpointRotationsPerSecond) {
-    shooterLeft.set(
-        m_shooterFeedforward.calculate(setpointRotationsPerSecond)
-            + m_leftShooterFeedback.calculate(
-                m_leftencoder.getVelocity() / 60, setpointRotationsPerSecond));
+  public void shooterOn(double setPointRotationsPerMinute) {
+    m_pidController.setReference(setPointRotationsPerMinute, CANSparkMax.ControlType.kVelocity);
   }
 
   public void intakeHP() {
@@ -151,10 +164,7 @@ public class Shooter extends SubsystemBase {
   }
 
     public void interpolatedShooterVelocity(State state) {
-    shooterLeft.set(
-        m_shooterFeedforward.calculate(state.speed)
-            + m_leftShooterFeedback.calculate(
-                m_leftencoder.getVelocity() / 60, state.speed));
+      m_pidController.setReference(state.speed, CANSparkMax.ControlType.kVelocity);
   }
 
   public void interpolatedShootAngle(State state) {
@@ -182,7 +192,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isVelocitySet() {
-    return (m_leftShooterFeedback.atSetpoint());
+    return((m_encoder.getVelocity() >= (2500-100)) && (m_encoder.getVelocity() <= (2500+100)));
   }
 
   public boolean isAngleSet() {
@@ -190,7 +200,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isShooterSet() {
-    return ((m_mmReq.Position <= (shootAngle.getPosition().getValueAsDouble()+0.005) && m_mmReq.Position >= (shootAngle.getPosition().getValueAsDouble()-0.005))  && m_leftShooterFeedback.atSetpoint());
+    return false;
   }
 
   public void periodic() {
@@ -198,7 +208,7 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("Shoot Angle Velocity: ", shootAngle.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Shoot Angle Power:", shootAngle.get());
     SmartDashboard.putNumber("Shoot Angle Voltage:", shootAngle.getMotorVoltage().getValueAsDouble());
-    SmartDashboard.putNumber("Shooter Velocity: ", m_leftencoder.getVelocity());
+    SmartDashboard.putNumber("Shooter Velocity: ", m_encoder.getVelocity());
     SmartDashboard.putNumber("Shooter Power:", shooterLeft.get());
     SmartDashboard.putBoolean("Shooter Velocity Setpoint Reached: ", isVelocitySet());
     SmartDashboard.putBoolean("Shooter Angle Setpoint Reached: ", isAngleSet());
