@@ -117,7 +117,6 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    m_robotContainer.stowShooterAngle();
   }
 
   /** This function is called once when teleop is enabled. */
