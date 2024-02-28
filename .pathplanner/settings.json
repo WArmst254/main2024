@@ -7,21 +7,15 @@
     "A1AmpPL",
     "A2AmpPLAmpA1",
     "A2AmpPLAmpB1",
-    "A3AmpPLAmpA1ShootA2",
-    "A3AmpPLAmpB1ShootA1",
-    "A4AmpPlShootA1ShootA2ShootA3",
     "L0Exit",
     "L1ShootPL",
     "L2ShootPLShootA3",
     "L2ShootPLShootB5",
     "L3ShootPLShootA3ShootA2",
-    "L3ShootPLShootB5ShootA3",
-    "L4ShootPLShootA3ShootA2AmpA1",
     "L4ShootPLShootA3ShootA2ShootA1",
     "S0Exit",
     "S1ShootPL",
-    "S2ShootPLShootA2",
-    "S3ShootPLShootA2ShootA3"
+    "S2ShootPLShootA2"
   ],
   "autoFolders": [
     "Start Amp",

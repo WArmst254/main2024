@@ -3,8 +3,6 @@ package frc.robot;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -132,27 +130,23 @@ public class RobotContainer {
 
   private void configureAutos() {
     autoChooser.addDefaultOption("Do Nothing", Commands.none());
-    autoChooser.addOption("Exit Amp", new PathPlannerAuto("A1AmpPL"));
-    autoChooser.addOption("Exit Sub", new PathPlannerAuto("ExitSub"));
-    autoChooser.addOption("Exit Long", new PathPlannerAuto("ExitLong"));
-    autoChooser.addOption("Amp Both Two Piece (A1) Starting Amp", new PathPlannerAuto("2AmpA1"));
-    autoChooser.addOption("Amp Both Two Piece (B1) Starting Amp", new PathPlannerAuto("2AmpB1"));
-    autoChooser.addOption("Shoot Both Two Piece (A3) Starting Long", new PathPlannerAuto("2ShootLongA3"));
-    autoChooser.addOption("Shoot Both Two Piece (B5) Starting Long", new PathPlannerAuto("2ShootLongB5"));
-    autoChooser.addOption("Shoot Both Two Piece (A2) Starting Sub", new PathPlannerAuto("2ShootSubA2"));
-    autoChooser.addOption("Amp All Three Piece (B1,A1) Starting Amp", new PathPlannerAuto("3AmpB1AmpA1"));
-    autoChooser.addOption("Amp Two & Shoot One Three Piece (B1,A1) Starting Amp", new PathPlannerAuto("3AmpB1ShootA1"));
+    autoChooser.addOption("Exit AMP", new PathPlannerAuto("A0Exit"));
+    autoChooser.addOption("Exit SUB", new PathPlannerAuto("S0Exit"));
+    autoChooser.addOption("Exit LONG", new PathPlannerAuto("L0Exit"));
+    autoChooser.addOption("Starting AMP, Amp PL/Exit (1)", new PathPlannerAuto("A1AmpPL"));
+    autoChooser.addOption("Starting SUB, Shoot PL/Exit (1)", new PathPlannerAuto("S1ShootPL"));
+    autoChooser.addOption("Starting LONG, Shoot PL/Exit (1)", new PathPlannerAuto("L1ShootPL"));
+    autoChooser.addOption("Starting AMP, Amp PL/Amp A1 (2)", new PathPlannerAuto("A2AmpPLAmpA1"));
+    autoChooser.addOption("Starting AMP, Amp PL/Amp B1 (2)", new PathPlannerAuto("A2AmpPLAmpB1"));
+    autoChooser.addOption("Starting SUB, Shoot PL/Shoot A2 (2)", new PathPlannerAuto("S2ShootPLShootA2"));
+    autoChooser.addOption("Starting LONG, Shoot PL/Shoot A3 (2)", new PathPlannerAuto("L2ShootPLShootA3"));
+    autoChooser.addOption("Starting LONG, Shoot PL/Shoot B5 (2)", new PathPlannerAuto("L2ShootPLShootB5"));
+    autoChooser.addOption("Starting LONG, Shoot PL/Shoot A3/ShootA2 (3)", new PathPlannerAuto("L3ShootPLShootA3ShootA2"));
+    autoChooser.addOption("Starting LONG, Shoot PL/Shoot A3/ShootA2 (4)", new PathPlannerAuto("L3ShootPLShootA3ShootA2ShootA1"));
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
   public void configureButtonBindings() {
-    // Default TeleOperated Mode -- Sensor-Enabled Shooter Scoring Mode
-  
+    double shooterCloseSpeed = 2500*Math.PI;
 
     // Drive Controls
     drive.setDefaultCommand(
@@ -163,42 +157,42 @@ public class RobotContainer {
             () -> summonRotation.getR()));
 
             
-      Command intakeShooterAutoCommand = IntakeCommands.intakeToShooterSensorCommand(intake, shooter, 0.2);
-      Command disableIntakeShooterAutoCommand = (new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShootAngle())));
-       Command outakeShooterAutoCommand = IntakeCommands.outakeFromShooterSensorCommand(intake, shooter);
-       Command disableOutakeShooterAutoCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.disableShooter()));
-       Command scoreShooterAutoCommand = ShooterCommands.shootSensorCommand(shooter, intake, 0, 2500*Math.PI);
-       Command disableScoreShooterAutoCommand = new InstantCommand(() -> shooter.disableShooter()).alongWith(new InstantCommand(() -> intake.disableBackFeed()));
+    Command intakeShooterAutoCommand = IntakeCommands.intakeToShooterSensorCommand(intake, shooter, 0.2);
+    Command disableIntakeShooterAutoCommand = (new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShootAngle())));
+    Command outakeShooterAutoCommand = IntakeCommands.outakeFromShooterSensorCommand(intake, shooter);
+    Command disableOutakeShooterAutoCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.disableShooter()));
+    Command scoreShooterAutoCommand = ShooterCommands.shootSensorCommand(shooter, intake, 0, shooterCloseSpeed);
+    Command disableScoreShooterAutoCommand = new InstantCommand(() -> shooter.disableShooter()).alongWith(new InstantCommand(() -> intake.disableBackFeed()));
 
-       Command intakeAmpAutoCommand = IntakeCommands.intakeToAmpSensorCommand(intake, amp);
-       Command disableIntakeAmpAutoCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp()));
-       Command outakeAmpAutoCommand = IntakeCommands.outakeFromAmpSensorCommand(intake, amp);
-       Command disableOutakeAmpAutoCommand = (new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp())));
-       Command scoreAmpAutoCommand = new InstantCommand(() -> amp.ampOuttakeOn());
-       Command disableScoreAmpAutoCommand =  new InstantCommand(() -> amp.disableAmp());
+    Command intakeAmpAutoCommand = IntakeCommands.intakeToAmpSensorCommand(intake, amp);
+    Command disableIntakeAmpAutoCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp()));
+    Command outakeAmpAutoCommand = IntakeCommands.outakeFromAmpSensorCommand(intake, amp);
+    Command disableOutakeAmpAutoCommand = (new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp())));
+    Command scoreAmpAutoCommand = new InstantCommand(() -> amp.ampOuttakeOn());
+    Command disableScoreAmpAutoCommand =  new InstantCommand(() -> amp.disableAmp());
        
 
-      Command intakeShooterManualCommand = new InstantCommand(() -> intake.intakeToShooter()).alongWith(new InstantCommand(() -> shooter.lowerShootAngle(0.18)));
-      Command disableIntakeShooterManualCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShootAngle()));
-      Command outakeShooterManualCommand = new InstantCommand(() -> intake.outakeFromShooter()).alongWith(new InstantCommand(() -> shooter.lowerShootAngle(0.18)));
-       Command disableOutakeShooterManualCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShootAngle()));
-       Command scoreShooterManualCommand = ShooterCommands.shootManualCommand(shooter, intake, 0, 65);
-       Command disableScoreShooterManualCommand = new InstantCommand(() -> shooter.disableShooter()).alongWith(new InstantCommand(() -> intake.disableBackFeed()));
+    Command intakeShooterManualCommand = new InstantCommand(() -> intake.intakeToShooter()).alongWith(new InstantCommand(() -> shooter.lowerShootAngle(0.18)));
+    Command disableIntakeShooterManualCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShootAngle()));
+    Command outakeShooterManualCommand = new InstantCommand(() -> intake.outakeFromShooter()).alongWith(new InstantCommand(() -> shooter.lowerShootAngle(0.18)));
+    Command disableOutakeShooterManualCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShootAngle()));
+    Command scoreShooterManualCommand = ShooterCommands.shootManualCommand(shooter, intake, 0, shooterCloseSpeed);
+    Command disableScoreShooterManualCommand = new InstantCommand(() -> shooter.disableShooter()).alongWith(new InstantCommand(() -> intake.disableBackFeed()));
        
-       Command intakeHPShooterCommand = new InstantCommand(() -> shooter.intakeHP());
-       Command disableIntakeHPShooterCommand = new InstantCommand(() -> shooter.disableShooter());
+    Command intakeHPShooterCommand = new InstantCommand(() -> shooter.intakeHP());
+    Command disableIntakeHPShooterCommand = new InstantCommand(() -> shooter.disableShooter());
 
-       Command intakeAmpManualCommand = new InstantCommand(() -> intake.intakeToAmp()).alongWith(new InstantCommand(() -> amp.ampOuttakeOn()));
-       Command disableIntakeAmpManualCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp()));
-       Command outakeAmpManualCommand = new InstantCommand(() -> intake.outakeFromAmp());
-       Command disableOutakeAmpManualCommand = new InstantCommand(() -> intake.disableIntake());
-       Command scoreAmpManualCommand = new InstantCommand(() -> amp.ampOuttakeOn());
-       Command disableScoreAmpManualCommand = new InstantCommand(() -> amp.disableAmp());
+    Command intakeAmpManualCommand = new InstantCommand(() -> intake.intakeToAmp()).alongWith(new InstantCommand(() -> amp.ampOuttakeOn()));
+    Command disableIntakeAmpManualCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp()));
+    Command outakeAmpManualCommand = new InstantCommand(() -> intake.outakeFromAmp());
+    Command disableOutakeAmpManualCommand = new InstantCommand(() -> intake.disableIntake());
+    Command scoreAmpManualCommand = new InstantCommand(() -> amp.ampOuttakeOn());
+    Command disableScoreAmpManualCommand = new InstantCommand(() -> amp.disableAmp());
        
-       Command intakeHPAmpCommand = new InstantCommand(() -> shooter.intakeHP()).alongWith(new InstantCommand(() -> intake.feedHPIntakeToAmp())).alongWith(new InstantCommand(() -> amp.ampOuttakeOn()));
-       Command disableIntakeHPAmpCommand = new InstantCommand(() -> shooter.disableShooter()).alongWith(new InstantCommand(() -> intake.disableFeeds())).alongWith(new InstantCommand(() -> amp.disableAmp()));
+    Command intakeHPAmpCommand = ShooterCommands.HPintakeToAmpSensorCommand(intake, amp, shooter);
+    Command disableIntakeHPAmpCommand = new InstantCommand(() -> shooter.disableShooter()).alongWith(new InstantCommand(() -> intake.disableFeeds())).alongWith(new InstantCommand(() -> amp.disableAmp()));
 
-    
+    //intake to shooter
     driverController
       .a()
       .whileTrue(intakeShooterAutoCommand);
@@ -206,88 +200,97 @@ public class RobotContainer {
       .a()
       .onFalse(disableIntakeShooterAutoCommand);
 
-      driverController
+    //intake to amp
+    driverController
       .b()
       .whileTrue(intakeAmpAutoCommand);
     driverController
       .b()
       .onFalse(disableIntakeAmpAutoCommand);
 
-    // Ground Outtake
+    // score amp
     driverController
       .x()
-      .whileTrue(outakeShooterAutoCommand);
-    driverController
-      .x()
-      .onFalse(disableOutakeShooterAutoCommand);
-    
-    // Shooter Scoring
-    driverController
-      .y()
-      .whileTrue(outakeAmpAutoCommand);
-    driverController
-      .y()
-      .onFalse(disableOutakeAmpAutoCommand);
-
-      driverController
-      .rightTrigger()
-      .whileTrue(scoreShooterAutoCommand);
-    driverController
-      .rightTrigger()
-      .onFalse(disableScoreShooterAutoCommand);
-
-      driverController
-      .leftTrigger()
       .whileTrue(scoreAmpAutoCommand);
     driverController
-      .leftTrigger()
+      .x()
       .onFalse(disableScoreAmpAutoCommand);
+    
+    // score shooter
+    driverController
+      .y()
+      .whileTrue(scoreShooterAutoCommand);
+    driverController
+      .y()
+      .onFalse(disableScoreShooterAutoCommand);
 
-      manualController
+
+      //outake shooter
+    driverController
+      .rightTrigger()
+      .whileTrue(outakeShooterAutoCommand);
+    driverController
+      .rightTrigger()
+      .onFalse(disableOutakeShooterAutoCommand);
+
+      //outake amp
+    driverController
+      .leftTrigger()
+      .whileTrue(outakeAmpAutoCommand);
+    driverController
+      .leftTrigger()
+      .onFalse(disableOutakeAmpAutoCommand);
+
+    
+      //manual intake to shooter
+    manualController
       .a()
       .whileTrue(intakeShooterManualCommand);
     manualController
       .a()
       .onFalse(disableIntakeShooterManualCommand);
 
-      manualController
+      //manual intake to amp
+    manualController
       .b()
       .whileTrue(intakeAmpManualCommand);
     manualController
       .b()
       .onFalse(disableIntakeAmpManualCommand);
 
-    // Ground Outtake
+    // manual score amp
     manualController
       .x()
-      .whileTrue(outakeShooterManualCommand);
-    manualController
-      .x()
-      .onFalse(disableOutakeShooterManualCommand);
-
-    manualController
-      .y()
-      .whileTrue(outakeAmpManualCommand);
-    manualController
-      .y()
-      .onFalse(disableOutakeAmpManualCommand);
-
-      manualController
-      .rightTrigger()
-      .whileTrue(scoreShooterManualCommand);
-    manualController
-      .rightTrigger()
-      .onFalse(disableScoreShooterManualCommand);
-
-      manualController
-      .leftTrigger()
       .whileTrue(scoreAmpManualCommand);
     manualController
-      .leftTrigger()
+      .x()
       .onFalse(disableScoreAmpManualCommand);
 
+      //manual score shooter
+    manualController
+      .y()
+      .whileTrue(scoreShooterManualCommand);
+    manualController
+      .y()
+      .onFalse(disableScoreShooterManualCommand);
 
-    // Human Player Intake
+      //manual outake shooter
+    manualController
+      .rightTrigger()
+      .whileTrue(outakeShooterManualCommand);
+    manualController
+      .rightTrigger()
+      .onFalse(disableOutakeShooterManualCommand);
+
+    //manual outake amp
+    manualController
+      .leftTrigger()
+      .whileTrue(outakeAmpManualCommand);
+    manualController
+      .leftTrigger()
+      .onFalse(disableOutakeAmpManualCommand);
+
+    // Human Player Shooter Intake
     operatorController
       .leftBumper()
       .whileTrue(intakeHPShooterCommand);
@@ -295,14 +298,13 @@ public class RobotContainer {
       .leftBumper()
       .onFalse(disableIntakeHPShooterCommand);
 
-      // Human Player Intake
+      // Human Player Amp Intake
     operatorController
-    .rightBumper()
-    .whileTrue(intakeHPAmpCommand);
-  operatorController
-    .rightBumper()
-    .onFalse(disableIntakeHPAmpCommand);
-
+      .rightBumper()
+      .whileTrue(intakeHPAmpCommand);
+    operatorController
+      .rightBumper()
+      .onFalse(disableIntakeHPAmpCommand);
 
     // Lower Shooter Angle
     driverController

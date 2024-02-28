@@ -37,7 +37,7 @@ public class Intake extends SubsystemBase {
     backFeed.set(-0.95);
   }
 
-  public void feedHPIntakeToAmp() {
+  public void feedHPIntakeToGroundIntake() {
     frontFeed.set(0.95);
     backFeed.set(-0.95);
   }
