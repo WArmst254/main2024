@@ -83,7 +83,7 @@ public class Shooter extends SubsystemBase {
     mm.MotionMagicJerk = 50;
 
     Slot0Configs slot0 = cfg.Slot0;
-    slot0.kP = 11;
+    slot0.kP = 20;
     slot0.kI = 0.1;
     slot0.kD = 0.1;
     slot0.kV = 0.12;
@@ -184,11 +184,11 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean shooterSensorOut() {
-    return (shooter_sensor.getRange() < 300);
+    return (shooter_sensor.getRange() < 335);
   }
 
   public boolean invShooterSensorOut() {
-    return !(shooter_sensor.getRange() < 300);
+    return !(shooter_sensor.getRange() < 335);
   }
 
   public boolean isVelocitySet() {

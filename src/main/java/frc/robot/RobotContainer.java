@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.ctre.phoenix.led.FireAnimation;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -119,7 +120,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("intakeShooter", IntakeCommands.intakeToShooterSensorCommand(intake, shooter, 0.2));
     NamedCommands.registerCommand("elevatorUp", elevator.ampElevatorCommand());
     NamedCommands.registerCommand("elevatorDown", elevator.stowElevatorCommand());
-    NamedCommands.registerCommand("amp", AmpCommands.ampAutonomousCommand(amp, elevator));
+    NamedCommands.registerCommand("amp", AmpCommands.ampTeleopSensorCommand(amp));
     NamedCommands.registerCommand("ampOff", new InstantCommand(() -> amp.disableAmp()).alongWith(elevator.stowElevatorCommand()));
     NamedCommands.registerCommand("intakeAmp", IntakeCommands.intakeToAmpSensorCommand(intake, amp));
     NamedCommands.registerCommand("intakeOff", new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShootAngle())).alongWith(new InstantCommand(() -> amp.disableAmp())));
@@ -138,12 +139,12 @@ public class RobotContainer {
     autoChooser.addOption("Starting SUB, Shoot PL/Exit (1)", new PathPlannerAuto("S1ShootPL"));
     autoChooser.addOption("Starting LONG, Shoot PL/Exit (1)", new PathPlannerAuto("L1ShootPL"));
     autoChooser.addOption("Starting AMP, Amp PL/Amp A1 (2)", new PathPlannerAuto("A2AmpPLAmpA1"));
-    autoChooser.addOption("Starting AMP, Amp PL/Amp B1 (2)", new PathPlannerAuto("A2AmpPLAmpB1"));
+    autoChooser.addOption("2AMP", new PathPlannerAuto("A2AmpPLAmpB1"));
     autoChooser.addOption("Starting SUB, Shoot PL/Shoot A2 (2)", new PathPlannerAuto("S2ShootPLShootA2"));
     autoChooser.addOption("Starting LONG, Shoot PL/Shoot A3 (2)", new PathPlannerAuto("L2ShootPLShootA3"));
     autoChooser.addOption("Starting LONG, Shoot PL/Shoot B5 (2)", new PathPlannerAuto("L2ShootPLShootB5"));
-    autoChooser.addOption("Starting LONG, Shoot PL/Shoot A3/ShootA2 (3)", new PathPlannerAuto("L3ShootPLShootA3ShootA2"));
-    autoChooser.addOption("Starting LONG, Shoot PL/Shoot A3/ShootA2 (4)", new PathPlannerAuto("L3ShootPLShootA3ShootA2ShootA1"));
+   // autoChooser.addOption("Starting LONG, Shoot PL/Shoot A3/ShootA2 (3)", new PathPlannerAuto("L3ShootPLShootA3ShootA2"));
+    autoChooser.addOption("Starting LONG, Shoot PL/Shoot A3/ShootA2 (4)", new PathPlannerAuto("L4ShootPLShootA3ShootA2ShootA1"));
   }
 
   public void configureButtonBindings(double shooterCloseSpeed) {
@@ -202,10 +203,10 @@ public class RobotContainer {
       .onFalse(disableIntakeShooterAutoCommand);
 
     //intake to amp
-    driverController
+    operatorController
       .b()
       .whileTrue(intakeAmpAutoCommand);
-    driverController
+    operatorController
       .b()
       .onFalse(disableIntakeAmpAutoCommand);
 
@@ -227,18 +228,18 @@ public class RobotContainer {
 
 
       //outake shooter
-    driverController
+    operatorController
       .rightTrigger()
       .whileTrue(outakeShooterAutoCommand);
-    driverController
+    operatorController
       .rightTrigger()
       .onFalse(disableOutakeShooterAutoCommand);
 
       //outake amp
-    driverController
+    operatorController
       .leftTrigger()
       .whileTrue(outakeAmpAutoCommand);
-    driverController
+    operatorController
       .leftTrigger()
       .onFalse(disableOutakeAmpAutoCommand);
 
@@ -330,22 +331,44 @@ public class RobotContainer {
     .onFalse(new InstantCommand(() -> summonRotation = new Joystick()));
 
     // Extend Elevator to Amp Scoring Position
-    driverController
+    operatorController
       .povUp()
       .onTrue(
         new InstantCommand(() -> elevator.ampExtendElevator()));
 
     // Stow(Detract) Elevator
-    driverController
+    operatorController
       .povDown()
       .onTrue(
         new InstantCommand(() -> elevator.stowElevator()));
 
     // Reset Stowed Position
-    driverController
+    operatorController
       .povRight()
       .onTrue(
         new InstantCommand(() -> elevator.setElevatorStowPosition()));
+
+    operatorController
+      .start()
+      .whileTrue(
+        new InstantCommand(() -> shooter.shooterOn(shooterCloseSpeed))
+      );
+      operatorController
+      .start()
+      .onFalse(
+        new InstantCommand(() -> shooter.disableShooter())
+      );
+
+      operatorController
+      .back()
+      .whileTrue(
+        new InstantCommand(() -> shooter.shooterOn(shooterCloseSpeed))
+      );
+      operatorController
+      .back()
+      .onFalse(
+        new InstantCommand(() -> shooter.disableShooter())
+      );
 
     // Zero Gyro Yaw
     driverController
@@ -364,14 +387,22 @@ public class RobotContainer {
     //     new InstantCommand(() -> shooter.disableShooter()));
 
     operatorController
-      .rightTrigger()
+      .a()
       .whileTrue(
         new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.HP_AMPLIFY)));
     operatorController
-      .leftTrigger()
+      .y()
       .whileTrue(
         new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.HP_COOPERTITION)));
-  }
+       operatorController
+        .a()
+        .onFalse(
+          new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.IDLE)));
+      operatorController
+        .y()
+        .onFalse(
+          new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.IDLE)));
+      }
 
 
   public void checkControllers() {
@@ -391,16 +422,25 @@ public class RobotContainer {
     double intakeSensorRange = intake.intakeSensor();
     SmartDashboard.putBoolean("Intake Sensor: ", intakeSensor);
     SmartDashboard.putNumber("Intake Sensor Range: ", intakeSensorRange);
+    if(intakeSensor==true) {
+      LED.getInstance().changeLedState(LEDState.AUTON);
+    }
     
     boolean shooterSensor = shooter.shooterSensorOut();
     double shooterSensorRange = shooter.shooterSensor();
     SmartDashboard.putBoolean("Shooter Sensor: ", shooterSensor);
     SmartDashboard.putNumber("Shooter Sensor Range: ", shooterSensorRange);
+    if(shooterSensor==true) {
+      LED.getInstance().changeLedState(LEDState.AUTON);
+    }
 
     boolean ampSensor = amp.ampSensorOut();
     double ampSensorRange = amp.ampSensor();
     SmartDashboard.putBoolean("Amp Sensor: ", ampSensor);
     SmartDashboard.putNumber("Amp Sensor Range: ", ampSensorRange);
+    if(ampSensor==true) {
+      LED.getInstance().changeLedState(LEDState.AUTON);
+    }
   }
 
   public void stowShooterAngle() {

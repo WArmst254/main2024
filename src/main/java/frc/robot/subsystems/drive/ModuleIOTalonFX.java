@@ -73,9 +73,9 @@ public class ModuleIOTalonFX implements ModuleIO {
         absoluteEncoderOffset = new Rotation2d(2.523); // MUST BE CALIBRATED
         break;
       case 3:
-        driveTalon = new TalonFX(Constants.IDs.swerveDriveTalon2, "CAN0");
-        turnTalon = new TalonFX(Constants.IDs.swerveTurnTalon2, "CAN0");
-        cancoder = new CANcoder(Constants.IDs.swerveCANcoder2, "CAN0");
+        driveTalon = new TalonFX(Constants.IDs.swerveDriveTalon3, "CAN0");
+        turnTalon = new TalonFX(Constants.IDs.swerveTurnTalon3, "CAN0");
+        cancoder = new CANcoder(Constants.IDs.swerveCANcoder3, "CAN0");
         absoluteEncoderOffset = new Rotation2d(-2.582); // MUST BE CALIBRATED
         break;
       default:

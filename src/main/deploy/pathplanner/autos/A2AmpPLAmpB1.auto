@@ -20,6 +20,12 @@
         {
           "type": "named",
           "data": {
+            "name": "elevatorUp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "amp"
           }
         },
@@ -27,6 +33,12 @@
           "type": "named",
           "data": {
             "name": "ampOff"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "elevatorDown"
           }
         },
         {
@@ -63,6 +75,12 @@
         {
           "type": "named",
           "data": {
+            "name": "elevatorUp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "amp"
           }
         },
@@ -70,6 +88,12 @@
           "type": "named",
           "data": {
             "name": "ampOff"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "elevatorDown"
           }
         }
       ]
