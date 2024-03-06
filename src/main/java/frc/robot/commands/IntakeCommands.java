@@ -14,10 +14,10 @@ public class IntakeCommands {
             () -> {
               if (!shooter.shooterSensorOut()) {
                 intake.intakeToShooter(); // intake and feed to shooter mechanism
-                shooter.lowerShootAngle(lowerAngle);
+                shooter.lowerShooter(lowerAngle);
               } else {
                 intake.disableIntake(); // intake and feed motors off
-                shooter.stowShootAngle();
+                shooter.stowShooter();
               }
             })
         .until(
@@ -48,7 +48,7 @@ public class IntakeCommands {
                 shooter.intakeHP();
                 intake.outakeFromShooter();
               } else {
-                shooter.disableShooter();
+                shooter.disableFlywheels();
                 intake.outakeFromShooter();
               }
             }));

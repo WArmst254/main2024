@@ -8,8 +8,10 @@ import java.util.Optional;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.FireAnimation;
+import com.ctre.phoenix.led.LarsonAnimation;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdle.VBatOutputMode;
+import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
@@ -34,13 +36,16 @@ public class LED extends SubsystemBase {
       AUTON,
       OFF,
 
-      AUTO_SPEAKER,
-      AUTO_AMP,
-      MANUAL_SPEAKER,
-      MANUAL_AMP,
+      SPEAKER,
+      AMP,
+
 
       HP_AMPLIFY,
       HP_COOPERTITION,
+
+      INTAKING,
+      SUBWOOFER_SHOOTING,
+      SHOT_FIRED,
 
       HP_INTAKE_DETECTED,
       GROUND_INTAKE_DETECTED,
@@ -64,7 +69,7 @@ public class LED extends SubsystemBase {
    public void changeLedState(LEDState state) {
 
         for (int i = 0; i < 10; ++i) {
-            candle.clearAnimation(i);
+          candle.clearAnimation(i);
         }
         candle.setLEDs(0, 0, 0, 0, 8, 48);
 
@@ -72,72 +77,68 @@ public class LED extends SubsystemBase {
             case IDLE:
               candle.animate(new SingleFadeAnimation(255,255,255,255,0.9,48,8));
               currentState = LEDState.IDLE;
-            
             break;
 
             case DISABLED:
-                candle.animate(new RainbowAnimation(0.7, 0.9, 48, false,8));
-    
-                    currentState = LEDState.DISABLED;
-                    break;
+              candle.animate(new RainbowAnimation(0.7, 0.9, 48, false,8));
+              currentState = LEDState.DISABLED;
+            break;
 
             case PREMATCH:
-                currentState = LEDState.PREMATCH;
-                break;
+              currentState = LEDState.PREMATCH;
+            break;
 
             case AUTON:
-            candle.animate(new FireAnimation(0.7, 0.8, 48, .7, .5,false,8));
-                currentState = LEDState.AUTON;
-                break;
+              candle.animate(new FireAnimation(0.7, 0.8, 48, .7, .5,false,8));
+              currentState = LEDState.AUTON;
+            break;
 
             case OFF:
-
-                currentState = LEDState.OFF;
-                break;
+              currentState = LEDState.OFF;
+            break;
 
             default:
-                break;
+            break;
 
-            case AUTO_SPEAKER:
-                candle.setLEDs(255,0,255, 0, 8, 48);
-                currentState = LEDState.AUTO_SPEAKER;
+            case SPEAKER:
+              candle.setLEDs(255,0,255, 0, 8, 48);
+              currentState = LEDState.SPEAKER;
+            break;
+            case INTAKING:
+              candle.setLEDs(255,40,255, 0, 8, 48);
+              currentState = LEDState.INTAKING;
+            break;
 
-                break;
-
-            case AUTO_AMP:
+            case AMP:
               candle.setLEDs(255,160,0, 0, 8, 48);
-              currentState = LEDState.AUTO_AMP;
-
-              break;
-
-            case MANUAL_AMP:
-              candle.setLEDs(255,0,0, 0, 8, 48);
-              currentState = LEDState.MANUAL_AMP;
-
-              break;
+              currentState = LEDState.AMP;
+            break;
+            case SUBWOOFER_SHOOTING:
+            candle.animate(new LarsonAnimation(255, 0, 178, 255, 1, 48, BounceMode.Center, 8));
+            break;
+            case SHOT_FIRED:
+            candle.animate(new FireAnimation(0.7, 0.8, 48, .7, .5,false,8));
+            break;
 
             case HP_AMPLIFY:
               candle.animate(new StrobeAnimation(0,0,255,0,.5, 48, 8));
               currentState = LEDState.HP_AMPLIFY;
-
-              break;
+            break;
 
             case HP_COOPERTITION:
               candle.animate(new StrobeAnimation(255,255,0,0,.5, 48, 8));
               currentState = LEDState.HP_COOPERTITION;
-
-              break;
+            break;
 
             case GROUND_INTAKE_DETECTED:
               candle.setLEDs(0,255,0,0,8, 48);
               currentState = LEDState.GROUND_INTAKE_DETECTED;
-              break;
+            break;
 
             case HP_INTAKE_DETECTED:
               candle.setLEDs(0,255,0,0,28,48);
               currentState = LEDState.HP_INTAKE_DETECTED;
-
-              break;
+            break;
 
         }
     }
@@ -147,9 +148,9 @@ public class LED extends SubsystemBase {
       if(!DriverStation.isJoystickConnected(0) || !DriverStation.isJoystickConnected(1)) {
         candle.animate(new TwinkleAnimation(255, 0, 178, 255, 0.9, 48, TwinklePercent.Percent64,8));
       }
+
       if(DriverStation.isEStopped()) {
         candle.animate(new StrobeAnimation(255,0,0,0,.5, 48, 8));
-
       }
       if (currentState == LEDState.PREMATCH) {
 
@@ -162,7 +163,6 @@ public class LED extends SubsystemBase {
               } else {
                   // Blue Team
                   candle.animate(new SingleFadeAnimation(0, 0, 255, 0, 0.2, 48, 8), 1);
-
               }
           } else {
               candle.animate(new SingleFadeAnimation(255, 0, 255, 0, 0.2, 48, 8), 1);

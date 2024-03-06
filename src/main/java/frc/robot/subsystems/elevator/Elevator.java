@@ -20,7 +20,6 @@ public class Elevator extends SubsystemBase {
   public Elevator() {
     TalonFXConfiguration cfg = new TalonFXConfiguration();
 
-    /* Configure current limits */
     MotionMagicConfigs mm = cfg.MotionMagic;
     mm.MotionMagicCruiseVelocity = 100;
     mm.MotionMagicAcceleration = 100;
@@ -75,6 +74,10 @@ public class Elevator extends SubsystemBase {
       zeroElevatorPosition();
       elevator.set(0);
     }
+  }
+
+  public boolean isElevatorSet() {
+    return (m_mmReq.Position <= (elevator.getPosition().getValueAsDouble()+0.01) && m_mmReq.Position >= (elevator.getPosition().getValueAsDouble()-0.01));
   }
 
   public Command ampElevatorCommand() {

@@ -79,7 +79,7 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
-    m_robotContainer.checkControllers();
+    //m_robotContainer.checkControllers();
     m_robotContainer.checkSensors();
 
     // Runs the Scheduler. This is responsible for polling buttons, adding

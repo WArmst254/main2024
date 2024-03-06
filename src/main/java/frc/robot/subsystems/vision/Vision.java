@@ -7,21 +7,20 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-//import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Vision extends SubsystemBase {
 
-    public static NetworkTable table;
+    static NetworkTable table;
 
     public static void init() {
-        table = NetworkTableInstance.getDefault().getTable("limelight");
+       table = NetworkTableInstance.getDefault().getTable("limelight");
     }
 
     @Override
     public void periodic() {
-        //table.getEntry("pipeline").setDouble(0);
+        // table.getEntry("pipeline").setDouble(0);
         // SmartDashboard.putBoolean("limelight target detected", isValidTarget());
         // SmartDashboard.putNumber("LL target distance METERS", getDistance());
     }

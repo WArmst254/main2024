@@ -26,7 +26,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void intakeToShooter() {
-    intake.set(1); //TODO: Probably Change
+    intake.set(1);
     frontFeed.set(-0.95);
     backFeed.set(0.95);
   }
@@ -37,7 +37,7 @@ public class Intake extends SubsystemBase {
     backFeed.set(-0.95);
   }
 
-  public void feedHPIntakeToGroundIntake() {
+  public void feedFromHPIntake() {
     frontFeed.set(0.95);
     backFeed.set(-0.95);
   }
@@ -75,7 +75,6 @@ public class Intake extends SubsystemBase {
 
   public void backFeedOn() {
     frontFeed.set(-0.5);
-
   }
 
   public double intakeSensor() {

@@ -37,14 +37,14 @@ public final class Constants {
     public static final int frontFeed = 13;
     public static final int backFeed = 14;
     public static final int elevator = 15;
-    public static final int shootangle = 16;
+    public static final int shooter = 16;
     public static final int intake = 17;
     public static final int ampleft = 18;
     public static final int led = 20;
 
     // REV Hardware Client
-    public static final int shooterleft = 19;
-    public static final int shooterright = 20;
+    public static final int flywheelLeft = 19;
+    public static final int flywheelRight = 20;
     
     //PWF Config Page 10.49.44.2:5812
     public static final int intakesensor = 1;
