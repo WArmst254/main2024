@@ -30,17 +30,28 @@ public class Elevator extends SubsystemBase {
   public Elevator() {
     TalonFXConfiguration cfg = new TalonFXConfiguration();
 
+    mm_eVelocity.setDefault(120);
+    mm_eAcceleration.setDefault(120);
+    mm_eJerk.setDefault(120);
+
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.MotionMagicCruiseVelocity = 100;
-    mm.MotionMagicAcceleration = 100;
-    mm.MotionMagicJerk = 180;
+    mm.MotionMagicCruiseVelocity = mm_eVelocity.get();
+    mm.MotionMagicAcceleration = mm_eAcceleration.get();
+    mm.MotionMagicJerk = mm_eJerk.get();
+
+    eP.setDefault(100);
+    eI.setDefault(.2);
+    eD.setDefault(.4);
+    eV.setDefault(1.2);
+    eS.setDefault(1);
+
 
     Slot0Configs slot0 = cfg.Slot0;
-    slot0.kP = 100;
-    slot0.kI = .2;
-    slot0.kD = 0.4;
-    slot0.kV = 1.2;
-    slot0.kS = 1;
+    slot0.kP = eP.get();
+    slot0.kI = eI.get();
+    slot0.kD = eD.get();
+    slot0.kV = eV.get();
+    slot0.kS = eS.get();
 
     FeedbackConfigs fdb = cfg.Feedback;
     fdb.SensorToMechanismRatio = 52;

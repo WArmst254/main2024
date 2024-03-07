@@ -44,14 +44,13 @@ public class Shooter extends SubsystemBase {
 
   private SparkPIDController m_pidController = flywheelLeft.getPIDController();
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
+
   private TunableNumber fP = new TunableNumber("Shooter FlyWheel PID/P");
   private TunableNumber fI = new TunableNumber("Shooter FlyWheel PID/I");
   private TunableNumber fD = new TunableNumber("Shooter FlyWheel PID/D");
   private TunableNumber fIz = new TunableNumber("Shooter FlyWheel PID/IZ");
   private TunableNumber fFF = new TunableNumber("Shooter FlyWheel PID/FF");
-
-  private TunableNumber tRPM = new TunableNumber("TEST RPM");
-  private TunableNumber tAngle = new TunableNumber("TEST ANGLE");
+  private TunableNumber fThreshold = new TunableNumber("Shooter Flywheel/Threshold RPM");
 
   private TunableNumber mm_sVelocity = new TunableNumber("Shooter Angle/Velocity");
   private TunableNumber mm_sAcceleration = new TunableNumber("Shooter Angle/Acceleration");
@@ -60,7 +59,22 @@ public class Shooter extends SubsystemBase {
   private TunableNumber sI = new TunableNumber("Shooter Angle PID/I");
   private TunableNumber sD = new TunableNumber("Shooter Angle PID/D");
   private TunableNumber sV = new TunableNumber("Shooter Angle PID/V");
-  private TunableNumber sS = new TunableNumber("Shooter FlyWheel PID/S");
+  private TunableNumber sS = new TunableNumber("Shooter Angle PID/S");
+  private TunableNumber sThreshold = new TunableNumber("Shooter Angle/Threshold");
+
+  private TunableNumber subRPM = new TunableNumber("Subwoofer Shot/RPM");
+  private TunableNumber subAngle = new TunableNumber("SubwooferShot/Angle");
+
+  private TunableNumber podRPM = new TunableNumber("Podium Shot/RPM");
+  private TunableNumber podAngle = new TunableNumber("Podium Shot/Angle");
+
+  private TunableNumber intakeHPspeed = new TunableNumber("HP Intake/Speed");
+
+  private TunableNumber intakingAngle = new TunableNumber("Intake/Angle");
+
+  private TunableNumber shooterSensorRange = new TunableNumber("Sensor/Shooter Sensor Range");
+
+
 
   private static final SplineInterpolator SPLINE_INTERPOLATOR = new SplineInterpolator();
   private PolynomialSplineFunction m_shooterCurve;
@@ -70,8 +84,19 @@ public class Shooter extends SubsystemBase {
 
   public Shooter() {
 
-    tRPM.setDefault(2500);
-    tAngle.setDefault(0);
+    subRPM.setDefault(ShooterConstants.subwooferRPM);
+    subAngle.setDefault(ShooterConstants.subwooferAngle);
+
+    podRPM.setDefault(ShooterConstants.podiumRPM);
+    podAngle.setDefault(ShooterConstants.podiumAngle);
+
+    intakeHPspeed.setDefault(ShooterConstants.humanPlayerIntakeSpeed);
+    intakingAngle.setDefault(ShooterConstants.groundIntakeAngle);
+
+    shooterSensorRange.setDefault(ShooterConstants.TOFsensorRange);
+
+    sThreshold.setDefault(ShooterConstants.angleThreshold);
+    fThreshold.setDefault(ShooterConstants.flywheelThreshold);
     
     /*Flywheel Settings and Gains */
     flywheelLeft.restoreFactoryDefaults();
@@ -79,11 +104,11 @@ public class Shooter extends SubsystemBase {
     flywheelRight.follow(flywheelLeft);
     flywheelRight.burnFlash();
   
-    fP.setDefault(6e-5);
-    fI.setDefault(0);
-    fD.setDefault(0);
-    fIz.setDefault(0);
-    fFF.setDefault(0.000015);
+    fP.setDefault(ShooterConstants.flywheelP);
+    fI.setDefault(ShooterConstants.flywheelI);
+    fD.setDefault(ShooterConstants.flywheelD);
+    fIz.setDefault(ShooterConstants.flywheelIZ);
+    fFF.setDefault(ShooterConstants.flywheelFF);
     
     // PID coefficients for Flywheels
     kP = fP.get();
@@ -91,9 +116,9 @@ public class Shooter extends SubsystemBase {
     kD = fD.get();
     kIz = fIz.get(); 
     kFF = fFF.get(); 
-    kMaxOutput = 1;
-    kMinOutput = -1;
-    maxRPM = 6000; 
+    kMaxOutput = ShooterConstants.flywheelMaxOutput;
+    kMinOutput = ShooterConstants.flywheelMinOutput;
+    maxRPM = ShooterConstants.flywheelMaxRPM; 
 
     m_pidController.setP(kP);
     m_pidController.setI(kI);
@@ -103,14 +128,13 @@ public class Shooter extends SubsystemBase {
     m_pidController.setOutputRange(kMinOutput, kMaxOutput);
 
     /*Shooter Angle Settings and Motion Magic Constants */
-
     TalonFXConfiguration cfg = new TalonFXConfiguration();
     shooter.setNeutralMode(NeutralModeValue.Brake);
 
     /* Motion Profiling Constants For Shooter Angle*/
-    mm_sVelocity.setDefault(30);
-    mm_sAcceleration.setDefault(30);
-    mm_sJerk.setDefault(100);
+    mm_sVelocity.setDefault(ShooterConstants.shooterVelocity);
+    mm_sAcceleration.setDefault(ShooterConstants.shooterAcceleration);
+    mm_sJerk.setDefault(ShooterConstants.shooterJerk);
 
     MotionMagicConfigs mm = cfg.MotionMagic;
     mm.MotionMagicCruiseVelocity = mm_sVelocity.get();
@@ -118,11 +142,11 @@ public class Shooter extends SubsystemBase {
     mm.MotionMagicJerk = mm_sJerk.get();
 
     // PID Coefficients for Shooter Angle
-    sP.setDefault(30);
-    sI.setDefault(20);
-    sD.setDefault(0.12);
-    sV.setDefault(0.12);
-    sS.setDefault(0.25);
+    sP.setDefault(ShooterConstants.shooterP);
+    sI.setDefault(ShooterConstants.shooterI);
+    sD.setDefault(ShooterConstants.shooterD);
+    sV.setDefault(ShooterConstants.shooterV);
+    sS.setDefault(ShooterConstants.shooterS);
 
     Slot0Configs slot0 = cfg.Slot0;
     slot0.kP = sP.get();
@@ -190,12 +214,15 @@ public class Shooter extends SubsystemBase {
     );
   }
 
-  public void flywheelsOn() {
-    m_pidController.setReference(tRPM.get()*Math.PI, CANSparkMax.ControlType.kVelocity);
+  public void flywheelsOnSub() {
+    m_pidController.setReference(subRPM.get()*Math.PI, CANSparkMax.ControlType.kVelocity);
+  }
+  public void flywheelsOnPod() {
+    m_pidController.setReference(podRPM.get()*Math.PI, CANSparkMax.ControlType.kVelocity);
   }
 
   public void intakeHP() {
-    flywheelLeft.set(-0.2);
+    flywheelLeft.set(intakeHPspeed.get());
   }
 
   public void disableFlywheels() {
@@ -203,11 +230,15 @@ public class Shooter extends SubsystemBase {
   }
 
   public void lowerToIntake() {
-    shooter.setControl(m_mmReq.withPosition(0.2).withSlot(0));
+    shooter.setControl(m_mmReq.withPosition(intakingAngle.get()).withSlot(0));
   }
 
-  public void lowerToShoot() {
-    shooter.setControl(m_mmReq.withPosition(tAngle.get()).withSlot(0));
+  public void lowerToShootSub() {
+    shooter.setControl(m_mmReq.withPosition(subAngle.get()).withSlot(0));
+  }
+
+  public void lowerToShootPod() {
+    shooter.setControl(m_mmReq.withPosition(podAngle.get()).withSlot(0));
   }
 
   public void interpolatedFlywheelVelocity(State state) {
@@ -231,27 +262,30 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean shooterSensorOut() {
-    return (shooter_sensor.getRange() < 335);
+    return (shooter_sensor.getRange() < shooterSensorRange.get());
   }
 
   public boolean invShooterSensorOut() {
-    return !(shooter_sensor.getRange() < 335);
+    return (shooter_sensor.getRange() > shooterSensorRange.get());
   }
 
-  public boolean isVelocitySet() {
-    return((m_encoder.getVelocity() >= (tRPM.get())-100) && (m_encoder.getVelocity() <= ((tRPM.get())+100)));
+  public boolean isSubwooferVelocitySet() {
+    return((m_encoder.getVelocity() >= (subRPM.get())-fThreshold.get()) && (m_encoder.getVelocity() <= ((subRPM.get())+fThreshold.get())));
+  }
+
+  public boolean isPodiumVelocitySet() {
+    return((m_encoder.getVelocity() >= (podRPM.get())-fThreshold.get()) && (m_encoder.getVelocity() <= ((podRPM.get())+fThreshold.get())));
   }
 
   public boolean isInterpolatedVelocitySet(State state) {
-    return((m_encoder.getVelocity() >= (state.speed)-100) && (m_encoder.getVelocity() <= ((state.speed)+100)));
+    return((m_encoder.getVelocity() >= (state.speed)-fThreshold.get()) && (m_encoder.getVelocity() <= ((state.speed)+fThreshold.get())));
+  }
+  public double a(State state) {
+    return (state.speed)-fThreshold.get();
   }
 
   public boolean isAngleSet() {
-    return (m_mmReq.Position <= (shooter.getPosition().getValueAsDouble()+0.05) && m_mmReq.Position >= (shooter.getPosition().getValueAsDouble()-0.05));
-  }
-
-  public boolean isShooterSet() {
-    return isVelocitySet() && isAngleSet();
+    return (m_mmReq.Position <= (shooter.getPosition().getValueAsDouble()+sThreshold.get()) && m_mmReq.Position >= (shooter.getPosition().getValueAsDouble()-sThreshold.get()));
   }
 
   public void periodic() {
@@ -263,9 +297,7 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("Flywheels Velocity: ", m_encoder.getVelocity());
     SmartDashboard.putNumber("Flywheels Power:", flywheelLeft.get());
 
-    SmartDashboard.putBoolean("Flywheels Velocity Setpoint Reached: ", isVelocitySet());
     SmartDashboard.putBoolean("Shooter Angle Setpoint Reached: ", isAngleSet());
-    SmartDashboard.putBoolean("Shooter Setpoints Reached: ", isShooterSet());
   }
 
 }

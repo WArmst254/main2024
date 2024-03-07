@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.led.LED.LEDState;
@@ -30,7 +31,7 @@ public class ShootWithInterpolation extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    shooter.lowerToShoot();
+    //shooter.lowerToShoot();
      LED.getInstance().changeLedState(LEDState.SUBWOOFER_SHOOTING);
   }
 
@@ -39,6 +40,9 @@ public class ShootWithInterpolation extends Command {
   public void execute() {
     shooter.interpolatedFlywheelVelocity(shooter.getAutomaticState(vision));
     shooter.interpolatedShooterAngle(shooter.getAutomaticState(vision));
+    SmartDashboard.putBoolean("A", shooter.isInterpolatedVelocitySet(shooter.getAutomaticState(vision)));
+    SmartDashboard.putBoolean("B", shooter.isAngleSet());
+    SmartDashboard.putNumber("C", shooter.a(shooter.getAutomaticState(vision)));
     if (shooter.isInterpolatedVelocitySet(shooter.getAutomaticState(vision)) && shooter.isAngleSet()) {
       intake.backFeedOn();
       LED.getInstance().changeLedState(LEDState.SHOT_FIRED);
