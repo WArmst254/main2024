@@ -77,7 +77,7 @@ public class RobotContainer {
   private Trigger scoreAmp = new Trigger(() -> driverController.getYButton() && ampMode);
 
   private Trigger alignScoreAmp = new Trigger(() -> driverController.getRightBumper() && ampMode);
-  private Trigger aprilTagLock = new Trigger(() -> driverController.getRightBumper() && speakerMode);
+  private Trigger aprilTagLock = new Trigger(() -> driverController.getRightBumper() && speakerMode || driverController.getYButton() && speakerMode);
 
   private Trigger resetGyro = new Trigger(() -> driverController.getStartButton());
 

@@ -12,7 +12,7 @@ import com.ctre.phoenix.led.LarsonAnimation;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdle.VBatOutputMode;
 import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
-//import com.ctre.phoenix.led.RainbowAnimation;
+import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
 import com.ctre.phoenix.led.TwinkleAnimation;
@@ -81,9 +81,7 @@ public class LED extends SubsystemBase {
             break;
 
             case DISABLED:
-              //candle.animate(new RainbowAnimation(0.7, 0.9, 48, false,8));
-              candle.animate(new FireAnimation(0.7, 0.8, 48, .7, .5,false,8));
-              candle.animate(new FireAnimation(0.7, 0.8, 40, .7, .5,true,0));
+             candle.animate(new RainbowAnimation(0.7, 0.9, 48, false,8));
               currentState = LEDState.DISABLED;
             break;
 
@@ -152,9 +150,9 @@ public class LED extends SubsystemBase {
 
     public void periodic() {
       alliance = DriverStation.getAlliance();
-      if(!DriverStation.isJoystickConnected(0) || !DriverStation.isJoystickConnected(1)) {
-        candle.animate(new TwinkleAnimation(255, 0, 178, 255, 0.9, 48, TwinklePercent.Percent64,8));
-      }
+      // if(!DriverStation.isJoystickConnected(0) || !DriverStation.isJoystickConnected(1)) {
+      //   candle.animate(new TwinkleAnimation(255, 0, 178, 255, 0.9, 48, TwinklePercent.Percent64,8));
+      // }
 
       if(DriverStation.isEStopped()) {
         candle.animate(new StrobeAnimation(255,0,0,0,.5, 48, 8));

@@ -70,7 +70,7 @@ public class Shooter extends SubsystemBase {
 
   public Shooter() {
 
-    tRPM.setDefault(3500);
+    tRPM.setDefault(2500);
     tAngle.setDefault(0);
     
     /*Flywheel Settings and Gains */
@@ -108,9 +108,9 @@ public class Shooter extends SubsystemBase {
     shooter.setNeutralMode(NeutralModeValue.Brake);
 
     /* Motion Profiling Constants For Shooter Angle*/
-    mm_sVelocity.setDefault(20);
-    mm_sAcceleration.setDefault(20);
-    mm_sJerk.setDefault(50);
+    mm_sVelocity.setDefault(30);
+    mm_sAcceleration.setDefault(30);
+    mm_sJerk.setDefault(100);
 
     MotionMagicConfigs mm = cfg.MotionMagic;
     mm.MotionMagicCruiseVelocity = mm_sVelocity.get();
@@ -118,9 +118,9 @@ public class Shooter extends SubsystemBase {
     mm.MotionMagicJerk = mm_sJerk.get();
 
     // PID Coefficients for Shooter Angle
-    sP.setDefault(20);
-    sI.setDefault(10);
-    sD.setDefault(0.1);
+    sP.setDefault(30);
+    sI.setDefault(20);
+    sD.setDefault(0.12);
     sV.setDefault(0.12);
     sS.setDefault(0.25);
 
