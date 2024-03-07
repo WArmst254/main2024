@@ -31,11 +31,8 @@ import frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.led.LED.LEDState;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.vision.Vision;
-//import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.Alert;
 import frc.robot.util.Alert.AlertType;
-import frc.robot.util.rotation.AprilTagLock;
-// import frc.robot.util.rotation.AprilTagLock;
 import frc.robot.util.rotation.Joystick;
 import frc.robot.util.rotation.RotationSource;
 
@@ -55,7 +52,7 @@ public class RobotContainer {
   private final Intake intake = new Intake();
   private final Elevator elevator = new Elevator();
   private final GyroIOPigeon2 gyro = new GyroIOPigeon2(true);
-  //private final Vision vision = new Vision();
+  private final Vision vision = new Vision();
   public static LED led = new LED();
 
   private double shooterFeedAngle = 0.2;
@@ -215,7 +212,7 @@ public class RobotContainer {
     runAmpSensorIntake.whileTrue(new IntakeNoteAmp(intake, amp, elevator)).onFalse(new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp())));
     scoreAmp.whileTrue(new InstantCommand(() -> amp.ampOuttakeOn())).onFalse(new InstantCommand(() -> amp.disableAmp()).alongWith(new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.IDLE))));
     subwooferShot.whileTrue(new ShootFromSubwoofer(intake, shooter)).onFalse(new InstantCommand(() -> intake.disableBackFeed()).alongWith(new InstantCommand(() -> shooter.disableFlywheels())));
-    aprilTagLock.whileTrue(new InstantCommand(() -> summonRotation = new AprilTagLock())).onFalse(new InstantCommand(() -> summonRotation = new Joystick()));
+    //aprilTagLock.whileTrue(new InstantCommand(() -> summonRotation = new AprilTagLock())).onFalse(new InstantCommand(() -> summonRotation = new Joystick()));
     // Command outakeShooterAutoCommand = IntakeCommands.outakeFromShooterSensorCommand(intake, shooter);
     // Command disableOutakeShooterAutoCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.disableFlywheels()));
 
@@ -415,8 +412,8 @@ public class RobotContainer {
     SmartDashboard.putBoolean("Intake Sensor: ", intakeSensor);
     SmartDashboard.putNumber("Intake Sensor Range: ", intakeSensorRange);
 
-    // double LLdistance = vision.getDistance();
-    // SmartDashboard.putNumber("Limelight Range: ", LLdistance);
+    double LLdistance = vision.getDistance();
+    SmartDashboard.putNumber("Limelight Range: ", LLdistance);
     
     boolean shooterSensor = shooter.shooterSensorOut();
     double shooterSensorRange = shooter.shooterSensor();

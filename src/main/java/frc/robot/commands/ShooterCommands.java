@@ -11,7 +11,7 @@ public class ShooterCommands {
 
   public static Command shootSensorCommand(Shooter shooter, Intake intake, double angle, double setpointRotationsPerMinute) {
     return Commands.parallel(
-            Commands.run(() -> shooter.flywheelsOn(setpointRotationsPerMinute)),
+            Commands.run(() -> shooter.flywheelsOn()),
             Commands.waitUntil(shooter::isVelocitySet)
                 .andThen(() -> intake.backFeedOn())
                 ).until(shooter::invShooterSensorOut)
@@ -20,7 +20,7 @@ public class ShooterCommands {
 
   public static Command shootManualCommand(Shooter shooter, Intake intake, double angle, double setpointRotationsPerMinute) {
     return Commands.parallel(
-            Commands.run(() -> shooter.flywheelsOn(setpointRotationsPerMinute)),
+            Commands.run(() -> shooter.flywheelsOn()),
             Commands.waitUntil(
                     shooter::isVelocitySet)
                 .andThen(() -> intake.backFeedOn()))

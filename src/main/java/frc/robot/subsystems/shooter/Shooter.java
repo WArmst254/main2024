@@ -29,18 +29,38 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.util.TunableNumber;
 
 public class Shooter extends SubsystemBase {
   
   private final TalonFX shooter = new TalonFX(Constants.IDs.shooter);
   private final MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
+
   private final CANSparkFlex flywheelLeft = new CANSparkFlex(Constants.IDs.flywheelLeft, CANSparkLowLevel.MotorType.kBrushless);
   private final CANSparkFlex flywheelRight = new CANSparkFlex(Constants.IDs.flywheelRight, CANSparkLowLevel.MotorType.kBrushless);
-  public final TimeOfFlight shooter_sensor = new TimeOfFlight(Constants.IDs.shootersensor);
   private RelativeEncoder m_encoder = flywheelLeft.getEncoder();
+
+  public final TimeOfFlight shooter_sensor = new TimeOfFlight(Constants.IDs.shootersensor);
 
   private SparkPIDController m_pidController = flywheelLeft.getPIDController();
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
+  private TunableNumber fP = new TunableNumber("Shooter FlyWheel PID/P");
+  private TunableNumber fI = new TunableNumber("Shooter FlyWheel PID/I");
+  private TunableNumber fD = new TunableNumber("Shooter FlyWheel PID/D");
+  private TunableNumber fIz = new TunableNumber("Shooter FlyWheel PID/IZ");
+  private TunableNumber fFF = new TunableNumber("Shooter FlyWheel PID/FF");
+
+  private TunableNumber tRPM = new TunableNumber("TEST RPM");
+  private TunableNumber tAngle = new TunableNumber("TEST ANGLE");
+
+  private TunableNumber mm_velocity = new TunableNumber("Shooter Angle/Velocity");
+  private TunableNumber mm_acceleration = new TunableNumber("Shooter Angle/Acceleration");
+  private TunableNumber mm_jerk = new TunableNumber("Shooter Angle/Jerk");
+  private TunableNumber sP = new TunableNumber("Shooter Angle PID/P");
+  private TunableNumber sI = new TunableNumber("Shooter Angle PID/I");
+  private TunableNumber sD = new TunableNumber("Shooter Angle PID/D");
+  private TunableNumber sV = new TunableNumber("Shooter Angle PID/V");
+  private TunableNumber sS = new TunableNumber("Shooter FlyWheel PID/S");
 
   private static final SplineInterpolator SPLINE_INTERPOLATOR = new SplineInterpolator();
   private PolynomialSplineFunction m_shooterCurve;
@@ -50,22 +70,29 @@ public class Shooter extends SubsystemBase {
 
   public Shooter() {
 
+    tRPM.setDefault(3500);
+    tAngle.setDefault(0);
     /*Flywheel Settings and Gains */
     flywheelLeft.restoreFactoryDefaults();
     flywheelRight.restoreFactoryDefaults();
     flywheelRight.follow(flywheelLeft);
     flywheelRight.burnFlash();
   
-
+    fP.setDefault(6e-5);
+    fI.setDefault(0);
+    fD.setDefault(0);
+    fIz.setDefault(0);
+    fFF.setDefault(0.000015);
+    
     // PID coefficients for Flywheels
-    kP = 6e-5; 
-    kI = 0;
-    kD = 0; 
-    kIz = 0; 
-    kFF = 0.000015; 
-    kMaxOutput = 1; 
+    kP = fP.get();
+    kI = fI.get();
+    kD = fD.get();
+    kIz = fIz.get(); 
+    kFF = fFF.get(); 
+    kMaxOutput = 1;
     kMinOutput = -1;
-    maxRPM = 5700;
+    maxRPM = 6000; 
 
     m_pidController.setP(kP);
     m_pidController.setI(kI);
@@ -80,18 +107,28 @@ public class Shooter extends SubsystemBase {
     shooter.setNeutralMode(NeutralModeValue.Brake);
 
     /* Motion Profiling Constants For Shooter Angle*/
+    mm_velocity.setDefault(20);
+    mm_acceleration.setDefault(20);
+    mm_jerk.setDefault(50);
+
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.MotionMagicCruiseVelocity = 20;
-    mm.MotionMagicAcceleration = 20;
-    mm.MotionMagicJerk = 50;
+    mm.MotionMagicCruiseVelocity = mm_velocity.get();
+    mm.MotionMagicAcceleration = mm_acceleration.get();
+    mm.MotionMagicJerk = mm_jerk.get();
 
     // PID Coefficients for Shooter Angle
+    sP.setDefault(20);
+    sI.setDefault(10);
+    sD.setDefault(0.1);
+    sV.setDefault(0.12);
+    sS.setDefault(0.25);
+
     Slot0Configs slot0 = cfg.Slot0;
-    slot0.kP = 20;
-    slot0.kI = 10;
-    slot0.kD = 0.1;
-    slot0.kV = 0.12;
-    slot0.kS = 0.25;
+    slot0.kP = sP.get();
+    slot0.kI = sI.get();
+    slot0.kD = sD.get();
+    slot0.kV = sV.get();
+    slot0.kS = sS.get();
 
     FeedbackConfigs fdb = cfg.Feedback;
     fdb.SensorToMechanismRatio = 12.8;
@@ -152,9 +189,8 @@ public class Shooter extends SubsystemBase {
     );
   }
 
-  public void flywheelsOn(double setPointRotationsPerMinute) {
-    m_pidController.setReference(setPointRotationsPerMinute, CANSparkMax.ControlType.kVelocity);
-    SmartDashboard.putNumber("Flywheel Taget Velocity", setPointRotationsPerMinute);
+  public void flywheelsOn() {
+    m_pidController.setReference(tRPM.get()*Math.PI, CANSparkMax.ControlType.kVelocity);
   }
 
   public void intakeHP() {
@@ -165,8 +201,12 @@ public class Shooter extends SubsystemBase {
     flywheelLeft.set(0);
   }
 
-  public void lowerShooter(double angle) {
-    shooter.setControl(m_mmReq.withPosition(angle).withSlot(0));
+  public void lowerToIntake() {
+    shooter.setControl(m_mmReq.withPosition(0.2).withSlot(0));
+  }
+
+  public void lowerToShoot() {
+    shooter.setControl(m_mmReq.withPosition(tAngle.get()).withSlot(0));
   }
 
   public void interpolatedFlywheelVelocity(State state) {
@@ -198,7 +238,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isVelocitySet() {
-    return((m_encoder.getVelocity() >= 2500-100) && (m_encoder.getVelocity() <= (2500+100)));
+    return((m_encoder.getVelocity() >= (tRPM.get())-100) && (m_encoder.getVelocity() <= ((tRPM.get())+100)));
   }
 
   public boolean isAngleSet() {
@@ -206,7 +246,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isShooterSet() {
-    return isAngleSet() && isAngleSet();
+    return isVelocitySet() && isAngleSet();
   }
 
   public void periodic() {
@@ -214,8 +254,10 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("Shooter Angle Velocity: ", shooter.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Shooter Angle Power:", shooter.get());
     SmartDashboard.putNumber("Shooter Angle Voltage:", shooter.getMotorVoltage().getValueAsDouble());
+
     SmartDashboard.putNumber("Flywheels Velocity: ", m_encoder.getVelocity());
     SmartDashboard.putNumber("Flywheels Power:", flywheelLeft.get());
+
     SmartDashboard.putBoolean("Flywheels Velocity Setpoint Reached: ", isVelocitySet());
     SmartDashboard.putBoolean("Shooter Angle Setpoint Reached: ", isAngleSet());
     SmartDashboard.putBoolean("Shooter Setpoints Reached: ", isShooterSet());

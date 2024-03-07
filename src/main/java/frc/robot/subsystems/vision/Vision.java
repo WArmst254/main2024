@@ -11,29 +11,24 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Vision extends SubsystemBase {
-
-    static NetworkTable table;
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
 
     public static void init() {
-       table = NetworkTableInstance.getDefault().getTable("limelight");
     }
 
     @Override
     public void periodic() {
-        // table.getEntry("pipeline").setDouble(0);
-        // SmartDashboard.putBoolean("limelight target detected", isValidTarget());
-        // SmartDashboard.putNumber("LL target distance METERS", getDistance());
     }
 
     public double getDistance() {
-       int tid = (int) table.getEntry("tid").getDouble(-1);
-        int ty = (int) table.getEntry("ty").getDouble(0);
+        double ty = table.getEntry("ty").getDouble(0);
+        double tid =  table.getEntry("tid").getDouble(-1);
        if (tid == -1) return 0;
         double h2 = Constants.AprilTagHeights[1];
-        double angleToGoal = Units.degreesToRadians(37 + ty); //TODO: CHANGE mount pitch from 37deg
-        double heightToGoal = h2 - 7.75; //TODO: CHANGE mount height from 7.75in
+        double angleToGoal = Units.degreesToRadians(13 + ty);
+        double heightToGoal = h2 - 26;
         double distance = heightToGoal / Math.tan(angleToGoal);
-        return Units.inchesToMeters(distance / 2);
+        return Units.inchesToMeters(distance);
     }
 
     public boolean isValidTarget() {
@@ -41,9 +36,9 @@ public class Vision extends SubsystemBase {
 
     }
 
-    public static boolean isSpeaker() {
-       int tid = (int) table.getEntry("tid").getDouble(-1);
-       return tid == 3 || tid == 4 || tid == 7 || tid == 8;
-    }
+    // public static boolean isSpeaker() {
+    //    int tid = (int) table.getEntry("tid").getDouble(-1);
+    //    return tid == 3 || tid == 4 || tid == 7 || tid == 8;
+    // }
 
 }

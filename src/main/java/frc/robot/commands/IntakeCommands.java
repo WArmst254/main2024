@@ -14,7 +14,7 @@ public class IntakeCommands {
             () -> {
               if (!shooter.shooterSensorOut()) {
                 intake.intakeToShooter(); // intake and feed to shooter mechanism
-                shooter.lowerShooter(lowerAngle);
+                shooter.lowerToIntake();
               } else {
                 intake.disableIntake(); // intake and feed motors off
                 shooter.stowShooter();

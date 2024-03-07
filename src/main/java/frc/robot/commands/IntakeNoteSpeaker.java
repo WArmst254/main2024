@@ -27,7 +27,7 @@ public class IntakeNoteSpeaker extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    shooter.lowerShooter(0.15);
+    shooter.lowerToIntake();
      LED.getInstance().changeLedState(LEDState.INTAKING);
   }
 

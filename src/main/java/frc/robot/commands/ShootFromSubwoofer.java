@@ -27,14 +27,14 @@ public class ShootFromSubwoofer extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    shooter.stowShooter();
+    shooter.lowerToShoot();
      LED.getInstance().changeLedState(LEDState.SUBWOOFER_SHOOTING);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    shooter.flywheelsOn(3500*Math.PI);
+    shooter.flywheelsOn();
     if (shooter.isVelocitySet()) {
       intake.backFeedOn();
       LED.getInstance().changeLedState(LEDState.SHOT_FIRED);

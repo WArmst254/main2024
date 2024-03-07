@@ -19,7 +19,9 @@ import frc.robot.subsystems.shooter.Shooter.State;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final boolean tuningMode = true;
   public static final class IDs {
+    
     // Tuner X
     public static final int pigeon = 0;
     public static final int swerveDriveTalon0 = 1;
