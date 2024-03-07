@@ -1,15 +1,13 @@
 package frc.robot;
 
-import com.ctre.phoenix.led.FireAnimation;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AmpCommands;
 import frc.robot.commands.DriveCommands;
@@ -17,6 +15,7 @@ import frc.robot.commands.IntakeCommands;
 import frc.robot.commands.IntakeNoteAmp;
 import frc.robot.commands.IntakeNoteSpeaker;
 import frc.robot.commands.ShootFromSubwoofer;
+import frc.robot.commands.ShootWithInterpolation;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.subsystems.amp.Amp;
 import frc.robot.subsystems.drive.Drive;
@@ -31,8 +30,7 @@ import frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.led.LED.LEDState;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.util.Alert;
-import frc.robot.util.Alert.AlertType;
+import frc.robot.util.rotation.AprilTagLock;
 import frc.robot.util.rotation.Joystick;
 import frc.robot.util.rotation.RotationSource;
 
@@ -55,16 +53,14 @@ public class RobotContainer {
   private final Vision vision = new Vision();
   public static LED led = new LED();
 
-  private double shooterFeedAngle = 0.2;
-  private double shooterScoreAngle = 0;
-  private double shooterScoreSpeed = 2500*Math.PI;
-
   // Auto Chooser
   private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
   private boolean speakerMode = true;
   private boolean ampMode = false;
   private boolean manualMode = false;
+
+  private RotationSource summonRotation = new Joystick();
 
   // Controllers
   public static XboxController driverController = new XboxController(0);
@@ -74,15 +70,14 @@ public class RobotContainer {
   private Trigger runAmpSensorIntake = new Trigger(() -> driverController.getAButton() && (ampMode && !manualMode));
   private Trigger runSpeakerManualIntake = new Trigger(() -> driverController.getAButton() && (speakerMode && manualMode));
   private Trigger runAmpManualIntake = new Trigger(() -> driverController.getAButton() && (ampMode && manualMode));
-
+  
   private Trigger subwooferShot = new Trigger(() -> driverController.getXButton() && speakerMode);
   private Trigger podiumShot = new Trigger(() -> driverController.getBButton() && speakerMode);
-  private Trigger shootWithInterpolation = new Trigger(() -> driverController.getYButton() && speakerMode);
-
+  private Trigger interpolatedShot = new Trigger(() -> driverController.getYButton() && speakerMode);
   private Trigger scoreAmp = new Trigger(() -> driverController.getYButton() && ampMode);
 
-  private Trigger alignScoreSpeaker = new Trigger(() -> driverController.getRightBumper() && speakerMode);
   private Trigger alignScoreAmp = new Trigger(() -> driverController.getRightBumper() && ampMode);
+  private Trigger aprilTagLock = new Trigger(() -> driverController.getRightBumper() && speakerMode);
 
   private Trigger resetGyro = new Trigger(() -> driverController.getStartButton());
 
@@ -91,11 +86,17 @@ public class RobotContainer {
 
   private Trigger selectSpeakerMode = new Trigger(() -> operatorController.getYButton());
   private Trigger selectAmpMode = new Trigger(() -> operatorController.getAButton());
-  private Trigger selectManualMode = new Trigger(() -> operatorController.getBackButton());
+  private Trigger selectManualMode = new Trigger(() -> operatorController.getBackButton() || operatorController.getStartButton());
 
-  private Trigger aprilTagLock = new Trigger(() -> driverController.getRightBumper());
+  private Trigger extendElevatorToAmp = new Trigger(() -> operatorController.getPOV() == 0);
+  private Trigger retractElevator = new Trigger(() ->  operatorController.getPOV() == 180);
 
-  private RotationSource summonRotation = new Joystick();
+  private Trigger runSensorHPIntakeToAmp = new Trigger(() -> operatorController.getLeftBumper() && ampMode && !manualMode);
+  private Trigger runSensorHPIntakeToSpeaker = new Trigger(() -> operatorController.getLeftBumper() && speakerMode && !manualMode);
+  private Trigger runManualHPIntakeToAmp = new Trigger(() -> operatorController.getLeftBumper() && ampMode && manualMode);
+  private Trigger runManualHPIntakeToSpeaker = new Trigger(() -> operatorController.getLeftBumper() && speakerMode && manualMode);
+
+
   // Use Initial Setpoints for Position Control
    void zeroSuperstructure() {
     elevator.zeroElevatorPosition();
@@ -140,9 +141,9 @@ public class RobotContainer {
         break;
     }
 
-    NamedCommands.registerCommand("shoot", ShooterCommands.shootSensorCommand(shooter, intake, shooterScoreAngle, shooterScoreSpeed));
+    NamedCommands.registerCommand("shoot", ShooterCommands.shootSensorCommand(shooter, intake, 0, 3500));
     NamedCommands.registerCommand("shootOff", new InstantCommand(() -> shooter.disableFlywheels()).alongWith(new InstantCommand(() -> intake.disableBackFeed())));
-    NamedCommands.registerCommand("intakeShooter", IntakeCommands.intakeToShooterSensorCommand(intake, shooter, shooterFeedAngle));
+    NamedCommands.registerCommand("intakeShooter", IntakeCommands.intakeToShooterSensorCommand(intake, shooter, 0.2));
     NamedCommands.registerCommand("elevatorUp", elevator.ampElevatorCommand());
     NamedCommands.registerCommand("elevatorDown", elevator.stowElevatorCommand());
     NamedCommands.registerCommand("amp", AmpCommands.ampTeleopSensorCommand(amp));
@@ -188,7 +189,7 @@ public class RobotContainer {
     }));
 
     selectManualMode.onTrue(new InstantCommand(() -> {
-      if(speakerMode==true && ampMode==false) {
+      if(speakerMode==false && ampMode==true) {
         speakerMode = false;
         ampMode = true;
         manualMode = true;
@@ -212,196 +213,13 @@ public class RobotContainer {
     runAmpSensorIntake.whileTrue(new IntakeNoteAmp(intake, amp, elevator)).onFalse(new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp())));
     scoreAmp.whileTrue(new InstantCommand(() -> amp.ampOuttakeOn())).onFalse(new InstantCommand(() -> amp.disableAmp()).alongWith(new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.IDLE))));
     subwooferShot.whileTrue(new ShootFromSubwoofer(intake, shooter)).onFalse(new InstantCommand(() -> intake.disableBackFeed()).alongWith(new InstantCommand(() -> shooter.disableFlywheels())));
-    //aprilTagLock.whileTrue(new InstantCommand(() -> summonRotation = new AprilTagLock())).onFalse(new InstantCommand(() -> summonRotation = new Joystick()));
-    // Command outakeShooterAutoCommand = IntakeCommands.outakeFromShooterSensorCommand(intake, shooter);
-    // Command disableOutakeShooterAutoCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.disableFlywheels()));
+    interpolatedShot.whileTrue(new ShootWithInterpolation(intake, shooter, vision)).onFalse(new InstantCommand(() -> intake.disableBackFeed()).alongWith(new InstantCommand(() -> shooter.disableFlywheels())));
+    aprilTagLock.whileTrue(new InstantCommand(() -> summonRotation = new AprilTagLock())).onFalse(new InstantCommand(() -> summonRotation = new Joystick()));
+    extendElevatorToAmp.onTrue(new InstantCommand(() -> elevator.ampExtendElevator()));
+    retractElevator.onTrue(new InstantCommand(() -> elevator.stowElevator()));
+    runAmpOuttake.onTrue(new InstantCommand(() -> amp.ampIntakeOn()).alongWith(new InstantCommand(() -> intake.outakeFromAmp()))).onFalse(new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp())));
 
-    // Command outakeAmpAutoCommand = IntakeCommands.outakeFromAmpSensorCommand(intake, amp);
-    // Command disableOutakeAmpAutoCommand = (new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp())));
-    // Command scoreAmpAutoCommand = new InstantCommand(() -> amp.ampOuttakeOn());
-    // Command disableScoreAmpAutoCommand =  new InstantCommand(() -> amp.disableAmp());
-
-    // Command intakeShooterManualCommand = new InstantCommand(() -> intake.intakeToShooter()).alongWith(new InstantCommand(() -> shooter.lowerShooter(shooterFeedAngle)));
-    // Command disableIntakeShooterManualCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShooter()));
-    // Command outakeShooterManualCommand = new InstantCommand(() -> intake.outakeFromShooter()).alongWith(new InstantCommand(() -> shooter.lowerShooter(shooterFeedAngle)));
-    // Command disableOutakeShooterManualCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShooter()));
-    // Command scoreShooterManualCommand = ShooterCommands.shootManualCommand(shooter, intake, shooterScoreAngle, shooterScoreSpeed);
-    // Command disableScoreShooterManualCommand = new InstantCommand(() -> shooter.disableFlywheels()).alongWith(new InstantCommand(() -> intake.disableBackFeed()));
-       
-    // Command intakeHPShooterCommand = new InstantCommand(() -> shooter.intakeHP());
-    // Command disableIntakeHPShooterCommand = new InstantCommand(() -> shooter.disableFlywheels());
-
-    // Command intakeAmpManualCommand = new InstantCommand(() -> intake.intakeToAmp()).alongWith(new InstantCommand(() -> amp.ampOuttakeOn()));
-    // Command disableIntakeAmpManualCommand = new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp()));
-    // Command outakeAmpManualCommand = new InstantCommand(() -> intake.outakeFromAmp());
-    // Command disableOutakeAmpManualCommand = new InstantCommand(() -> intake.disableIntake());
-    // Command scoreAmpManualCommand = new InstantCommand(() -> amp.ampOuttakeOn());
-    // Command disableScoreAmpManualCommand = new InstantCommand(() -> amp.disableAmp());
-       
-    // Command intakeHPAmpCommand = ShooterCommands.HPintakeToAmpSensorCommand(intake, amp, shooter);
-    // Command disableIntakeHPAmpCommand = new InstantCommand(() -> shooter.disableFlywheels()).alongWith(new InstantCommand(() -> intake.disableFeeds())).alongWith(new InstantCommand(() -> amp.disableAmp()));
-
-    // //intake to shooter
-    // driverController
-    //   .a()
-    //   .whileTrue(intakeShooterAutoCommand);
-    // driverController
-    //   .a()
-    //   .onFalse(disableIntakeShooterAutoCommand);
-
-    // //intake to amp
-    // operatorController
-    //   .b()
-    //   .whileTrue(intakeAmpAutoCommand);
-    // operatorController
-    //   .b()
-    //   .onFalse(disableIntakeAmpAutoCommand);
-
-    // // score amp
-    // driverController
-    //   .x()
-    //   .whileTrue(scoreAmpAutoCommand);
-    // driverController
-    //   .x()
-    //   .onFalse(disableScoreAmpAutoCommand);
-    
-    // // score shooter
-    // driverController
-    //   .y()
-    //   .whileTrue(scoreShooterAutoCommand);
-    // driverController
-    //   .y()
-    //   .onFalse(disableScoreShooterAutoCommand);
-
-
-    //   //outake shooter
-    // operatorController
-    //   .rightTrigger()
-    //   .whileTrue(outakeShooterAutoCommand);
-    // operatorController
-    //   .rightTrigger()
-    //   .onFalse(disableOutakeShooterAutoCommand);
-
-    //   //outake amp
-    // operatorController
-    //   .leftTrigger()
-    //   .whileTrue(outakeAmpAutoCommand);
-    // operatorController
-    //   .leftTrigger()
-    //   .onFalse(disableOutakeAmpAutoCommand);
-
-    // // Human Player Shooter Intake
-    // operatorController
-    //   .leftBumper()
-    //   .whileTrue(intakeHPShooterCommand);
-    // operatorController
-    //   .leftBumper()
-    //   .onFalse(disableIntakeHPShooterCommand);
-
-    //   // Human Player Amp Intake
-    // operatorController
-    //   .rightBumper()
-    //   .whileTrue(intakeHPAmpCommand);
-    // operatorController
-    //   .rightBumper()
-    //   .onFalse(disableIntakeHPAmpCommand);
-
-    // // Lower Shooter Angle
-    // driverController
-    //   .leftBumper()
-    //   .whileTrue(
-    //     new InstantCommand(() -> shooter.lowerShooter(0.15)));
-
-    // // Stow(Raise) Shooter Angle
-    // driverController
-    //   .leftBumper()
-    //   .onFalse(
-    //     new InstantCommand(() -> shooter.stowShooter()));
-
-
-    // // Extend Elevator to Amp Scoring Position
-    // operatorController
-    //   .povUp()
-    //   .onTrue(
-    //     new InstantCommand(() -> elevator.ampExtendElevator()));
-
-    // // Stow(Detract) Elevator
-    // operatorController
-    //   .povDown()
-    //   .onTrue(
-    //     new InstantCommand(() -> elevator.stowElevator()));
-
-    // // Reset Stowed Position
-    // operatorController
-    //   .povRight()
-    //   .onTrue(
-    //     new InstantCommand(() -> elevator.setElevatorStowPosition()));
-
-    // operatorController
-    //   .start()
-    //   .whileTrue(
-    //     new InstantCommand(() -> shooter.flywheelsOn(shooterScoreSpeed))
-    //   );
-    //   operatorController
-    //   .start()
-    //   .onFalse(
-    //     new InstantCommand(() -> shooter.disableFlywheels())
-    //   );
-
-    //   operatorController
-    //   .back()
-    //   .whileTrue(
-    //     new InstantCommand(() -> shooter.flywheelsOn(shooterScoreSpeed))
-    //   );
-    //   operatorController
-    //   .back()
-    //   .onFalse(
-    //     new InstantCommand(() -> shooter.disableFlywheels())
-    //   );
-
-    // // Zero Gyro Yaw
-    // driverController
-    //   .start()
-    //   .onTrue(
-    //     );
-
-    // // driverController //TODO: TEST INTERPOLATE METHOD
-    // //   .back()
-    // //   .whileTrue(
-    // //     ShooterCommands.interpolatedShootManualCommand(shooter, intake, shooter.getAutomaticState(vision)));
-      
-    // // driverController
-    // //   .back()
-    // //   .onFalse(
-    // //     new InstantCommand(() -> shooter.disableShooter()));
-
-    // operatorController
-    //   .a()
-    //   .whileTrue(
-    //     new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.HP_AMPLIFY)));
-    // operatorController
-    //   .y()
-    //   .whileTrue(
-    //     new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.HP_COOPERTITION)));
-    //    operatorController
-    //     .a()
-    //     .onFalse(
-    //       new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.IDLE)));
-    //   operatorController
-    //     .y()
-    //     .onFalse(
-    //       new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.IDLE)));
       }
-
-
-  // public void checkControllers() {
-  //   driverDisconnected.set(
-  //       !DriverStation.isJoystickConnected(driverController.getHID().getPort())
-  //           || !DriverStation.getJoystickIsXbox(driverController.getHID().getPort()));
-  //   operatorDisconnected.set(
-  //       !DriverStation.isJoystickConnected(operatorController.getHID().getPort())
-  //           || !DriverStation.getJoystickIsXbox(operatorController.getHID().getPort()));
-  // }
 
   public void checkSensors() {
     SmartDashboard.putBoolean("Speaker Mode", speakerMode);

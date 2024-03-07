@@ -8,20 +8,23 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.led.LED.LEDState;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.intake.Intake;
 
-public class ShootFromSubwoofer extends Command {
+public class ShootWithInterpolation extends Command {
 
   private Intake intake;
   private Shooter shooter;
+  private Vision vision;
 
   /** Creates a new IntakeNote. */
-  public ShootFromSubwoofer(Intake intake, Shooter shooter) {
+  public ShootWithInterpolation(Intake intake, Shooter shooter, Vision vision) {
 
     this.intake = intake;
     this.shooter = shooter;
+    this.vision = vision;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(intake, shooter);
+    addRequirements(intake, shooter, vision);
   }
 
   // Called when the command is initially scheduled.
@@ -34,8 +37,9 @@ public class ShootFromSubwoofer extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    shooter.flywheelsOn();
-    if (shooter.isVelocitySet() && shooter.isAngleSet()) {
+    shooter.interpolatedFlywheelVelocity(shooter.getAutomaticState(vision));
+    shooter.interpolatedShooterAngle(shooter.getAutomaticState(vision));
+    if (shooter.isInterpolatedVelocitySet(shooter.getAutomaticState(vision)) && shooter.isAngleSet()) {
       intake.backFeedOn();
       LED.getInstance().changeLedState(LEDState.SHOT_FIRED);
     } else {

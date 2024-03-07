@@ -53,9 +53,9 @@ public class Shooter extends SubsystemBase {
   private TunableNumber tRPM = new TunableNumber("TEST RPM");
   private TunableNumber tAngle = new TunableNumber("TEST ANGLE");
 
-  private TunableNumber mm_velocity = new TunableNumber("Shooter Angle/Velocity");
-  private TunableNumber mm_acceleration = new TunableNumber("Shooter Angle/Acceleration");
-  private TunableNumber mm_jerk = new TunableNumber("Shooter Angle/Jerk");
+  private TunableNumber mm_sVelocity = new TunableNumber("Shooter Angle/Velocity");
+  private TunableNumber mm_sAcceleration = new TunableNumber("Shooter Angle/Acceleration");
+  private TunableNumber mm_sJerk = new TunableNumber("Shooter Angle/Jerk");
   private TunableNumber sP = new TunableNumber("Shooter Angle PID/P");
   private TunableNumber sI = new TunableNumber("Shooter Angle PID/I");
   private TunableNumber sD = new TunableNumber("Shooter Angle PID/D");
@@ -72,6 +72,7 @@ public class Shooter extends SubsystemBase {
 
     tRPM.setDefault(3500);
     tAngle.setDefault(0);
+    
     /*Flywheel Settings and Gains */
     flywheelLeft.restoreFactoryDefaults();
     flywheelRight.restoreFactoryDefaults();
@@ -107,14 +108,14 @@ public class Shooter extends SubsystemBase {
     shooter.setNeutralMode(NeutralModeValue.Brake);
 
     /* Motion Profiling Constants For Shooter Angle*/
-    mm_velocity.setDefault(20);
-    mm_acceleration.setDefault(20);
-    mm_jerk.setDefault(50);
+    mm_sVelocity.setDefault(20);
+    mm_sAcceleration.setDefault(20);
+    mm_sJerk.setDefault(50);
 
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.MotionMagicCruiseVelocity = mm_velocity.get();
-    mm.MotionMagicAcceleration = mm_acceleration.get();
-    mm.MotionMagicJerk = mm_jerk.get();
+    mm.MotionMagicCruiseVelocity = mm_sVelocity.get();
+    mm.MotionMagicAcceleration = mm_sAcceleration.get();
+    mm.MotionMagicJerk = mm_sJerk.get();
 
     // PID Coefficients for Shooter Angle
     sP.setDefault(20);
@@ -210,7 +211,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void interpolatedFlywheelVelocity(State state) {
-    m_pidController.setReference(state.speed, CANSparkMax.ControlType.kVelocity);
+    m_pidController.setReference(state.speed*Math.PI, CANSparkMax.ControlType.kVelocity);
   }
 
   public void interpolatedShooterAngle(State state) {
@@ -241,8 +242,12 @@ public class Shooter extends SubsystemBase {
     return((m_encoder.getVelocity() >= (tRPM.get())-100) && (m_encoder.getVelocity() <= ((tRPM.get())+100)));
   }
 
+  public boolean isInterpolatedVelocitySet(State state) {
+    return((m_encoder.getVelocity() >= (state.speed)-100) && (m_encoder.getVelocity() <= ((state.speed)+100)));
+  }
+
   public boolean isAngleSet() {
-    return (m_mmReq.Position <= (shooter.getPosition().getValueAsDouble()+0.01) && m_mmReq.Position >= (shooter.getPosition().getValueAsDouble()-0.01));
+    return (m_mmReq.Position <= (shooter.getPosition().getValueAsDouble()+0.05) && m_mmReq.Position >= (shooter.getPosition().getValueAsDouble()-0.05));
   }
 
   public boolean isShooterSet() {

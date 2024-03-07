@@ -50,8 +50,8 @@ public class Intake extends SubsystemBase {
 
   public void outakeFromAmp() {
     intake.set(-1);
-    frontFeed.set(0.95);
-    backFeed.set(0.95);
+    frontFeed.set(-0.95);
+    backFeed.set(-0.95);
   }
 
   public void disableIntake() {

@@ -11,11 +11,21 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.TunableNumber;
 
 public class Elevator extends SubsystemBase {
 
   private final TalonFX elevator = new TalonFX(Constants.IDs.elevator);
   private final MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
+
+   private TunableNumber mm_eVelocity = new TunableNumber("Elevator/Velocity");
+  private TunableNumber mm_eAcceleration = new TunableNumber("Elevator/Acceleration");
+  private TunableNumber mm_eJerk = new TunableNumber("Elevator/Jerk");
+  private TunableNumber eP = new TunableNumber("Elevator PID/P");
+  private TunableNumber eI = new TunableNumber("Elevator PID/I");
+  private TunableNumber eD = new TunableNumber("Elevator PID/D");
+  private TunableNumber eV = new TunableNumber("Elevator PID/V");
+  private TunableNumber eS = new TunableNumber("Elevator PID/S");
 
   public Elevator() {
     TalonFXConfiguration cfg = new TalonFXConfiguration();
@@ -57,7 +67,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public void ampExtendElevator() {
-    elevator.setControl(m_mmReq.withPosition(-0.8).withSlot(0));
+    elevator.setControl(m_mmReq.withPosition(-0.65).withSlot(0));
   }
 
   public void stowElevator() {

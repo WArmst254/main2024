@@ -31,7 +31,7 @@ public class IntakeNoteAmp extends Command {
   @Override
   public void initialize() {
     elevator.stowElevator();
-     LED.getInstance().changeLedState(LEDState.INTAKING);
+     LED.getInstance().changeLedState(LEDState.INTAKING_AMP);
   }
 
   // Called every time the scheduler runs while the command is scheduled.

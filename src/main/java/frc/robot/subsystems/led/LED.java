@@ -12,7 +12,7 @@ import com.ctre.phoenix.led.LarsonAnimation;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdle.VBatOutputMode;
 import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
-import com.ctre.phoenix.led.RainbowAnimation;
+//import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
 import com.ctre.phoenix.led.TwinkleAnimation;
@@ -43,7 +43,8 @@ public class LED extends SubsystemBase {
       HP_AMPLIFY,
       HP_COOPERTITION,
 
-      INTAKING,
+      INTAKING_SPEAKER,
+      INTAKING_AMP,
       SUBWOOFER_SHOOTING,
       SHOT_FIRED,
 
@@ -80,7 +81,9 @@ public class LED extends SubsystemBase {
             break;
 
             case DISABLED:
-              candle.animate(new RainbowAnimation(0.7, 0.9, 48, false,8));
+              //candle.animate(new RainbowAnimation(0.7, 0.9, 48, false,8));
+              candle.animate(new FireAnimation(0.7, 0.8, 48, .7, .5,false,8));
+              candle.animate(new FireAnimation(0.7, 0.8, 40, .7, .5,true,0));
               currentState = LEDState.DISABLED;
             break;
 
@@ -101,18 +104,22 @@ public class LED extends SubsystemBase {
             break;
 
             case SPEAKER:
-              candle.setLEDs(255,0,255, 0, 8, 48);
+              candle.setLEDs(128,0,255, 0, 8, 48);
               currentState = LEDState.SPEAKER;
             break;
-            case INTAKING:
-              candle.setLEDs(255,40,255, 0, 8, 48);
-              currentState = LEDState.INTAKING;
+            case AMP:
+            candle.setLEDs(255,35,0, 0, 8, 48);
+            currentState = LEDState.AMP;
+            break;
+            case INTAKING_SPEAKER:
+            candle.animate(new SingleFadeAnimation(128, 0, 255, 0, 0.9, 48, 8), 1);
+              currentState = LEDState.INTAKING_SPEAKER;
+            break;
+            case INTAKING_AMP:
+            candle.animate(new SingleFadeAnimation(255, 35, 0, 0, 0.9, 48, 8), 1);
+              currentState = LEDState.INTAKING_AMP;
             break;
 
-            case AMP:
-              candle.setLEDs(255,160,0, 0, 8, 48);
-              currentState = LEDState.AMP;
-            break;
             case SUBWOOFER_SHOOTING:
             candle.animate(new LarsonAnimation(255, 0, 178, 255, 1, 48, BounceMode.Center, 8));
             break;
