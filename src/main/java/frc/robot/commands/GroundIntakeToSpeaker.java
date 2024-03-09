@@ -10,13 +10,13 @@ import frc.robot.subsystems.led.LED.LEDState;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.intake.Intake;
 
-public class IntakeNoteSpeaker extends Command {
+public class GroundIntakeToSpeaker extends Command {
 
   private Intake intake;
   private Shooter shooter;
 
   /** Creates a new IntakeNote. */
-  public IntakeNoteSpeaker(Intake intake, Shooter shooter) {
+  public GroundIntakeToSpeaker(Intake intake, Shooter shooter) {
 
     this.intake = intake;
     this.shooter = shooter;

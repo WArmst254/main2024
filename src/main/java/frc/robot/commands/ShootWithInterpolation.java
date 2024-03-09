@@ -40,14 +40,12 @@ public class ShootWithInterpolation extends Command {
   public void execute() {
     shooter.interpolatedFlywheelVelocity(shooter.getAutomaticState(vision));
     shooter.interpolatedShooterAngle(shooter.getAutomaticState(vision));
-    SmartDashboard.putBoolean("A", shooter.isInterpolatedVelocitySet(shooter.getAutomaticState(vision)));
-    SmartDashboard.putBoolean("B", shooter.isAngleSet());
-    SmartDashboard.putNumber("C", shooter.a(shooter.getAutomaticState(vision)));
+    SmartDashboard.putNumber("ABC", shooter.getAutomaticState(vision).speed);
     if (shooter.isInterpolatedVelocitySet(shooter.getAutomaticState(vision)) && shooter.isAngleSet()) {
       intake.backFeedOn();
       LED.getInstance().changeLedState(LEDState.SHOT_FIRED);
     } else {
-      intake.disableBackFeed();
+      intake.disableFeeds();
     }
 
   }
@@ -55,7 +53,7 @@ public class ShootWithInterpolation extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    intake.disableBackFeed();
+    intake.disableFeeds();
     shooter.disableFlywheels();
     shooter.stowShooter();
     LED.getInstance().changeLedState(LEDState.IDLE);

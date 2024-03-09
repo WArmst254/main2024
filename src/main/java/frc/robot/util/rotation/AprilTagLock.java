@@ -10,7 +10,7 @@ public class AprilTagLock implements RotationSource {
     public static PIDController rotationPID = createPIDController();
     private static PIDController createPIDController() {
         PIDController pid = new PIDController(0.020, 0.00006, 0.00006);
-        pid.setTolerance(.005);
+        pid.setTolerance(0);
         pid.enableContinuousInput(0, 360);
         pid.setSetpoint(0);
         return pid;

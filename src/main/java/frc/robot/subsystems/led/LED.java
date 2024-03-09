@@ -18,7 +18,6 @@ import com.ctre.phoenix.led.StrobeAnimation;
 import com.ctre.phoenix.led.TwinkleAnimation;
 import com.ctre.phoenix.led.TwinkleAnimation.TwinklePercent;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -32,13 +31,13 @@ public class LED extends SubsystemBase {
     public enum LEDState {
       IDLE, 
       DISABLED,
+      CONTROLLERS_DISCONNECTED,
       PREMATCH,
       AUTON,
       OFF,
 
       SPEAKER,
       AMP,
-
 
       HP_AMPLIFY,
       HP_COOPERTITION,
@@ -75,6 +74,9 @@ public class LED extends SubsystemBase {
         candle.setLEDs(0, 0, 0, 0, 8, 48);
 
         switch (state) {
+            default:
+            break;
+
             case IDLE:
               candle.animate(new SingleFadeAnimation(255,255,255,255,0.9,48,8));
               currentState = LEDState.IDLE;
@@ -89,6 +91,10 @@ public class LED extends SubsystemBase {
               currentState = LEDState.PREMATCH;
             break;
 
+            case CONTROLLERS_DISCONNECTED:
+            candle.animate(new TwinkleAnimation(255, 0, 178, 255, 0.9, 48, TwinklePercent.Percent64,8));
+            break;
+
             case AUTON:
               candle.animate(new FireAnimation(0.7, 0.8, 48, .7, .5,false,8));
               currentState = LEDState.AUTON;
@@ -98,21 +104,21 @@ public class LED extends SubsystemBase {
               currentState = LEDState.OFF;
             break;
 
-            default:
-            break;
-
             case SPEAKER:
               candle.setLEDs(128,0,255, 0, 8, 48);
               currentState = LEDState.SPEAKER;
             break;
+
             case AMP:
             candle.setLEDs(255,35,0, 0, 8, 48);
             currentState = LEDState.AMP;
             break;
+
             case INTAKING_SPEAKER:
             candle.animate(new SingleFadeAnimation(128, 0, 255, 0, 0.9, 48, 8), 1);
               currentState = LEDState.INTAKING_SPEAKER;
             break;
+
             case INTAKING_AMP:
             candle.animate(new SingleFadeAnimation(255, 35, 0, 0, 0.9, 48, 8), 1);
               currentState = LEDState.INTAKING_AMP;
@@ -121,8 +127,9 @@ public class LED extends SubsystemBase {
             case SUBWOOFER_SHOOTING:
             candle.animate(new LarsonAnimation(255, 0, 178, 255, 1, 48, BounceMode.Center, 8));
             break;
+
             case SHOT_FIRED:
-            candle.animate(new FireAnimation(0.7, 0.8, 48, .7, .5,false,8));
+            candle.animate(new FireAnimation(0.9, 0.8, 48, .7, .5,false,8));
             break;
 
             case HP_AMPLIFY:
@@ -140,40 +147,26 @@ public class LED extends SubsystemBase {
               currentState = LEDState.GROUND_INTAKE_DETECTED;
             break;
 
-            case HP_INTAKE_DETECTED:
-              candle.setLEDs(0,255,0,0,28,48);
-              currentState = LEDState.HP_INTAKE_DETECTED;
-            break;
-
         }
     }
 
     public void periodic() {
       alliance = DriverStation.getAlliance();
-      // if(!DriverStation.isJoystickConnected(0) || !DriverStation.isJoystickConnected(1)) {
-      //   candle.animate(new TwinkleAnimation(255, 0, 178, 255, 0.9, 48, TwinklePercent.Percent64,8));
-      // }
 
       if(DriverStation.isEStopped()) {
         candle.animate(new StrobeAnimation(255,0,0,0,.5, 48, 8));
       }
-      if (currentState == LEDState.PREMATCH) {
 
-          if (NetworkTableInstance.getDefault().isConnected()) {
-            
+      if (currentState == LEDState.PREMATCH) {
               if (alliance.get() == Alliance.Red){
                   // Red team
                   candle.animate(new SingleFadeAnimation(255, 0, 0, 0, 0.2, 48, 8), 1);
-
               } else {
                   // Blue Team
                   candle.animate(new SingleFadeAnimation(0, 0, 255, 0, 0.2, 48, 8), 1);
               }
-          } else {
-              candle.animate(new SingleFadeAnimation(255, 0, 255, 0, 0.2, 48, 8), 1);
           }
-        }
-      }
+    }
 
     public static LED getInstance() {
       // To ensure only one instance is created

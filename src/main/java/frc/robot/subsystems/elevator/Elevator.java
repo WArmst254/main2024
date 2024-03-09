@@ -89,14 +89,6 @@ public class Elevator extends SubsystemBase {
     elevator.setPosition(0);
   }
 
-  public void setElevatorStowPosition() {
-    elevator.set(.2);
-    if (elevator.getMotorVoltage().getValueAsDouble() > .5) {
-      zeroElevatorPosition();
-      elevator.set(0);
-    }
-  }
-
   public boolean isElevatorSet() {
     return (m_mmReq.Position <= (elevator.getPosition().getValueAsDouble()+0.01) && m_mmReq.Position >= (elevator.getPosition().getValueAsDouble()-0.01));
   }

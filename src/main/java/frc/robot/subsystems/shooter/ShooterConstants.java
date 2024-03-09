@@ -1,7 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 public class ShooterConstants {
-    public static double subwooferRPM = 2500;
+    public static double subwooferRPM = 3000;
     public static double subwooferAngle = 0;
     public static double podiumRPM = 3200;
     public static double podiumAngle = 0.14;
@@ -10,10 +10,10 @@ public class ShooterConstants {
     public static double groundIntakeAngle = 0.2;
     public static double TOFsensorRange = 335;
 
-    public static double flywheelThreshold = 100;
-    public static double angleThreshold = 0.01;
+    public static double flywheelTolerance = 200;
+    public static double angleTolerance = 0.05;
 
-    public static double flywheelP = 6e-5;
+    public static double flywheelP = 0.1;
     public static double flywheelI = 0;
     public static double flywheelD = 0;
     public static double flywheelIZ = 0;

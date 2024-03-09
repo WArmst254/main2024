@@ -39,7 +39,7 @@ public class ShootFromSubwoofer extends Command {
       intake.backFeedOn();
       LED.getInstance().changeLedState(LEDState.SHOT_FIRED);
     } else {
-      intake.disableBackFeed();
+      intake.disableFeeds();
     }
 
   }
@@ -47,7 +47,7 @@ public class ShootFromSubwoofer extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    intake.disableBackFeed();
+    intake.disableFeeds();
     shooter.disableFlywheels();
     shooter.stowShooter();
     LED.getInstance().changeLedState(LEDState.IDLE);

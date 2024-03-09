@@ -15,13 +15,14 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.playingwithfusion.TimeOfFlight;
+import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkBase.ControlType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
@@ -33,103 +34,122 @@ import frc.robot.util.TunableNumber;
 
 public class Shooter extends SubsystemBase {
   
-  private final TalonFX shooter = new TalonFX(Constants.IDs.shooter);
-  private final MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
+  private final TalonFX shooter;
+  private final MotionMagicVoltage m_mmReq;
 
-  private final CANSparkFlex flywheelLeft = new CANSparkFlex(Constants.IDs.flywheelLeft, CANSparkLowLevel.MotorType.kBrushless);
-  private final CANSparkFlex flywheelRight = new CANSparkFlex(Constants.IDs.flywheelRight, CANSparkLowLevel.MotorType.kBrushless);
-  private RelativeEncoder m_encoder = flywheelLeft.getEncoder();
+  private final CANSparkFlex flywheelLeft;
+  private final CANSparkFlex flywheelRight;
+  private final RelativeEncoder leftEncoder;
+  private final RelativeEncoder rightEncoder;
+  private final SparkPIDController leftController;
+  private final SparkPIDController rightController;
 
-  public final TimeOfFlight shooter_sensor = new TimeOfFlight(Constants.IDs.shootersensor);
+  private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.335, 0.00175, 0.0);
 
-  private SparkPIDController m_pidController = flywheelLeft.getPIDController();
+  public final TimeOfFlight shooter_sensor;
+
+
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
 
-  private TunableNumber fP = new TunableNumber("Shooter FlyWheel PID/P");
-  private TunableNumber fI = new TunableNumber("Shooter FlyWheel PID/I");
-  private TunableNumber fD = new TunableNumber("Shooter FlyWheel PID/D");
-  private TunableNumber fIz = new TunableNumber("Shooter FlyWheel PID/IZ");
-  private TunableNumber fFF = new TunableNumber("Shooter FlyWheel PID/FF");
-  private TunableNumber fThreshold = new TunableNumber("Shooter Flywheel/Threshold RPM");
+  private TunableNumber fP = new TunableNumber("FlyWheel/PID/P");
+  private TunableNumber fI = new TunableNumber("FlyWheel/PID/I");
+  private TunableNumber fD = new TunableNumber("FlyWheel/PID/D");
+  private TunableNumber fIz = new TunableNumber("FlyWheel/PID/IZ");
+  private TunableNumber fFF = new TunableNumber("FlyWheel/PID/FF");
+  private TunableNumber fTolerance = new TunableNumber("Flywheel/PID/Tolerance(RPM)");
 
-  private TunableNumber mm_sVelocity = new TunableNumber("Shooter Angle/Velocity");
-  private TunableNumber mm_sAcceleration = new TunableNumber("Shooter Angle/Acceleration");
-  private TunableNumber mm_sJerk = new TunableNumber("Shooter Angle/Jerk");
-  private TunableNumber sP = new TunableNumber("Shooter Angle PID/P");
-  private TunableNumber sI = new TunableNumber("Shooter Angle PID/I");
-  private TunableNumber sD = new TunableNumber("Shooter Angle PID/D");
-  private TunableNumber sV = new TunableNumber("Shooter Angle PID/V");
-  private TunableNumber sS = new TunableNumber("Shooter Angle PID/S");
-  private TunableNumber sThreshold = new TunableNumber("Shooter Angle/Threshold");
-
-  private TunableNumber subRPM = new TunableNumber("Subwoofer Shot/RPM");
-  private TunableNumber subAngle = new TunableNumber("SubwooferShot/Angle");
-
-  private TunableNumber podRPM = new TunableNumber("Podium Shot/RPM");
-  private TunableNumber podAngle = new TunableNumber("Podium Shot/Angle");
-
-  private TunableNumber intakeHPspeed = new TunableNumber("HP Intake/Speed");
-
-  private TunableNumber intakingAngle = new TunableNumber("Intake/Angle");
-
-  private TunableNumber shooterSensorRange = new TunableNumber("Sensor/Shooter Sensor Range");
-
-
+  private TunableNumber mm_sVelocity = new TunableNumber("Angle/PID/Velocity");
+  private TunableNumber mm_sAcceleration = new TunableNumber("Angle/PID/Acceleration");
+  private TunableNumber mm_sJerk = new TunableNumber("Angle/PID/Jerk");
+  private TunableNumber sP = new TunableNumber("Angle/PID/P");
+  private TunableNumber sI = new TunableNumber("Angle/PID/I");
+  private TunableNumber sD = new TunableNumber("Angle/PID/D");
+  private TunableNumber sV = new TunableNumber("Angle/PID/V");
+  private TunableNumber sS = new TunableNumber("Angle/PID/S");
+  private TunableNumber sTolerance = new TunableNumber("Angle/PID/Tolerance");
+  
+  private TunableNumber subRPM = new TunableNumber("Flywheel/Setpoints/Subwoofer(RPM)");
+  private TunableNumber subAngle = new TunableNumber("Angle/Setpoints/Subwoofer");
+  private TunableNumber podRPM = new TunableNumber("Flywheel/Setpoints/Podium (RPM)");
+  private TunableNumber podAngle = new TunableNumber("Angle/Setpoints/Podium");
+  private TunableNumber intakeHPspeed = new TunableNumber("Flywheel/Setpoints/HPIntake(Speed)");
+  private TunableNumber intakingAngle = new TunableNumber("Angle/Setpoints/Intaking");
+  private TunableNumber shooterSensorRange = new TunableNumber("Sensors/ShooterSensorRange");
 
   private static final SplineInterpolator SPLINE_INTERPOLATOR = new SplineInterpolator();
   private PolynomialSplineFunction m_shooterCurve;
   private PolynomialSplineFunction m_flywheelCurve;
   private final Measure<Distance> MIN_SHOOTING_DISTANCE = Units.Meters.of(0.0);
   private final Measure<Distance> MAX_SHOOTING_DISTANCE;
+  
 
   public Shooter() {
-
-    subRPM.setDefault(ShooterConstants.subwooferRPM);
-    subAngle.setDefault(ShooterConstants.subwooferAngle);
-
-    podRPM.setDefault(ShooterConstants.podiumRPM);
-    podAngle.setDefault(ShooterConstants.podiumAngle);
-
-    intakeHPspeed.setDefault(ShooterConstants.humanPlayerIntakeSpeed);
-    intakingAngle.setDefault(ShooterConstants.groundIntakeAngle);
-
-    shooterSensorRange.setDefault(ShooterConstants.TOFsensorRange);
-
-    sThreshold.setDefault(ShooterConstants.angleThreshold);
-    fThreshold.setDefault(ShooterConstants.flywheelThreshold);
-    
-    /*Flywheel Settings and Gains */
+    flywheelRight = new CANSparkFlex(Constants.IDs.flywheelRight, CANSparkFlex.MotorType.kBrushless);
+    flywheelLeft = new CANSparkFlex(Constants.IDs.flywheelLeft, CANSparkFlex.MotorType.kBrushless);
+    rightEncoder= flywheelRight.getEncoder();
+    leftEncoder = flywheelLeft.getEncoder();
+    // Config Hardware
+    // Default
     flywheelLeft.restoreFactoryDefaults();
     flywheelRight.restoreFactoryDefaults();
-    flywheelRight.follow(flywheelLeft);
+
+    
+
+    // Limits
+    flywheelLeft.setSmartCurrentLimit(60);
+    flywheelRight.setSmartCurrentLimit(60);
+    flywheelLeft.enableVoltageCompensation(12.0);
+    flywheelRight.enableVoltageCompensation(12.0);
+
+    // Reset encoders
+    leftEncoder.setMeasurementPeriod(10);
+    rightEncoder.setMeasurementPeriod(10);
+    leftEncoder.setAverageDepth(2);
+    rightEncoder.setAverageDepth(2);
+
+    // Get controllers
+    rightController = flywheelRight.getPIDController();
+    leftController = flywheelLeft.getPIDController();
+    
+    // Disable brake mode
+    flywheelLeft.setIdleMode(CANSparkBase.IdleMode.kCoast);
+    flywheelRight.setIdleMode(CANSparkBase.IdleMode.kCoast);
+
     flywheelRight.burnFlash();
+    flywheelLeft.burnFlash();
+
+    shooter_sensor = new TimeOfFlight(Constants.IDs.shootersensor);
+    shooterSensorRange.setDefault(ShooterConstants.TOFsensorRange);
+
   
     fP.setDefault(ShooterConstants.flywheelP);
     fI.setDefault(ShooterConstants.flywheelI);
     fD.setDefault(ShooterConstants.flywheelD);
     fIz.setDefault(ShooterConstants.flywheelIZ);
     fFF.setDefault(ShooterConstants.flywheelFF);
+    fTolerance.setDefault(ShooterConstants.flywheelTolerance);
+    subRPM.setDefault(ShooterConstants.subwooferRPM);
+    podRPM.setDefault(ShooterConstants.podiumRPM);
     
-    // PID coefficients for Flywheels
-    kP = fP.get();
-    kI = fI.get();
-    kD = fD.get();
-    kIz = fIz.get(); 
-    kFF = fFF.get(); 
     kMaxOutput = ShooterConstants.flywheelMaxOutput;
     kMinOutput = ShooterConstants.flywheelMinOutput;
     maxRPM = ShooterConstants.flywheelMaxRPM; 
 
-    m_pidController.setP(kP);
-    m_pidController.setI(kI);
-    m_pidController.setD(kD);
-    m_pidController.setIZone(kIz);
-    m_pidController.setFF(kFF);
-    m_pidController.setOutputRange(kMinOutput, kMaxOutput);
+    rightController.setP(fP.get());
+    rightController.setI(fI.get());
+    rightController.setD(fD.get());
+    rightController.setIZone(fIz.get());
+    rightController.setOutputRange(kMinOutput, kMaxOutput);
+    leftController.setP(fP.get()+1e-3);
+    leftController.setI(fI.get());
+    leftController.setD(fD.get());
+    leftController.setIZone(fIz.get());
+    leftController.setOutputRange(kMinOutput, kMaxOutput);
 
-    /*Shooter Angle Settings and Motion Magic Constants */
-    TalonFXConfiguration cfg = new TalonFXConfiguration();
+    shooter = new TalonFX(Constants.IDs.shooter);
+    m_mmReq = new MotionMagicVoltage(0);
     shooter.setNeutralMode(NeutralModeValue.Brake);
+    TalonFXConfiguration cfg = new TalonFXConfiguration();
 
     /* Motion Profiling Constants For Shooter Angle*/
     mm_sVelocity.setDefault(ShooterConstants.shooterVelocity);
@@ -166,6 +186,12 @@ public class Shooter extends SubsystemBase {
     if (!status.isOK()) {
       System.out.println("Could not configure device. Error: " + status.toString());
     }
+
+    subAngle.setDefault(ShooterConstants.subwooferAngle);
+    podAngle.setDefault(ShooterConstants.podiumAngle);
+    intakeHPspeed.setDefault(ShooterConstants.humanPlayerIntakeSpeed);
+    intakingAngle.setDefault(ShooterConstants.groundIntakeAngle);
+    sTolerance.setDefault(ShooterConstants.angleTolerance);
 
     MAX_SHOOTING_DISTANCE = Constants.SHOOTER_MAP.get(Constants.SHOOTER_MAP.size() - 1).getKey();
     initializeShooterCurves(Constants.SHOOTER_MAP);
@@ -215,18 +241,34 @@ public class Shooter extends SubsystemBase {
   }
 
   public void flywheelsOnSub() {
-    m_pidController.setReference(subRPM.get()*Math.PI, CANSparkMax.ControlType.kVelocity);
+    leftController.setReference(
+      subRPM.get() * 3,
+      CANSparkBase.ControlType.kVelocity,
+      0,
+      feedforward.calculate(subRPM.get()),
+      SparkPIDController.ArbFFUnits.kVoltage);
+  rightController.setReference(
+      subRPM.get() * 3,
+      CANSparkBase.ControlType.kVelocity,
+      0,
+      feedforward.calculate(subRPM.get()),
+      SparkPIDController.ArbFFUnits.kVoltage);
   }
   public void flywheelsOnPod() {
-    m_pidController.setReference(podRPM.get()*Math.PI, CANSparkMax.ControlType.kVelocity);
+    leftController.setReference(podRPM.get()*Math.PI, CANSparkFlex.ControlType.kVelocity);
+    //rightController.setReference(podRPM.get()*Math.PI, CANSparkFlex.ControlType.kVelocity);
+    rightController.setReference(3, ControlType.kPosition);
   }
 
   public void intakeHP() {
     flywheelLeft.set(intakeHPspeed.get());
+    flywheelRight.set(intakeHPspeed.get());
   }
+
 
   public void disableFlywheels() {
     flywheelLeft.set(0);
+    flywheelRight.set(0);
   }
 
   public void lowerToIntake() {
@@ -242,7 +284,18 @@ public class Shooter extends SubsystemBase {
   }
 
   public void interpolatedFlywheelVelocity(State state) {
-    m_pidController.setReference(state.speed*Math.PI, CANSparkMax.ControlType.kVelocity);
+    leftController.setReference(
+      state.speed * 3,
+      CANSparkBase.ControlType.kVelocity,
+      0,
+      feedforward.calculate(state.speed),
+      SparkPIDController.ArbFFUnits.kVoltage);
+  rightController.setReference(
+      state.speed * 3,
+      CANSparkBase.ControlType.kVelocity,
+      0,
+      feedforward.calculate(state.speed),
+      SparkPIDController.ArbFFUnits.kVoltage);
   }
 
   public void interpolatedShooterAngle(State state) {
@@ -270,34 +323,36 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isSubwooferVelocitySet() {
-    return((m_encoder.getVelocity() >= (subRPM.get())-fThreshold.get()) && (m_encoder.getVelocity() <= ((subRPM.get())+fThreshold.get())));
+    return((leftEncoder.getVelocity() >= (subRPM.get())-fTolerance.get()) && (leftEncoder.getVelocity() <= ((subRPM.get())+fTolerance.get()))
+    && ((rightEncoder.getVelocity() >= (subRPM.get())-fTolerance.get()) && (rightEncoder.getVelocity() <= ((subRPM.get())+fTolerance.get()))));
   }
 
   public boolean isPodiumVelocitySet() {
-    return((m_encoder.getVelocity() >= (podRPM.get())-fThreshold.get()) && (m_encoder.getVelocity() <= ((podRPM.get())+fThreshold.get())));
+    return((leftEncoder.getVelocity() >= (podRPM.get())-fTolerance.get()) && (leftEncoder.getVelocity() <= ((podRPM.get())+fTolerance.get()))
+    && ((rightEncoder.getVelocity() >= (podRPM.get())-fTolerance.get()) && (rightEncoder.getVelocity() <= ((podRPM.get())+fTolerance.get()))));
   }
 
   public boolean isInterpolatedVelocitySet(State state) {
-    return((m_encoder.getVelocity() >= (state.speed)-fThreshold.get()) && (m_encoder.getVelocity() <= ((state.speed)+fThreshold.get())));
-  }
-  public double a(State state) {
-    return (state.speed)-fThreshold.get();
+    return((leftEncoder.getVelocity() >= (state.speed)-fTolerance.get()) && (leftEncoder.getVelocity() <= ((state.speed)+fTolerance.get()))
+    && ((rightEncoder.getVelocity() >= (state.speed)-fTolerance.get()) && (rightEncoder.getVelocity() <= ((state.speed)+fTolerance.get()))));
   }
 
   public boolean isAngleSet() {
-    return (m_mmReq.Position <= (shooter.getPosition().getValueAsDouble()+sThreshold.get()) && m_mmReq.Position >= (shooter.getPosition().getValueAsDouble()-sThreshold.get()));
+    return (m_mmReq.Position <= (shooter.getPosition().getValueAsDouble()+sTolerance.get()) && m_mmReq.Position >= (shooter.getPosition().getValueAsDouble()-sTolerance.get()));
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("Shooter Angle Position: ", shooter.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("Shooter Angle Velocity: ", shooter.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Shooter Angle Power:", shooter.get());
-    SmartDashboard.putNumber("Shooter Angle Voltage:", shooter.getMotorVoltage().getValueAsDouble());
+    SmartDashboard.putNumber("Angle/Reported Position:", shooter.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Angle/Reported Velocity:", shooter.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Angle/Reported Power:", shooter.get());
+    SmartDashboard.putNumber("Angle/ReportedVoltage:", shooter.getMotorVoltage().getValueAsDouble());
 
-    SmartDashboard.putNumber("Flywheels Velocity: ", m_encoder.getVelocity());
-    SmartDashboard.putNumber("Flywheels Power:", flywheelLeft.get());
+    SmartDashboard.putNumber("Reported Left Velocity:", leftEncoder.getVelocity());
+    SmartDashboard.putNumber("Flywheel/Reported Left Power:", flywheelLeft.get());
+    SmartDashboard.putNumber("Reported Right Velocity:", rightEncoder.getVelocity());
+    SmartDashboard.putNumber("Flywheel/Reported Right Power:", flywheelRight.get());
 
-    SmartDashboard.putBoolean("Shooter Angle Setpoint Reached: ", isAngleSet());
+    SmartDashboard.putBoolean("Angle/Boolean Setpoint Reached:", isAngleSet());
   }
 
 }

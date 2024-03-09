@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.led.LED;
@@ -73,7 +74,13 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-    LED.getInstance().changeLedState(LEDState.PREMATCH);
+    if(!DriverStation.isJoystickConnected(0) && !DriverStation.isJoystickConnected(1)) {  
+      LED.getInstance().changeLedState(LEDState.PREMATCH);
+      } else {
+        LED.getInstance().changeLedState(LEDState.CONTROLLERS_DISCONNECTED);
+      }
+ 
+    
   }
 
   /** This function is called periodically during all modes. */
@@ -94,7 +101,11 @@ public class Robot extends LoggedRobot {
   /** This function is called once when the robot is disabled. */
   @Override
   public void disabledInit() {
+    if(!DriverStation.isJoystickConnected(0) && !DriverStation.isJoystickConnected(1)) {  
     LED.getInstance().changeLedState(LEDState.DISABLED);
+    } else {
+    LED.getInstance().changeLedState(LEDState.CONTROLLERS_DISCONNECTED);
+    }
   }
 
   /** This function is called periodically when disabled. */

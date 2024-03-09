@@ -62,13 +62,13 @@ public class ShooterCommands {
             Commands.run(() -> {
               if (!intake.intakeSensorOut()) {
                 shooter.intakeHP();
-                intake.feedFromHPIntake();
+                intake.feedFromShooter();
               }}
               ).until(intake::intakeSensorOut),
               Commands.run(() -> {
                 if (!amp.ampSensorOut()) {
                   shooter.intakeHP();
-                  intake.feedFromHPIntake();
+                  intake.feedFromShooter();
                  }} ).until(amp::ampSensorOut)));
   }
 }

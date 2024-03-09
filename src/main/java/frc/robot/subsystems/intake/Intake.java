@@ -31,16 +31,31 @@ public class Intake extends SubsystemBase {
     backFeed.set(0.95);
   }
 
+  public void feedToShooter() {
+    frontFeed.set(-0.95);
+    backFeed.set(0.95);
+  }
+
   public void intakeToAmp() {
     intake.set(1);
     frontFeed.set(-0.95);
     backFeed.set(-0.95);
   }
 
-  public void feedFromHPIntake() {
+  public void feedToAmp() {
+    intake.set(1);
+    backFeed.set(-0.95);
+  }
+
+  public void feedFromShooter() {
     frontFeed.set(0.95);
     backFeed.set(-0.95);
   }
+
+  public void feedFromAmp(){
+    frontFeed.set(0.95);
+    backFeed.set(-0.95);
+}
 
   public void outakeFromShooter() {
     intake.set(-.95);
@@ -58,10 +73,6 @@ public class Intake extends SubsystemBase {
     intake.set(0);
     frontFeed.set(0);
     backFeed.set(0);
-  }
-
-  public void disableBackFeed() {
-    frontFeed.set(0);
   }
 
   public void disableFeeds() {
@@ -83,6 +94,10 @@ public class Intake extends SubsystemBase {
 
   public boolean intakeSensorOut() {
     return (intake_sensor.getRange() < 300);
+  }
+
+  public boolean intakeSensorOutForAmp() {
+    return (intake_sensor.getRange() < 160);
   }
 
   public boolean invIntakeSensorOut() {
