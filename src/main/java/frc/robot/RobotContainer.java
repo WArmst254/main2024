@@ -11,12 +11,11 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AmpCommands;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.FeedToAmp;
 import frc.robot.commands.FeedToSpeaker;
 import frc.robot.commands.IntakeCommands;
+import frc.robot.commands.RevFlywheelsWithInterpolation;
 import frc.robot.commands.GroundIntakeToAmp;
 import frc.robot.commands.GroundIntakeToSpeaker;
-import frc.robot.commands.HPToAmpFeed;
 import frc.robot.commands.HPSpeakerRefeed;
 import frc.robot.commands.ShootFromSubwoofer;
 import frc.robot.commands.ShootWithInterpolation;
@@ -73,18 +72,20 @@ public class RobotContainer {
   private Trigger runSpeakerSensorIntake = new Trigger(() -> driverController.getAButton() && (speakerMode && !manualMode));
   private Trigger runAmpSensorIntake = new Trigger(() -> driverController.getAButton() && (ampMode && !manualMode));
   
-  private Trigger runSpeakerManualIntake = new Trigger(() -> driverController.getAButton() && (speakerMode && manualMode));
-  private Trigger runAmpManualIntake = new Trigger(() -> driverController.getAButton() && (ampMode && manualMode));
+  //private Trigger runSpeakerManualIntake = new Trigger(() -> driverController.getAButton() && (speakerMode && manualMode));
+  //private Trigger runAmpManualIntake = new Trigger(() -> driverController.getAButton() && (ampMode && manualMode));
   
   private Trigger subwooferShot = new Trigger(() -> driverController.getXButton() && speakerMode);
-  private Trigger podiumShot = new Trigger(() -> driverController.getBButton() && speakerMode);
+  //private Trigger podiumShot = new Trigger(() -> driverController.getBButton() && speakerMode);
   private Trigger interpolatedShot = new Trigger(() -> driverController.getYButton() && speakerMode);
   private Trigger scoreAmp = new Trigger(() -> driverController.getYButton() && ampMode);
+
+  private Trigger revFlywheels = new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.1);
 
   //private Trigger alignScoreAmp = new Trigger(() -> driverController.getRightBumper() && ampMode);
   private Trigger aprilTagLock  = new Trigger(() -> driverController.getRightBumper() && speakerMode || driverController.getYButton() && speakerMode);
 
-  private Trigger resetGyro = new Trigger(() -> driverController.getStartButton());
+  private Trigger resetGyro = new Trigger(() -> driverController.getStartButton()|| driverController.getBackButton());
 
   private Trigger runSpeakerOuttake = new Trigger(() -> operatorController.getRightTriggerAxis() > 0.1 && speakerMode);
   private Trigger runAmpOuttake = new Trigger(() -> operatorController.getRightTriggerAxis() > 0.1 && ampMode);
@@ -96,8 +97,7 @@ public class RobotContainer {
   private Trigger extendElevatorToAmp = new Trigger(() -> operatorController.getPOV() == 0);
   private Trigger retractElevator = new Trigger(() ->  operatorController.getPOV() == 180);
 
-  private Trigger runSensorHPIntakeToAmp = new Trigger(() -> operatorController.getXButton() && ampMode && !manualMode);
-  private Trigger runSensorHPIntakeToSpeaker = new Trigger(() -> operatorController.getXButton() && speakerMode && !manualMode);
+  private Trigger runSensorHPIntakeToSpeaker = new Trigger(() -> operatorController.getXButton() && !manualMode);
   
 
   // Use Initial Setpoints for Position Control
@@ -219,10 +219,10 @@ public class RobotContainer {
     aprilTagLock.whileTrue(new InstantCommand(() -> summonRotation = new AprilTagLock())).onFalse(new InstantCommand(() -> summonRotation = new Joystick()));
     extendElevatorToAmp.onTrue(new InstantCommand(() -> elevator.ampExtendElevator()));
     retractElevator.onTrue(new InstantCommand(() -> elevator.stowElevator()));
-    runAmpOuttake.onTrue(new InstantCommand(() -> amp.ampIntakeOn()).alongWith(new InstantCommand(() -> intake.outakeFromAmp()))).onFalse(new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp())));
-    runSpeakerOuttake.onTrue(new InstantCommand(() -> shooter.intakeHP()).alongWith(new InstantCommand(() -> intake.outakeFromShooter()))).onFalse(new InstantCommand(() -> shooter.disableFlywheels()).alongWith(new InstantCommand(() -> intake.disableIntake())));
+    runAmpOuttake.whileTrue(new InstantCommand(() -> amp.ampIntakeOn()).alongWith(new InstantCommand(() -> intake.outakeFromAmp()))).onFalse(new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp())));
+    runSpeakerOuttake.whileTrue(new InstantCommand(() -> shooter.intakeHP()).alongWith(new InstantCommand(() -> intake.outakeFromShooter()))).onFalse(new InstantCommand(() -> shooter.disableFlywheels()).alongWith(new InstantCommand(() -> intake.disableIntake())));
+    revFlywheels.whileTrue(new RevFlywheelsWithInterpolation(shooter, vision)).onFalse(new InstantCommand(() -> shooter.disableFlywheels()));
     
-    runSensorHPIntakeToAmp.onTrue(new HPToAmpFeed(intake, shooter).andThen(new FeedToAmp(intake, amp, elevator, shooter))).onFalse(new InstantCommand(() -> shooter.disableFlywheels()).alongWith(new InstantCommand(() -> intake.disableFeeds())).alongWith(new InstantCommand(() -> amp.disableAmp())));
     runSensorHPIntakeToSpeaker.onTrue(new HPSpeakerRefeed(intake, shooter).andThen(new FeedToSpeaker(intake, shooter))).onFalse(new InstantCommand(() -> shooter.disableFlywheels()).alongWith(new InstantCommand(() -> intake.disableFeeds())));
   }
 

@@ -30,9 +30,9 @@ public class Elevator extends SubsystemBase {
   public Elevator() {
     TalonFXConfiguration cfg = new TalonFXConfiguration();
 
-    mm_eVelocity.setDefault(120);
-    mm_eAcceleration.setDefault(120);
-    mm_eJerk.setDefault(120);
+    mm_eVelocity.setDefault(2000);
+    mm_eAcceleration.setDefault(2000);
+    mm_eJerk.setDefault(2000);
 
     MotionMagicConfigs mm = cfg.MotionMagic;
     mm.MotionMagicCruiseVelocity = mm_eVelocity.get();
