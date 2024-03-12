@@ -30,28 +30,36 @@ public class Elevator extends SubsystemBase {
   public Elevator() {
     TalonFXConfiguration cfg = new TalonFXConfiguration();
 
-    mm_eVelocity.setDefault(2000);
-    mm_eAcceleration.setDefault(2000);
-    mm_eJerk.setDefault(2000);
+    mm_eVelocity.setDefault(ElevatorConstants.elevatorVelocity);
+    mm_eAcceleration.setDefault(ElevatorConstants.elevatorAcceleration);
+    mm_eJerk.setDefault(ElevatorConstants.elevatorJerk);
 
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.MotionMagicCruiseVelocity = mm_eVelocity.get();
-    mm.MotionMagicAcceleration = mm_eAcceleration.get();
-    mm.MotionMagicJerk = mm_eJerk.get();
+    // mm.MotionMagicCruiseVelocity = mm_eVelocity.get();
+    // mm.MotionMagicAcceleration = mm_eAcceleration.get();
+    // mm.MotionMagicJerk = mm_eJerk.get();
+        mm.MotionMagicCruiseVelocity = ElevatorConstants.elevatorVelocity;
+    mm.MotionMagicAcceleration = ElevatorConstants.elevatorAcceleration;
+    mm.MotionMagicJerk = ElevatorConstants.elevatorJerk;
 
-    eP.setDefault(100);
-    eI.setDefault(.2);
-    eD.setDefault(.4);
-    eV.setDefault(1.2);
-    eS.setDefault(1);
+    eP.setDefault(ElevatorConstants.elevatorP);
+    eI.setDefault(ElevatorConstants.elevatorI);
+    eD.setDefault(ElevatorConstants.elevatorD);
+    eV.setDefault(ElevatorConstants.elevatorV);
+    eS.setDefault(ElevatorConstants.elevatorS);
 
 
     Slot0Configs slot0 = cfg.Slot0;
-    slot0.kP = eP.get();
-    slot0.kI = eI.get();
-    slot0.kD = eD.get();
-    slot0.kV = eV.get();
-    slot0.kS = eS.get();
+    // slot0.kP = eP.get();
+    // slot0.kI = eI.get();
+    // slot0.kD = eD.get();
+    // slot0.kV = eV.get();
+    // slot0.kS = eS.get();
+     slot0.kP = ElevatorConstants.elevatorP;
+    slot0.kI = ElevatorConstants.elevatorI;
+    slot0.kD = ElevatorConstants.elevatorD;
+    slot0.kV = ElevatorConstants.elevatorV;
+    slot0.kS = ElevatorConstants.elevatorS;
 
     FeedbackConfigs fdb = cfg.Feedback;
     fdb.SensorToMechanismRatio = 52;

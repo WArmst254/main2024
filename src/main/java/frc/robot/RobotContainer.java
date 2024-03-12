@@ -21,6 +21,7 @@ import frc.robot.commands.ShootFromSubwoofer;
 import frc.robot.commands.ShootWithInterpolation;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.subsystems.amp.Amp;
+import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -55,6 +56,7 @@ public class RobotContainer {
   private final GyroIOPigeon2 gyro = new GyroIOPigeon2(true);
   private final Vision vision = new Vision();
   public static LED led = new LED();
+  private final Climber m_Climber = new Climber();
 
   // Auto Chooser
   private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -97,6 +99,8 @@ public class RobotContainer {
   private Trigger extendElevatorToAmp = new Trigger(() -> operatorController.getPOV() == 0);
   private Trigger retractElevator = new Trigger(() ->  operatorController.getPOV() == 180);
 
+  private Trigger climbUp = new Trigger(() -> driverController.getPOV() == 0);
+  private Trigger climbDown = new Trigger(() -> driverController.getPOV() == 180);
   private Trigger runSensorHPIntakeToSpeaker = new Trigger(() -> operatorController.getXButton() && !manualMode);
   
 
@@ -224,6 +228,9 @@ public class RobotContainer {
     revFlywheels.whileTrue(new RevFlywheelsWithInterpolation(shooter, vision)).onFalse(new InstantCommand(() -> shooter.disableFlywheels()));
     
     runSensorHPIntakeToSpeaker.onTrue(new HPSpeakerRefeed(intake, shooter).andThen(new FeedToSpeaker(intake, shooter))).onFalse(new InstantCommand(() -> shooter.disableFlywheels()).alongWith(new InstantCommand(() -> intake.disableFeeds())));
+
+    climbUp.onTrue(new InstantCommand(() -> m_Climber.climbUp())).onFalse(new InstantCommand(() -> m_Climber.climbOff()));
+    climbDown.onTrue(new InstantCommand(() -> m_Climber.climbDown())).onFalse(new InstantCommand(() -> m_Climber.climbOff())); 
   }
 
   public void checkSensors() {
