@@ -18,9 +18,11 @@ public class Elevator extends SubsystemBase {
   private final TalonFX elevator = new TalonFX(Constants.IDs.elevator);
   private final MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
 
-   private TunableNumber mm_eVelocity = new TunableNumber("Elevator/Velocity");
+  private TunableNumber mm_eVelocity = new TunableNumber("Elevator/Velocity");
   private TunableNumber mm_eAcceleration = new TunableNumber("Elevator/Acceleration");
   private TunableNumber mm_eJerk = new TunableNumber("Elevator/Jerk");
+  private TunableNumber eTolerance = new TunableNumber("Elevator PID/Tolerance");
+  private TunableNumber ampPosition = new TunableNumber("Elevator/Amp Setpoint");
   private TunableNumber eP = new TunableNumber("Elevator PID/P");
   private TunableNumber eI = new TunableNumber("Elevator PID/I");
   private TunableNumber eD = new TunableNumber("Elevator PID/D");
@@ -28,22 +30,24 @@ public class Elevator extends SubsystemBase {
   private TunableNumber eS = new TunableNumber("Elevator PID/S");
 
   public Elevator() {
+    ampPosition.setDefault(ElevatorConstants.ampPosition);
+    eTolerance.setDefault(ElevatorConstants.elevatorTolerance);
     TalonFXConfiguration cfg = new TalonFXConfiguration();
 
-    mm_eVelocity.setDefault(2000);
-    mm_eAcceleration.setDefault(2000);
-    mm_eJerk.setDefault(2000);
+    mm_eVelocity.setDefault(ElevatorConstants.elevatorVelocity);
+    mm_eAcceleration.setDefault(ElevatorConstants.elevatorAcceleration);
+    mm_eJerk.setDefault(ElevatorConstants.elevatorJerk);
 
     MotionMagicConfigs mm = cfg.MotionMagic;
     mm.MotionMagicCruiseVelocity = mm_eVelocity.get();
     mm.MotionMagicAcceleration = mm_eAcceleration.get();
     mm.MotionMagicJerk = mm_eJerk.get();
 
-    eP.setDefault(100);
-    eI.setDefault(.2);
-    eD.setDefault(.4);
-    eV.setDefault(1.2);
-    eS.setDefault(1);
+    eP.setDefault(ElevatorConstants.elevatorP);
+    eI.setDefault(ElevatorConstants.elevatorI);
+    eD.setDefault(ElevatorConstants.elevatorD);
+    eV.setDefault(ElevatorConstants.elevatorV);
+    eS.setDefault(ElevatorConstants.elevatorS);
 
 
     Slot0Configs slot0 = cfg.Slot0;
@@ -73,12 +77,8 @@ public class Elevator extends SubsystemBase {
     SmartDashboard.putNumber("Elevator Voltage:", elevator.getMotorVoltage().getValueAsDouble());
   }
 
-  public void fullExtendElevator() {
-    elevator.setControl(m_mmReq.withPosition(-1).withSlot(0));
-  }
-
   public void ampExtendElevator() {
-    elevator.setControl(m_mmReq.withPosition(-0.65).withSlot(0));
+    elevator.setControl(m_mmReq.withPosition(ampPosition.get()).withSlot(0));
   }
 
   public void stowElevator() {
@@ -90,15 +90,19 @@ public class Elevator extends SubsystemBase {
   }
 
   public boolean isElevatorSet() {
-    return (m_mmReq.Position <= (elevator.getPosition().getValueAsDouble()+0.01) && m_mmReq.Position >= (elevator.getPosition().getValueAsDouble()-0.01));
+    return (m_mmReq.Position <= (elevator.getPosition().getValueAsDouble()+eTolerance.get()) && m_mmReq.Position >= (elevator.getPosition().getValueAsDouble()-eTolerance.get()));
+  }
+
+  public boolean isElevatorAmped() {
+    return (ampPosition.get() <= (elevator.getPosition().getValueAsDouble()+eTolerance.get()) && ampPosition.get() >= (elevator.getPosition().getValueAsDouble()-eTolerance.get()));
   }
 
   public Command ampElevatorCommand() {
     return runOnce(
             () -> {
-              elevator.setControl(m_mmReq.withPosition(-0.8).withSlot(0));
+              elevator.setControl(m_mmReq.withPosition(ampPosition.get()).withSlot(0));
             })
-        .andThen(run(() -> {}).withTimeout(0.5))
+        .andThen(run(() -> {}).withTimeout(0.05))
         .withName("Elevator Lifted");
   }
 
@@ -107,7 +111,7 @@ public class Elevator extends SubsystemBase {
             () -> {
               elevator.setControl(m_mmReq.withPosition(0).withSlot(0));
             })
-        .andThen(run(() -> {}).withTimeout(0.5))
+        .andThen(run(() -> {}).withTimeout(0.05))
         .withName("Elevator Stowed");
   }
 }

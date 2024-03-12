@@ -39,16 +39,25 @@ public class LED extends SubsystemBase {
       SPEAKER,
       AMP,
 
-      HP_AMPLIFY,
-      HP_COOPERTITION,
-
       INTAKING_SPEAKER,
+      INTAKE_SUCCESS_SPEAKER,
+
       INTAKING_AMP,
-      SUBWOOFER_SHOOTING,
+      INTAKE_SUCCESS_AMP,
+
+      MANUAL_SHOOTING,
+      VISION_SHOOTING,
+
+      AMP_SCORING,
+
       SHOT_FIRED,
 
-      HP_INTAKE_DETECTED,
-      GROUND_INTAKE_DETECTED,
+      NOTE_IN_FEED,
+      NO_VISION,
+
+      REQUEST_HP_INTAKE,
+      HP_AMPLIFY,
+      HP_COOPERTITION
   }
 
   private LEDState currentState = LEDState.OFF;
@@ -83,7 +92,7 @@ public class LED extends SubsystemBase {
             break;
 
             case DISABLED:
-             candle.animate(new RainbowAnimation(0.7, 0.9, 48, false,8));
+              candle.animate(new RainbowAnimation(0.7, 0.9, 48, false,8));
               currentState = LEDState.DISABLED;
             break;
 
@@ -92,7 +101,8 @@ public class LED extends SubsystemBase {
             break;
 
             case CONTROLLERS_DISCONNECTED:
-            candle.animate(new TwinkleAnimation(255, 0, 178, 255, 0.9, 48, TwinklePercent.Percent64,8));
+              candle.animate(new TwinkleAnimation(255, 0, 178, 255, 1, 48, TwinklePercent.Percent64,8));
+              currentState = LEDState.CONTROLLERS_DISCONNECTED;
             break;
 
             case AUTON:
@@ -110,8 +120,8 @@ public class LED extends SubsystemBase {
             break;
 
             case AMP:
-            candle.setLEDs(255,35,0, 0, 8, 48);
-            currentState = LEDState.AMP;
+              candle.setLEDs(255,0,0, 0, 8, 48);
+              currentState = LEDState.AMP;
             break;
 
             case INTAKING_SPEAKER:
@@ -120,16 +130,38 @@ public class LED extends SubsystemBase {
             break;
 
             case INTAKING_AMP:
-            candle.animate(new SingleFadeAnimation(255, 35, 0, 0, 0.9, 48, 8), 1);
+              candle.animate(new SingleFadeAnimation(255, 0, 0, 0, 0.9, 48, 8), 1);
               currentState = LEDState.INTAKING_AMP;
             break;
 
-            case SUBWOOFER_SHOOTING:
-            candle.animate(new LarsonAnimation(255, 0, 178, 255, 1, 48, BounceMode.Center, 8));
+            case MANUAL_SHOOTING:
+              candle.animate(new LarsonAnimation(128, 0, 255, 0, 1, 48, BounceMode.Center, 7));
+              currentState = LEDState.MANUAL_SHOOTING;
+            break;
+
+            case VISION_SHOOTING:
+              candle.animate(new LarsonAnimation(0, 255, 0, 0, 1, 48, BounceMode.Center, 7));
+              currentState = LEDState.VISION_SHOOTING;
+            break;
+
+            case NOTE_IN_FEED: 
+              candle.animate(new SingleFadeAnimation(0, 0, 0, 255, 1, 48, 8), 1);
+              currentState = LEDState.NOTE_IN_FEED;
+            break;
+
+            case AMP_SCORING:
+              candle.animate(new LarsonAnimation(255, 0, 0, 0, 1, 48, BounceMode.Center, 7));
+              currentState = LEDState.AMP_SCORING;
+            break;
+
+            case NO_VISION:
+              candle.animate(new StrobeAnimation(255,0,0,0,.3, 48, 8));
+              currentState = LEDState.NO_VISION;
             break;
 
             case SHOT_FIRED:
-            candle.animate(new FireAnimation(0.9, 0.8, 48, .7, .5,false,8));
+              candle.animate(new FireAnimation(0.9, 0.8, 48, .7, .5,false,8));
+              currentState = LEDState.SHOT_FIRED;
             break;
 
             case HP_AMPLIFY:
@@ -142,9 +174,22 @@ public class LED extends SubsystemBase {
               currentState = LEDState.HP_COOPERTITION;
             break;
 
-            case GROUND_INTAKE_DETECTED:
-              candle.setLEDs(0,255,0,0,8, 48);
-              currentState = LEDState.GROUND_INTAKE_DETECTED;
+            case REQUEST_HP_INTAKE:
+              candle.animate(new StrobeAnimation(255,128,0,0,.5, 48, 8));
+              currentState = LEDState.REQUEST_HP_INTAKE;
+            break;
+
+
+            case INTAKE_SUCCESS_SPEAKER:
+              candle.setLEDs(128,0,255,0,8, 20);
+              candle.setLEDs(0,255,0,0,28, 20);
+              currentState = LEDState.INTAKE_SUCCESS_SPEAKER;
+            break;
+
+            case INTAKE_SUCCESS_AMP:
+              candle.setLEDs(255,0,0,0,8, 20);
+              candle.setLEDs(0,255,0,0,28, 20);
+              currentState = LEDState.INTAKE_SUCCESS_SPEAKER;
             break;
 
         }

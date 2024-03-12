@@ -2,7 +2,6 @@ package frc.robot.subsystems.elevator;
 
 public class ElevatorConstants {
     public static double ampPosition = -0.65;
-    public static double fullExtendPosition = -1;
 
     public static double elevatorVelocity = 120;
     public static double elevatorAcceleration = 120;

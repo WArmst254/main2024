@@ -1,52 +1,48 @@
-package frc.robot.commands;
-
+package frc.robot.commands.indexing;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.led.LED.LEDState;
-import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.amp.Amp;
 import frc.robot.subsystems.intake.Intake;
 
-public class HPSpeakerRefeed extends Command {
+public class AmpToFeed extends Command {
 
     private Intake intake;
-    private Shooter shooter;
+    private Amp amp;
   
-    /** Creates a new IntakeNote. */
-    public HPSpeakerRefeed(Intake intake, Shooter shooter) {
+    /** Creates a new AmpToFeed. */
+    public AmpToFeed(Intake intake, Amp amp) {
   
       this.intake = intake;
-      this.shooter = shooter;
+      this.amp = amp;
       // Use addRequirements() here to declare subsystem dependencies.
-      addRequirements(intake, shooter);
+      addRequirements(intake, amp);
     }
   
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-      shooter.stowShooter();
        LED.getInstance().changeLedState(LEDState.INTAKING_SPEAKER);
     }
   
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        
-      if (shooter.invShooterSensorOut()) {
-        shooter.intakeHP();
+      if(intake.intakeSensorOut()) {
+        LED.getInstance().changeLedState(LEDState.NOTE_IN_FEED);
       } else {
-        shooter.lowerToIntake();
-        intake.feedFromShooter();
+        amp.ampIntakeOn();
+        intake.feedFromAmp();
+        LED.getInstance().changeLedState(LEDState.INTAKING_SPEAKER);
       }
-  
     }
   
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
       intake.disableIntake();
-      shooter.stowShooter();
-      shooter.disableFlywheels();
+      amp.disableAmp();
     }
   
     // Returns true when the command should end.
@@ -58,4 +54,3 @@ public class HPSpeakerRefeed extends Command {
       return false;
     }
   }
-  

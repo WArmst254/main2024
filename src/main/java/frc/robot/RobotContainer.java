@@ -9,17 +9,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.AmpCommands;
-import frc.robot.commands.DriveCommands;
-import frc.robot.commands.FeedToSpeaker;
-import frc.robot.commands.IntakeCommands;
-import frc.robot.commands.RevFlywheelsWithInterpolation;
-import frc.robot.commands.GroundIntakeToAmp;
-import frc.robot.commands.GroundIntakeToSpeaker;
-import frc.robot.commands.HPSpeakerRefeed;
-import frc.robot.commands.ShootFromSubwoofer;
-import frc.robot.commands.ShootWithInterpolation;
-import frc.robot.commands.ShooterCommands;
+import frc.robot.commands.*;
+import frc.robot.commands.indexing.FeedToShooter;
+import frc.robot.commands.indexing.HPShooterToFeed;
 import frc.robot.subsystems.amp.Amp;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -144,15 +136,16 @@ public class RobotContainer {
         break;
     }
 
-    NamedCommands.registerCommand("shoot", ShooterCommands.shootSensorCommand(shooter, intake, 0, 3500));
-    NamedCommands.registerCommand("shootOff", new InstantCommand(() -> shooter.disableFlywheels()).alongWith(new InstantCommand(() -> intake.disableFeeds())));
-    NamedCommands.registerCommand("intakeShooter", IntakeCommands.intakeToShooterSensorCommand(intake, shooter, 0.2));
+    NamedCommands.registerCommand("shootSub", new ShootFromSubwoofer(intake, shooter));
+    NamedCommands.registerCommand("shootPod", new ShootFromPodium(intake, shooter));
+    NamedCommands.registerCommand("shootInt", new ShootWithInterpolation(intake, shooter, vision));
+    NamedCommands.registerCommand("shootOff", new InstantCommand(() -> shooter.disableFlywheels()).alongWith(new InstantCommand(() -> intake.disableFeeds())).alongWith(new InstantCommand(() -> shooter.stowShooter())));
+    NamedCommands.registerCommand("intakeShooter", new GroundIntakeToShooter(intake, shooter));
     NamedCommands.registerCommand("elevatorUp", elevator.ampElevatorCommand());
     NamedCommands.registerCommand("elevatorDown", elevator.stowElevatorCommand());
-    NamedCommands.registerCommand("amp", AmpCommands.ampTeleopSensorCommand(amp));
+    NamedCommands.registerCommand("amp", new ScoreAmp(intake, amp, elevator));
     NamedCommands.registerCommand("ampOff", new InstantCommand(() -> amp.disableAmp()).alongWith(elevator.stowElevatorCommand()));
-    NamedCommands.registerCommand("ampoff", new InstantCommand(() -> amp.disableAmp()).alongWith(elevator.stowElevatorCommand()));
-    NamedCommands.registerCommand("intakeAmp", IntakeCommands.intakeToAmpSensorCommand(intake, amp));
+    NamedCommands.registerCommand("intakeAmp", new GroundIntakeToAmp(intake, amp, elevator));
     NamedCommands.registerCommand("intakeOff", new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShooter())).alongWith(new InstantCommand(() -> amp.disableAmp())));
 
     zeroSuperstructure();
@@ -211,7 +204,7 @@ public class RobotContainer {
             () -> summonRotation.getR()));
 
     resetGyro.onTrue(new InstantCommand(() -> gyro.zeroGyro()));
-    runSpeakerSensorIntake.whileTrue(new GroundIntakeToSpeaker(intake, shooter)).onFalse(new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShooter())));
+    runSpeakerSensorIntake.whileTrue(new GroundIntakeToShooter(intake, shooter)).onFalse(new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> shooter.stowShooter())));
     runAmpSensorIntake.whileTrue(new GroundIntakeToAmp(intake, amp, elevator)).onFalse(new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp())));
     scoreAmp.whileTrue(new InstantCommand(() -> amp.ampOuttakeOn())).onFalse(new InstantCommand(() -> amp.disableAmp()).alongWith(new InstantCommand(() -> LED.getInstance().changeLedState(LEDState.IDLE))));
     subwooferShot.whileTrue(new ShootFromSubwoofer(intake, shooter)).onFalse(new InstantCommand(() -> intake.disableFeeds()).alongWith(new InstantCommand(() -> shooter.disableFlywheels())));
@@ -221,9 +214,9 @@ public class RobotContainer {
     retractElevator.onTrue(new InstantCommand(() -> elevator.stowElevator()));
     runAmpOuttake.whileTrue(new InstantCommand(() -> amp.ampIntakeOn()).alongWith(new InstantCommand(() -> intake.outakeFromAmp()))).onFalse(new InstantCommand(() -> intake.disableIntake()).alongWith(new InstantCommand(() -> amp.disableAmp())));
     runSpeakerOuttake.whileTrue(new InstantCommand(() -> shooter.intakeHP()).alongWith(new InstantCommand(() -> intake.outakeFromShooter()))).onFalse(new InstantCommand(() -> shooter.disableFlywheels()).alongWith(new InstantCommand(() -> intake.disableIntake())));
-    revFlywheels.whileTrue(new RevFlywheelsWithInterpolation(shooter, vision)).onFalse(new InstantCommand(() -> shooter.disableFlywheels()));
+    revFlywheels.whileTrue(new RevFlywheels(shooter, vision)).onFalse(new InstantCommand(() -> shooter.disableFlywheels()));
     
-    runSensorHPIntakeToSpeaker.onTrue(new HPSpeakerRefeed(intake, shooter).andThen(new FeedToSpeaker(intake, shooter))).onFalse(new InstantCommand(() -> shooter.disableFlywheels()).alongWith(new InstantCommand(() -> intake.disableFeeds())));
+    runSensorHPIntakeToSpeaker.onTrue(new HPShooterToFeed(intake, shooter).andThen(new FeedToShooter(intake, shooter))).onFalse(new InstantCommand(() -> shooter.disableFlywheels()).alongWith(new InstantCommand(() -> intake.disableFeeds())));
   }
 
   public void checkSensors() {

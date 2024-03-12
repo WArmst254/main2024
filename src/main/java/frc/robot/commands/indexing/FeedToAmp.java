@@ -2,44 +2,45 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands;
+package frc.robot.commands.indexing;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.led.LED.LEDState;
-import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.amp.Amp;
 import frc.robot.subsystems.intake.Intake;
 
-public class GroundIntakeToSpeaker extends Command {
+public class FeedToAmp extends Command {
 
   private Intake intake;
-  private Shooter shooter;
+  private Amp amp;
 
-  /** Creates a new IntakeNote. */
-  public GroundIntakeToSpeaker(Intake intake, Shooter shooter) {
+  /** Creates a new FeedToAmp */
+  public FeedToAmp(Intake intake, Amp amp) {
 
     this.intake = intake;
-    this.shooter = shooter;
+    this.amp = amp;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(intake, shooter);
+    addRequirements(intake, amp);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    shooter.lowerToIntake();
-     LED.getInstance().changeLedState(LEDState.INTAKING_SPEAKER);
+    LED.getInstance().changeLedState(LEDState.INTAKING_AMP);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
 
-    if (shooter.invShooterSensorOut()) {
-      intake.intakeToShooter();
+    if (!amp.ampSensorOut()) {
+      intake.intakeToAmp();
+      amp.ampOuttakeOn();
     } else {
       intake.disableIntake();
-      LED.getInstance().changeLedState(LEDState.GROUND_INTAKE_DETECTED);
+      amp.disableAmp();
+      LED.getInstance().changeLedState(LEDState.INTAKE_SUCCESS_AMP);
     }
 
   }
@@ -48,13 +49,13 @@ public class GroundIntakeToSpeaker extends Command {
   @Override
   public void end(boolean interrupted) {
     intake.disableIntake();
-    shooter.stowShooter();
+    amp.disableAmp();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (shooter.shooterSensorOut()) {
+    if (amp.ampSensorOut()) {
       return true;
     }
     return false;

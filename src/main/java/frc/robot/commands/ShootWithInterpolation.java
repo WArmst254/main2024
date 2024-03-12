@@ -4,7 +4,6 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.led.LED.LEDState;
@@ -18,7 +17,7 @@ public class ShootWithInterpolation extends Command {
   private Shooter shooter;
   private Vision vision;
 
-  /** Creates a new IntakeNote. */
+  /** Creates a new ShootWithInterpolation. */
   public ShootWithInterpolation(Intake intake, Shooter shooter, Vision vision) {
 
     this.intake = intake;
@@ -32,22 +31,23 @@ public class ShootWithInterpolation extends Command {
   @Override
   public void initialize() {
     //shooter.lowerToShoot();
-     LED.getInstance().changeLedState(LEDState.SUBWOOFER_SHOOTING);
+     LED.getInstance().changeLedState(LEDState.VISION_SHOOTING);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if(!vision.isValidTarget()) {
+      LED.getInstance().changeLedState(LEDState.NO_VISION);
+    }
     shooter.interpolatedFlywheelVelocity(shooter.getAutomaticState(vision));
     shooter.interpolatedShooterAngle(shooter.getAutomaticState(vision));
-    SmartDashboard.putNumber("ABC", shooter.getAutomaticState(vision).speed);
     if (shooter.isInterpolatedVelocitySet(shooter.getAutomaticState(vision)) && shooter.isAngleSet()) {
-      intake.backFeedOn();
+      intake.pushToShoot();
       LED.getInstance().changeLedState(LEDState.SHOT_FIRED);
     } else {
       intake.disableFeeds();
     }
-
   }
 
   // Called once the command ends or is interrupted.

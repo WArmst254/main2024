@@ -10,13 +10,13 @@ import frc.robot.subsystems.led.LED.LEDState;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.vision.Vision;
 
-public class RevFlywheelsWithInterpolation extends Command {
+public class RevFlywheels extends Command {
 
   private Shooter shooter;
   private Vision vision;
 
-  /** Creates a new IntakeNote. */
-  public RevFlywheelsWithInterpolation(Shooter shooter, Vision vision) {
+  /** Creates a new RevFlywheelsWithInterpolation */
+  public RevFlywheels(Shooter shooter, Vision vision) {
 
     this.shooter = shooter;
     this.vision = vision;
@@ -27,13 +27,14 @@ public class RevFlywheelsWithInterpolation extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    //shooter.lowerToShoot();
-     LED.getInstance().changeLedState(LEDState.SUBWOOFER_SHOOTING);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if(!vision.isValidTarget()) {
+      LED.getInstance().changeLedState(LEDState.NO_VISION);
+    }
     shooter.interpolatedFlywheelVelocity(shooter.getAutomaticState(vision));
   }
 
@@ -43,12 +44,4 @@ public class RevFlywheelsWithInterpolation extends Command {
     shooter.disableFlywheels();
   }
 
- // Returns true when the command should end.
-  // @Override
-  // public boolean isFinished() {
-  //   if (shooter.invShooterSensorOut()) {
-  //     return true;
-  //   }
-  //   return false;
-  // }
 }

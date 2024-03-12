@@ -6,14 +6,29 @@ import com.playingwithfusion.TimeOfFlight;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.TunableNumber;
 
 public class Intake extends SubsystemBase {
+  private TunableNumber intakeEntrySpeed = new TunableNumber("Intake/Intake Entry Speed");
+   private TunableNumber intakeFeedSpeed = new TunableNumber("Intake/Intake Feed Speed");
+   private TunableNumber outakeExitSpeed = new TunableNumber("Intake/Outake Exit Speed");
+   private TunableNumber outakeFeedSpeed = new TunableNumber("Intake/Outake Feed Speed");
+   private TunableNumber pushToShootFeedSpeed = new TunableNumber("Shooter/Feed Speed");
+   private TunableNumber intakeSensorThreshold = new TunableNumber("Sensors/Intake Sensor Threshold");
+
   private final TalonFX intake = new TalonFX(Constants.IDs.intake);
   private final TalonFX frontFeed = new TalonFX(Constants.IDs.frontFeed);
   private final TalonFX backFeed = new TalonFX(Constants.IDs.backFeed);
   public final TimeOfFlight intake_sensor = new TimeOfFlight(Constants.IDs.intakesensor);
 
   public Intake() {
+    intakeEntrySpeed.setDefault(IntakeConstants.entrySpeed);
+    intakeFeedSpeed.setDefault(IntakeConstants.intakeFeedSpeed);
+    outakeExitSpeed.setDefault(IntakeConstants.exitSpeed);
+    outakeFeedSpeed.setDefault(IntakeConstants.outakeFeedSpeed);
+    pushToShootFeedSpeed.setDefault(IntakeConstants.pushSpeed);
+    intakeSensorThreshold.setDefault(IntakeConstants.sensorThreshold);
+
     setDefaultCommand(
         runOnce(
                 () -> {
@@ -26,47 +41,43 @@ public class Intake extends SubsystemBase {
   }
 
   public void intakeToShooter() {
-    intake.set(1);
-    frontFeed.set(-0.95);
-    backFeed.set(0.95);
+    intake.set(intakeEntrySpeed.get());
+    frontFeed.set(-(intakeFeedSpeed.get()));
+    backFeed.set(intakeFeedSpeed.get());
   }
 
   public void feedToShooter() {
-    frontFeed.set(-0.95);
-    backFeed.set(0.95);
+    frontFeed.set(-(intakeFeedSpeed.get()));
+    backFeed.set(intakeFeedSpeed.get());
   }
 
   public void intakeToAmp() {
-    intake.set(1);
-    frontFeed.set(-0.95);
-    backFeed.set(-0.95);
+    intake.set(intakeEntrySpeed.get());
+    frontFeed.set(-(intakeFeedSpeed.get()));
+    backFeed.set(-(intakeFeedSpeed.get()));
   }
 
-  public void feedToAmp() {
-    intake.set(1);
-    backFeed.set(-0.95);
-  }
 
   public void feedFromShooter() {
-    frontFeed.set(0.95);
-    backFeed.set(-0.95);
+    frontFeed.set(outakeFeedSpeed.get());
+    backFeed.set(-(outakeFeedSpeed.get()));
   }
 
   public void feedFromAmp(){
-    frontFeed.set(0.95);
-    backFeed.set(-0.95);
+    frontFeed.set(outakeFeedSpeed.get());
+    backFeed.set(-(outakeFeedSpeed.get()));
 }
 
   public void outakeFromShooter() {
-    intake.set(-.95);
-    frontFeed.set(0.95);
-    backFeed.set(-0.95);
+    intake.set(-(outakeExitSpeed.get()));
+    frontFeed.set(outakeFeedSpeed.get());
+    backFeed.set(-(outakeFeedSpeed.get()));
   }
 
   public void outakeFromAmp() {
-    intake.set(-1);
-    frontFeed.set(-0.95);
-    backFeed.set(-0.95);
+    intake.set(-(outakeExitSpeed.get()));
+    frontFeed.set(-(outakeFeedSpeed.get()));
+    backFeed.set(-(outakeFeedSpeed.get()));
   }
 
   public void disableIntake() {
@@ -81,11 +92,11 @@ public class Intake extends SubsystemBase {
   }
 
   public void intakeOn() {
-    intake.set(1);
+    intake.set(intakeEntrySpeed.get());
   }
 
-  public void backFeedOn() {
-    frontFeed.set(-0.5);
+  public void pushToShoot() {
+    frontFeed.set(-(pushToShootFeedSpeed.get()));
   }
 
   public double intakeSensor() {
@@ -93,15 +104,7 @@ public class Intake extends SubsystemBase {
   }
 
   public boolean intakeSensorOut() {
-    return (intake_sensor.getRange() < 300);
-  }
-
-  public boolean intakeSensorOutForAmp() {
-    return (intake_sensor.getRange() < 160);
-  }
-
-  public boolean invIntakeSensorOut() {
-    return !(intake_sensor.getRange() < 300);
+    return (intake_sensor.getRange() < intakeSensorThreshold.get());
   }
 
   public void periodic() {

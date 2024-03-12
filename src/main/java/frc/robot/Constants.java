@@ -18,10 +18,11 @@ import frc.robot.subsystems.shooter.Shooter.State;
  * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
+
 public final class Constants {
   public static final boolean tuningMode = true;
+
   public static final class IDs {
-    
     // Tuner X
     public static final int pigeon = 0;
     public static final int swerveDriveTalon0 = 1;
@@ -41,7 +42,7 @@ public final class Constants {
     public static final int elevator = 15;
     public static final int shooter = 16;
     public static final int intake = 17;
-    public static final int ampleft = 18;
+    public static final int amp = 18;
     public static final int led = 20;
 
     // REV Hardware Client
@@ -54,6 +55,7 @@ public final class Constants {
     public static final int ampsensor = 3;
     
   }
+
   public static final Mode currentMode = Mode.REAL;
 
   public static enum Mode {
@@ -70,14 +72,12 @@ public final class Constants {
 
   public static final List<Entry<Measure<Distance>,State>> SHOOTER_MAP = Arrays.asList(
     Map.entry(Units.Meters.of(0), new State(2500, 0)),
-     Map.entry(Units.Meters.of(1.215), new State(3300, 0)),
-      Map.entry(Units.Meters.of(1.697), new State(3600,0.095)),
-      Map.entry(Units.Meters.of(2.000), new State(3700,0.133)),
-      Map.entry(Units.Meters.of(2.709), new State(3700,0.206)),
-      Map.entry(Units.Meters.of(3.596), new State(3900,0.242)),
-      Map.entry(Units.Meters.of(3.620), new State(3910,0.248)));
-
-      //Map.entry(Units.Meters.of(3.596), new State(3900,0.255)));
+    Map.entry(Units.Meters.of(1.215), new State(3300, 0)),
+    Map.entry(Units.Meters.of(1.697), new State(3600,0.095)),
+    Map.entry(Units.Meters.of(2.000), new State(3700,0.133)),
+    Map.entry(Units.Meters.of(2.709), new State(3700,0.206)),
+    Map.entry(Units.Meters.of(3.596), new State(3900,0.242)),
+    Map.entry(Units.Meters.of(3.620), new State(3910,0.248)));
 
   public static final double AprilTagHeights[] = {
     53.38,

@@ -8,7 +8,7 @@ public class ShooterConstants {
 
     public static double humanPlayerIntakeSpeed = -0.2;
     public static double groundIntakeAngle = 0.2;
-    public static double TOFsensorRange = 335;
+    public static double sensorThreshold = 335;
 
     public static double flywheelTolerance = 200;
     public static double angleTolerance = 0.05;

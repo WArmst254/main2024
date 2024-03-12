@@ -15,7 +15,7 @@ public class ShootFromSubwoofer extends Command {
   private Intake intake;
   private Shooter shooter;
 
-  /** Creates a new IntakeNote. */
+  /** Creates a new ShootFromSubwoofer. */
   public ShootFromSubwoofer(Intake intake, Shooter shooter) {
 
     this.intake = intake;
@@ -28,7 +28,7 @@ public class ShootFromSubwoofer extends Command {
   @Override
   public void initialize() {
     shooter.lowerToShootSub();
-     LED.getInstance().changeLedState(LEDState.SUBWOOFER_SHOOTING);
+     LED.getInstance().changeLedState(LEDState.MANUAL_SHOOTING);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -36,7 +36,7 @@ public class ShootFromSubwoofer extends Command {
   public void execute() {
     shooter.flywheelsOnSub();
     if (shooter.isSubwooferVelocitySet() && shooter.isAngleSet()) {
-      intake.backFeedOn();
+      intake.pushToShoot();
       LED.getInstance().changeLedState(LEDState.SHOT_FIRED);
     } else {
       intake.disableFeeds();
