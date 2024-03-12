@@ -51,6 +51,6 @@ public class Amp extends SubsystemBase {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("Amp Power: ", ampMotor.get());
+    SmartDashboard.putNumber("Amp/Reported Power: ", ampMotor.get());
   }
 }

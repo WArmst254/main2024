@@ -108,8 +108,8 @@ public class Intake extends SubsystemBase {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("Intake Power: ", intake.get());
-    SmartDashboard.putNumber("Front Feed Power: ", frontFeed.get());
-    SmartDashboard.putNumber("Back Feed Power:", backFeed.get());
+    SmartDashboard.putNumber("Intake/Reported Intake Power: ", intake.get());
+    SmartDashboard.putNumber("Intake/Reported Front Feed Power: ", frontFeed.get());
+    SmartDashboard.putNumber("Intake/Reported Back Feed Power:", backFeed.get());
   }
 }

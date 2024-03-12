@@ -251,13 +251,13 @@ public class Shooter extends SubsystemBase {
   }
   public void flywheelsOnPod() {
     leftController.setReference(
-      subRPM.get() * 3,
+      podRPM.get() * 3,
       CANSparkBase.ControlType.kVelocity,
       0,
       feedforward.calculate(subRPM.get()),
       SparkPIDController.ArbFFUnits.kVoltage);
   rightController.setReference(
-      subRPM.get() * 3,
+      podRPM.get() * 3,
       CANSparkBase.ControlType.kVelocity,
       0,
       feedforward.calculate(subRPM.get()),
@@ -347,9 +347,9 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("Angle/Reported Power:", shooter.get());
     SmartDashboard.putNumber("Angle/ReportedVoltage:", shooter.getMotorVoltage().getValueAsDouble());
 
-    SmartDashboard.putNumber("Reported Left Velocity:", leftEncoder.getVelocity());
+    SmartDashboard.putNumber("Flywheel/Reported Left Velocity:", leftEncoder.getVelocity());
     SmartDashboard.putNumber("Flywheel/Reported Left Power:", flywheelLeft.get());
-    SmartDashboard.putNumber("Reported Right Velocity:", rightEncoder.getVelocity());
+    SmartDashboard.putNumber("Flywheel/Reported Right Velocity:", rightEncoder.getVelocity());
     SmartDashboard.putNumber("Flywheel/Reported Right Power:", flywheelRight.get());
 
     SmartDashboard.putBoolean("Angle/Boolean Setpoint Reached:", isAngleSet());

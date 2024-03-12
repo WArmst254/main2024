@@ -71,10 +71,10 @@ public class Elevator extends SubsystemBase {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("Elevator Position: ", elevator.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("Elevator Velocity: ", elevator.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Elevator Power:", elevator.get());
-    SmartDashboard.putNumber("Elevator Voltage:", elevator.getMotorVoltage().getValueAsDouble());
+    SmartDashboard.putNumber("Elevator/Reported Position: ", elevator.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Elevator/Reported Velocity: ", elevator.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Elevator/Reported Power:", elevator.get());
+    SmartDashboard.putNumber("Elevator/Reported Voltage:", elevator.getMotorVoltage().getValueAsDouble());
   }
 
   public void ampExtendElevator() {
