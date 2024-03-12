@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
@@ -97,5 +101,74 @@ public final class Constants {
     52,
     52
   };
+
+  public class XboxConstants {
+    // Joystick Axises
+    public static final int L_JOYSTICK_HORIZONTAL = 0;
+    public static final int L_JOYSTICK_VERTICAL = 1;
+    public static final int LT = 2;
+    public static final int RT = 3;
+    public static final int R_JOYSTICK_HORIZONTAL = 4;
+    public static final int R_JOYSTICK_VERTICAL = 5;
+
+    // Controller Buttons
+    public static final int A_BUTTON = 1;
+    public static final int B_BUTTON = 2;
+    public static final int X_BUTTON = 3;
+    public static final int Y_BUTTON = 4;
+    public static final int LB_BUTTON = 5;
+    public static final int RB_BUTTON = 6;
+    public static final int SELECT_BUTTON = 7;
+    public static final int START_BUTTON = 8;
+
+    // These buttons are when you push down the left and right circle pad
+    public static final int L_JOYSTICK_BUTTON = 9;
+    public static final int R_JOYSTICK_BUTTON = 10;
+
+    // D Pad Buttons
+    public static final int DPAD_UP = 0;
+    public static final int DPAD_UP_RIGHT = 45;
+    public static final int DPAD_RIGHT = 90;
+    public static final int DPAD_DOWN_RIGHT = 135;
+    public static final int DPAD_DOWN = 180;
+    public static final int DPAD_DOWN_LEFT = 225;
+    public static final int DPAD_LEFT = 270;
+    public static final int DPAD_UP_LEFT = 315;
+
+    // Controller Zeroes
+    public static final double ZERO = 0.15;
+  }
+
+  /**
+     * Gotten from here
+     * https://firstfrc.blob.core.windows.net/frc2024/FieldAssets/2024LayoutMarkingDiagram.pdf
+     */
+  public static class AprilTags {
+    public static final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFields.k2024Crescendo
+        .loadAprilTagLayoutField();
+
+    public static int BLUE_SOURCE_LEFT = 1;
+    public static int BLUE_SOURCE_RIGHT = 2;
+    public static int RED_SPEAKER_BOTTOM = 3;
+    public static int RED_SPEAKER_TOP = 4;
+    public static int RED_AMP = 5;
+    public static int BLUE_AMP = 6;
+    public static int BLUE_SPEAKER_TOP = 7;
+    public static int BLUE_SPEAKER_BUTTON = 8;
+    public static int RED_SOURCE_LEFT = 9;
+    public static int RED_SOURCE_RIGHT = 10;
+    public static int RED_STAGE_BOTTOM = 11;
+    public static int RED_STAGE_TOP = 12;
+    public static int RED_STAGE_SIDE = 13;
+    public static int BLUE_STAGE_SIDE = 14;
+    public static int BLUE_STAGE_TOP = 15;
+    public static int BLUE_STAGE_BOTTOM = 16;
+  }
+    public static Pose2d mirrorPose(Pose2d bluePose) {
+        return new Pose2d(
+                Constants.AprilTags.aprilTagFieldLayout.getFieldLength() - bluePose.getX(),
+                bluePose.getY(),
+                Rotation2d.fromRadians(Math.PI - bluePose.getRotation().getRadians()));
+    }
 }
 
