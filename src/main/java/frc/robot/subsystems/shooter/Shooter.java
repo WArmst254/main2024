@@ -269,7 +269,6 @@ public class Shooter extends SubsystemBase {
     flywheelRight.set(intakeHPspeed.get());
   }
 
-
   public void disableFlywheels() {
     flywheelLeft.set(0);
     flywheelRight.set(0);

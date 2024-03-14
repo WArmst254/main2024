@@ -63,7 +63,7 @@ public class RobotContainer {
 
   private BooleanSupplier speakerModeSupplier = () -> speakerMode;
   private BooleanSupplier ampModeSupplier = () -> ampMode;
-  private BooleanSupplier manualModeSupplier = () -> manualMode;
+  //private BooleanSupplier manualModeSupplier = () -> manualMode;
 
   private RotationSource summonRotation = new Joystick();
 
@@ -75,12 +75,11 @@ public class RobotContainer {
 
   // private Trigger runSpeakerSensorIntake = new Trigger(() ->
   // driverController.getAButton() && (speakerMode && !manualMode));
-  private Trigger runSpeakerSensorIntake = driverController.a()
-      .and(() -> speakerModeSupplier.getAsBoolean() && !manualModeSupplier.getAsBoolean());
+  private Trigger runSpeakerSensorIntake = (driverController.a().or(operatorController.rightBumper()))
+      .and(() -> speakerModeSupplier.getAsBoolean());
   // private Trigger runAmpSensorIntake = new Trigger(() ->
   // driverController.getAButton() && (ampMode && !manualMode));
-  private Trigger runAmpSensorIntake = driverController.a().and(ampModeSupplier)
-      .and(() -> !manualModeSupplier.getAsBoolean());
+  private Trigger runAmpSensorIntake = (driverController.a().or(operatorController.rightBumper())).and(ampModeSupplier);
 
   // private Trigger subwooferShot = new Trigger(() ->
   // driverController.getXButton() && speakerMode);
@@ -98,14 +97,14 @@ public class RobotContainer {
   // private Trigger aprilTagLock = new Trigger(() ->
   // driverController.getRightBumper() && speakerMode ||
   // driverController.getYButton() && speakerMode);
-  private Trigger aprilTagLock = driverController.rightBumper().or(driverController.y()).and(speakerModeSupplier);
+  private Trigger aprilTagLock = (driverController.rightBumper().or(driverController.y())).and(speakerModeSupplier);
 
   // private Trigger resetGyro = new Trigger(() ->
   // driverController.getStartButton()|| driverController.getBackButton());
   private Trigger resetGyro = driverController.start().or(driverController.back());
 
-  private Trigger runSpeakerOuttake = operatorController.rightBumper().and(speakerModeSupplier);
-  private Trigger runAmpOuttake = operatorController.rightBumper().and(ampModeSupplier);
+  private Trigger runSpeakerOuttake = operatorController.leftBumper().and(speakerModeSupplier);
+  private Trigger runAmpOuttake = operatorController.leftBumper().and(ampModeSupplier);
 
   // private Trigger selectSpeakerMode = new Trigger(() ->
   // operatorController.getYButton());
@@ -115,7 +114,7 @@ public class RobotContainer {
   private Trigger selectAmpMode = operatorController.a();
   // private Trigger selectManualMode = new Trigger(() ->
   // operatorController.getBackButton() || operatorController.getStartButton());
-  private Trigger selectManualMode = operatorController.back().or(operatorController.start());
+ // private Trigger selectManualMode = operatorController.back().or(operatorController.start());
 
   // private Trigger extendElevatorToAmp = new Trigger(() ->
   // operatorController.getPOV() == 0);
@@ -126,7 +125,7 @@ public class RobotContainer {
 
   // private Trigger runSensorHPIntakeToSpeaker = new Trigger(() ->
   // operatorController.getXButton());
-  private Trigger runSensorHPIntakeToSpeaker = operatorController.x().and(() -> !manualModeSupplier.getAsBoolean());
+  private Trigger runSensorHPIntakeToSpeaker = operatorController.x();
 
   // Use Initial Setpoints for Position Control
   void zeroSuperstructure() {
@@ -228,17 +227,17 @@ public class RobotContainer {
       LED.getInstance().changeLedState(LEDState.AMP);
     }));
 
-    selectManualMode.onTrue(runOnce(() -> {
-      if (speakerMode == false && ampMode == true) {
-        speakerMode = false;
-        ampMode = true;
-        manualMode = true;
-      } else {
-        speakerMode = true;
-        ampMode = false;
-        manualMode = true;
-      }
-    }));
+    // selectManualMode.onTrue(runOnce(() -> {
+    //   if (speakerMode == false && ampMode == true) {
+    //     speakerMode = false;
+    //     ampMode = true;
+    //     manualMode = true;
+    //   } else {
+    //     speakerMode = true;
+    //     ampMode = false;
+    //     manualMode = true;
+    //   }
+    //}));
 
     // Drive Controls
     drive.setDefaultCommand(
