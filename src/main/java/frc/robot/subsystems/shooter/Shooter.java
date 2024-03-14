@@ -321,6 +321,10 @@ public class Shooter extends SubsystemBase {
   public boolean shooterSensorOut() {
     return (shooter_sensor.getRange() < shooterSensorThreshold.get());
   }
+  
+  public boolean invShooterSensorOut() {
+    return !(shooter_sensor.getRange() < shooterSensorThreshold.get());
+  }
 
   public boolean isSubwooferVelocitySet() {
     return((leftEncoder.getVelocity() >= (subRPM.get())-fTolerance.get()) && (leftEncoder.getVelocity() <= ((subRPM.get())+fTolerance.get()))

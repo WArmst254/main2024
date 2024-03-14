@@ -57,5 +57,6 @@ public class ScoreAmp extends Command {
     intake.disableIntake();
     LED.getInstance().changeLedState(LEDState.IDLE);
   }
+  
 
 }

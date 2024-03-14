@@ -106,6 +106,15 @@ public class Elevator extends SubsystemBase {
         .withName("Elevator Lifted");
   }
 
+  public Command fullElevatorCommand() {
+    return runOnce(
+            () -> {
+              elevator.setControl(m_mmReq.withPosition(1).withSlot(0));
+            })
+        .andThen(run(() -> {}).withTimeout(0.05))
+        .withName("Elevator Lifted");
+  }
+
   public Command stowElevatorCommand() {
     return runOnce(
             () -> {

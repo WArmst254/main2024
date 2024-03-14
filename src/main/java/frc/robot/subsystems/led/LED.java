@@ -92,7 +92,7 @@ public class LED extends SubsystemBase {
             break;
 
             case DISABLED:
-              candle.animate(new RainbowAnimation(0.7, 0.9, 48, false,8));
+              candle.animate(new RainbowAnimation(0.7, 0.9, 48, false,0));
               currentState = LEDState.DISABLED;
             break;
 
@@ -101,7 +101,7 @@ public class LED extends SubsystemBase {
             break;
 
             case CONTROLLERS_DISCONNECTED:
-              candle.animate(new TwinkleAnimation(255, 0, 178, 255, 1, 48, TwinklePercent.Percent64,8));
+              candle.animate(new TwinkleAnimation(255, 0, 178, 255, 1, 48, TwinklePercent.Percent64,0));
               currentState = LEDState.CONTROLLERS_DISCONNECTED;
             break;
 

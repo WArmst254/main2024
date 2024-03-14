@@ -53,12 +53,12 @@ public class ShootFromPodium extends Command {
     LED.getInstance().changeLedState(LEDState.IDLE);
   }
 
- // Returns true when the command should end.
-  // @Override
-  // public boolean isFinished() {
-  //   if (shooter.invShooterSensorOut()) {
-  //     return true;
-  //   }
-  //   return false;
-  // }
+ //Returns true when the command should end.
+  @Override
+  public boolean isFinished() {
+    if (!shooter.shooterSensorOut()) {
+      return true;
+    }
+    return false;
+  }
 }
