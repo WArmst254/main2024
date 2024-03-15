@@ -48,7 +48,8 @@ public final class Constants {
     public static final int swerveCANcoder3 = 12;
     public static final int frontFeed = 13;
     public static final int backFeed = 14;
-    public static final int elevator = 15;
+    public static final int elevator1 = 30;
+    public static final int elevator2 = 31;
     public static final int shooter = 16;
     public static final int intake = 17;
     public static final int amp = 18;
@@ -82,12 +83,12 @@ public final class Constants {
   public static final List<Entry<Measure<Distance>, State>> SHOOTER_MAP = Arrays.asList(
       Map.entry(Units.Meters.of(0), new State(2500, 0)),
       Map.entry(Units.Meters.of(1.225), new State(3100, 0)),
-      Map.entry(Units.Meters.of(1.707), new State(3400, 0.095)),
-      Map.entry(Units.Meters.of(2.010), new State(3500, 0.133)),
-      Map.entry(Units.Meters.of(2.540), new State(3500, 0.19)),
-      Map.entry(Units.Meters.of(2.719), new State(3500, 0.206)),
-      Map.entry(Units.Meters.of(3.606), new State(3700, 0.242)),
-      Map.entry(Units.Meters.of(3.630), new State(3700, 0.248)));
+      Map.entry(Units.Meters.of(1.707), new State(3400, 0.)),
+      Map.entry(Units.Meters.of(2.010), new State(3500, 0.136)),
+      Map.entry(Units.Meters.of(2.540), new State(3500, 0.21)),
+      Map.entry(Units.Meters.of(2.719), new State(3500, 0.20)),
+      Map.entry(Units.Meters.of(3.606), new State(3700, 0.26)),
+      Map.entry(Units.Meters.of(3.630), new State(3700, 0.268)));
 
   public static final double AprilTagHeights[] = {
       53.38,

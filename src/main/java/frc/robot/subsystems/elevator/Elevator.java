@@ -1,10 +1,12 @@
 package frc.robot.subsystems.elevator;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -15,7 +17,8 @@ import frc.robot.util.TunableNumber;
 
 public class Elevator extends SubsystemBase {
 
-  private final TalonFX elevator = new TalonFX(Constants.IDs.elevator);
+  private final TalonFX elevator1 = new TalonFX(Constants.IDs.elevator1);
+  private final TalonFX elevator2 = new TalonFX(Constants.IDs.elevator2);
   private final MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
 
   private TunableNumber mm_eVelocity = new TunableNumber("Elevator/Velocity");
@@ -30,47 +33,40 @@ public class Elevator extends SubsystemBase {
   private TunableNumber eS = new TunableNumber("Elevator PID/S");
 
   public Elevator() {
+    elevator2.setControl(new Follower(Constants.IDs.elevator1 , false));    
     ampPosition.setDefault(ElevatorConstants.ampPosition);
-    eTolerance.setDefault(ElevatorConstants.elevatorTolerance);
+    eTolerance.setDefault(ElevatorConstants.elevator1Tolerance);
     TalonFXConfiguration cfg = new TalonFXConfiguration();
 
-    mm_eVelocity.setDefault(ElevatorConstants.elevatorVelocity);
-    mm_eAcceleration.setDefault(ElevatorConstants.elevatorAcceleration);
-    mm_eJerk.setDefault(ElevatorConstants.elevatorJerk);
+    mm_eVelocity.setDefault(ElevatorConstants.elevator1Velocity);
+    mm_eAcceleration.setDefault(ElevatorConstants.elevator1Acceleration);
+    mm_eJerk.setDefault(ElevatorConstants.elevator1Jerk);
 
     MotionMagicConfigs mm = cfg.MotionMagic;
-    // mm.MotionMagicCruiseVelocity = mm_eVelocity.get();
-    // mm.MotionMagicAcceleration = mm_eAcceleration.get();
-    // mm.MotionMagicJerk = mm_eJerk.get();
-        mm.MotionMagicCruiseVelocity = ElevatorConstants.elevatorVelocity;
-    mm.MotionMagicAcceleration = ElevatorConstants.elevatorAcceleration;
-    mm.MotionMagicJerk = ElevatorConstants.elevatorJerk;
+    mm.MotionMagicCruiseVelocity = mm_eVelocity.get();
+    mm.MotionMagicAcceleration = mm_eAcceleration.get();
+    mm.MotionMagicJerk = mm_eJerk.get();
 
-    eP.setDefault(ElevatorConstants.elevatorP);
-    eI.setDefault(ElevatorConstants.elevatorI);
-    eD.setDefault(ElevatorConstants.elevatorD);
-    eV.setDefault(ElevatorConstants.elevatorV);
-    eS.setDefault(ElevatorConstants.elevatorS);
+    eP.setDefault(ElevatorConstants.elevator1P);
+    eI.setDefault(ElevatorConstants.elevator1I);
+    eD.setDefault(ElevatorConstants.elevator1D);
+    eV.setDefault(ElevatorConstants.elevator1V);
+    eS.setDefault(ElevatorConstants.elevator1S);
 
 
     Slot0Configs slot0 = cfg.Slot0;
-    // slot0.kP = eP.get();
-    // slot0.kI = eI.get();
-    // slot0.kD = eD.get();
-    // slot0.kV = eV.get();
-    // slot0.kS = eS.get();
-     slot0.kP = ElevatorConstants.elevatorP;
-    slot0.kI = ElevatorConstants.elevatorI;
-    slot0.kD = ElevatorConstants.elevatorD;
-    slot0.kV = ElevatorConstants.elevatorV;
-    slot0.kS = ElevatorConstants.elevatorS;
+    slot0.kP = eP.get();
+    slot0.kI = eI.get();
+    slot0.kD = eD.get();
+    slot0.kV = eV.get();
+    slot0.kS = eS.get();
 
     FeedbackConfigs fdb = cfg.Feedback;
-    fdb.SensorToMechanismRatio = 52;
+    fdb.SensorToMechanismRatio = 28;
 
     StatusCode status = StatusCode.StatusCodeNotInitialized;
     for (int i = 0; i < 5; ++i) {
-      status = elevator.getConfigurator().apply(cfg);
+      status = elevator1.getConfigurator().apply(cfg);
       if (status.isOK()) break;
     }
     if (!status.isOK()) {
@@ -79,36 +75,36 @@ public class Elevator extends SubsystemBase {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("Elevator/Reported Position: ", elevator.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("Elevator/Reported Velocity: ", elevator.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Elevator/Reported Power:", elevator.get());
-    SmartDashboard.putNumber("Elevator/Reported Voltage:", elevator.getMotorVoltage().getValueAsDouble());
+    SmartDashboard.putNumber("Elevator/Reported Position: ", elevator1.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Elevator/Reported Velocity: ", elevator1.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Elevator/Reported Power:", elevator1.get());
+    SmartDashboard.putNumber("Elevator/Reported Voltage:", elevator1.getMotorVoltage().getValueAsDouble());
   }
 
   public void ampExtendElevator() {
-    elevator.setControl(m_mmReq.withPosition(ampPosition.get()).withSlot(0));
+    elevator1.setControl(m_mmReq.withPosition(ElevatorConstants.ampPosition).withSlot(0));
   }
 
   public void stowElevator() {
-    elevator.setControl(m_mmReq.withPosition(0).withSlot(0));
+    elevator1.setControl(m_mmReq.withPosition(0).withSlot(0));
   }
 
   public void zeroElevatorPosition() {
-    elevator.setPosition(0);
+    elevator1.setPosition(0);
   }
 
   public boolean isElevatorSet() {
-    return (m_mmReq.Position <= (elevator.getPosition().getValueAsDouble()+eTolerance.get()) && m_mmReq.Position >= (elevator.getPosition().getValueAsDouble()-eTolerance.get()));
+    return (m_mmReq.Position <= (elevator1.getPosition().getValueAsDouble()+eTolerance.get()) && m_mmReq.Position >= (elevator1.getPosition().getValueAsDouble()-eTolerance.get()));
   }
 
   public boolean isElevatorAmped() {
-    return (ampPosition.get() <= (elevator.getPosition().getValueAsDouble()+eTolerance.get()) && ampPosition.get() >= (elevator.getPosition().getValueAsDouble()-eTolerance.get()));
+    return (ampPosition.get() <= (elevator1.getPosition().getValueAsDouble()+eTolerance.get()) && ampPosition.get() >= (elevator1.getPosition().getValueAsDouble()-eTolerance.get()));
   }
 
   public Command ampElevatorCommand() {
     return runOnce(
             () -> {
-              elevator.setControl(m_mmReq.withPosition(ampPosition.get()).withSlot(0));
+              elevator1.setControl(m_mmReq.withPosition(ampPosition.get()).withSlot(0));
             })
         .andThen(run(() -> {}).withTimeout(0.05))
         .withName("Elevator Lifted");
@@ -117,7 +113,7 @@ public class Elevator extends SubsystemBase {
   public Command fullElevatorCommand() {
     return runOnce(
             () -> {
-              elevator.setControl(m_mmReq.withPosition(1).withSlot(0));
+              elevator1.setControl(m_mmReq.withPosition(1).withSlot(0));
             })
         .andThen(run(() -> {}).withTimeout(0.05))
         .withName("Elevator Lifted");
@@ -126,7 +122,7 @@ public class Elevator extends SubsystemBase {
   public Command stowElevatorCommand() {
     return runOnce(
             () -> {
-              elevator.setControl(m_mmReq.withPosition(0).withSlot(0));
+              elevator1.setControl(m_mmReq.withPosition(0).withSlot(0));
             })
         .andThen(run(() -> {}).withTimeout(0.05))
         .withName("Elevator Stowed");

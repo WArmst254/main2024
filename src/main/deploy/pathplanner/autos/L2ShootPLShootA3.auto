@@ -14,7 +14,7 @@
         {
           "type": "named",
           "data": {
-            "name": "shoot"
+            "name": "shootSub"
           }
         },
         {
@@ -51,13 +51,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "L2ShootPLShootA3_3"
+            "pathName": "New Path"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "shoot"
+            "name": "shootInt"
           }
         },
         {
@@ -69,6 +69,6 @@
       ]
     }
   },
-  "folder": "Start Long",
+  "folder": null,
   "choreoAuto": false
 }

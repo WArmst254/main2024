@@ -6,6 +6,7 @@ import frc.robot.subsystems.amp.Amp;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 //import frc.robot.subsystems.shooter.Shooter.State;
+import frc.robot.subsystems.vision.Vision;
 
 public class ShooterCommands {
 
@@ -17,6 +18,17 @@ public class ShooterCommands {
                 ).until(shooter::invShooterSensorOut)
         .withName("Shoot");
   }
+
+  public static Command shootSensorCommand(Shooter shooter, Intake intake, Vision vision) {
+    return Commands.parallel(
+            Commands.run(() -> shooter.interpolatedFlywheelVelocity((shooter.getAutomaticState(vision)))),
+            Commands.run(() -> shooter.interpolatedShooterAngle((shooter.getAutomaticState(vision)))),
+            Commands.waitUntil(() -> shooter.isInterpolatedVelocitySet(shooter.getAutomaticState(vision)) && shooter.isAngleSet())
+                .andThen(() -> intake.feedToShooter())
+                ).until(shooter::invShooterSensorOut)
+        .withName("Shoot");
+  }
+
 
   public static Command shootManualCommand(Shooter shooter, Intake intake, double angle, double setpointRotationsPerMinute) {
     return Commands.parallel(

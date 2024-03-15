@@ -25,8 +25,8 @@ public class Vision extends SubsystemBase {
         double tid =  table.getEntry("tid").getDouble(-1);
        if (tid == -1) return 0;
         double h2 = Constants.AprilTagHeights[1];
-        double angleToGoal = Units.degreesToRadians(13 + ty);
-        double heightToGoal = h2 - 26;
+        double angleToGoal = Units.degreesToRadians(24 + ty);
+        double heightToGoal = h2 - 20.5;
         double distance = heightToGoal / Math.tan(angleToGoal);
         return Units.inchesToMeters(distance);
     }

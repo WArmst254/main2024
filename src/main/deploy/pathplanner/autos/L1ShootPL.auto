@@ -14,7 +14,7 @@
         {
           "type": "named",
           "data": {
-            "name": "shoot"
+            "name": "shootSub"
           }
         },
         {
@@ -32,6 +32,6 @@
       ]
     }
   },
-  "folder": "Start Long",
+  "folder": null,
   "choreoAuto": false
 }
