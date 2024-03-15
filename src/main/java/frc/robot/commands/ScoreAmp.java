@@ -11,46 +11,42 @@ import frc.robot.subsystems.amp.Amp;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.intake.Intake;
 
-public class GroundIntakeToAmp extends Command {
+public class ScoreAmp extends Command {
 
   private Intake intake;
   private Amp amp;
   private Elevator elevator;
 
-  /** Creates a new GroundIntakeToAmp */
-  public GroundIntakeToAmp(Intake intake, Amp amp, Elevator elevator) {
+  /** Creates a new ScoreAmp */
+  public ScoreAmp(Intake intake, Amp amp, Elevator elevator) {
 
     this.intake = intake;
     this.amp = amp;
-    this.elevator = elevator;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(intake, amp, elevator);
+    addRequirements(intake, amp);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    elevator.stowElevator();
-     LED.getInstance().changeLedState(LEDState.INTAKING_AMP);
+     LED.getInstance().changeLedState(LEDState.AMP_SCORING);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
-    if (!amp.ampSensorOut() && !elevator.isElevatorSet()) {
-      intake.disableIntake();
-    } else if (!amp.ampSensorOut() && elevator.isElevatorSet()) {
+    if (!amp.ampSensorOut()) {
       intake.intakeToAmp();
-      amp.ampOuttakeOn();
       if(intake.intakeSensorOut()) {
         LED.getInstance().changeLedState(LEDState.NOTE_IN_FEED);
       } else {
         LED.getInstance().changeLedState(LEDState.INTAKING_AMP);
       }
-    } else {
+    }
+    if(amp.ampSensorOut() && elevator.isElevatorAmped()) {
       intake.disableIntake();
-      LED.getInstance().changeLedState(LEDState.INTAKE_SUCCESS_AMP);
+      amp.ampOuttakeOn();
+      LED.getInstance().changeLedState(LEDState.SHOT_FIRED);
     }
 
   }
@@ -59,15 +55,8 @@ public class GroundIntakeToAmp extends Command {
   @Override
   public void end(boolean interrupted) {
     intake.disableIntake();
-    amp.disableAmp();
+    LED.getInstance().changeLedState(LEDState.IDLE);
   }
+  
 
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    if (amp.ampSensorOut()) {
-      return true;
-    }
-    return false;
-  }
 }

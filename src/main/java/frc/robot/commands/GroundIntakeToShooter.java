@@ -7,50 +7,44 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.led.LED.LEDState;
-import frc.robot.subsystems.amp.Amp;
-import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.intake.Intake;
 
-public class GroundIntakeToAmp extends Command {
+public class GroundIntakeToShooter extends Command {
 
   private Intake intake;
-  private Amp amp;
-  private Elevator elevator;
+  private Shooter shooter;
 
-  /** Creates a new GroundIntakeToAmp */
-  public GroundIntakeToAmp(Intake intake, Amp amp, Elevator elevator) {
+  /** Creates a new GroundIntakeToShooter */
+  public GroundIntakeToShooter(Intake intake, Shooter shooter) {
 
     this.intake = intake;
-    this.amp = amp;
-    this.elevator = elevator;
+    this.shooter = shooter;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(intake, amp, elevator);
+    addRequirements(intake, shooter);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    elevator.stowElevator();
-     LED.getInstance().changeLedState(LEDState.INTAKING_AMP);
+    shooter.lowerToIntake();
+     LED.getInstance().changeLedState(LEDState.INTAKING_SPEAKER);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
 
-    if (!amp.ampSensorOut() && !elevator.isElevatorSet()) {
-      intake.disableIntake();
-    } else if (!amp.ampSensorOut() && elevator.isElevatorSet()) {
-      intake.intakeToAmp();
-      amp.ampOuttakeOn();
+    if (!shooter.shooterSensorOut()) {
+      intake.intakeToShooter();
       if(intake.intakeSensorOut()) {
         LED.getInstance().changeLedState(LEDState.NOTE_IN_FEED);
       } else {
-        LED.getInstance().changeLedState(LEDState.INTAKING_AMP);
+        LED.getInstance().changeLedState(LEDState.INTAKING_SPEAKER);
       }
     } else {
       intake.disableIntake();
-      LED.getInstance().changeLedState(LEDState.INTAKE_SUCCESS_AMP);
+      LED.getInstance().changeLedState(LEDState.INTAKE_SUCCESS_SPEAKER);
     }
 
   }
@@ -59,13 +53,13 @@ public class GroundIntakeToAmp extends Command {
   @Override
   public void end(boolean interrupted) {
     intake.disableIntake();
-    amp.disableAmp();
+    shooter.stowShooter();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (amp.ampSensorOut()) {
+    if (shooter.shooterSensorOut()) {
       return true;
     }
     return false;

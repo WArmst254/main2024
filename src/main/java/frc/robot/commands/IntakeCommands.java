@@ -9,7 +9,7 @@ import frc.robot.subsystems.shooter.Shooter;
 public class IntakeCommands {
 
   public static Command intakeToShooterSensorCommand(
-      Intake intake, Shooter shooter, double lowerAngle) {
+      Intake intake, Shooter shooter) {
     return (Commands.run(
             () -> {
               if (!shooter.shooterSensorOut()) {

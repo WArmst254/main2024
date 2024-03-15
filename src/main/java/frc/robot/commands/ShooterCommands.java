@@ -9,11 +9,11 @@ import frc.robot.subsystems.shooter.Shooter;
 
 public class ShooterCommands {
 
-  public static Command shootSensorCommand(Shooter shooter, Intake intake, double angle, double setpointRotationsPerMinute) {
+  public static Command shootSensorCommand(Shooter shooter, Intake intake) {
     return Commands.parallel(
             Commands.run(() -> shooter.flywheelsOnSub()),
             Commands.waitUntil(shooter::isSubwooferVelocitySet)
-                .andThen(() -> intake.backFeedOn())
+                .andThen(() -> intake.feedToShooter())
                 ).until(shooter::invShooterSensorOut)
         .withName("Shoot");
   }
@@ -23,7 +23,7 @@ public class ShooterCommands {
             Commands.run(() -> shooter.flywheelsOnSub()),
             Commands.waitUntil(
                     shooter::isSubwooferVelocitySet)
-                .andThen(() -> intake.backFeedOn()))
+                .andThen(() -> intake.feedToShooter()))
         .withName("Shoot");
   }
 

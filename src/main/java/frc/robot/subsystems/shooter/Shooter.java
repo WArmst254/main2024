@@ -19,8 +19,6 @@ import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
-import com.revrobotics.CANSparkBase.ControlType;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.units.Distance;
@@ -74,7 +72,7 @@ public class Shooter extends SubsystemBase {
   private TunableNumber podAngle = new TunableNumber("Angle/Setpoints/Podium");
   private TunableNumber intakeHPspeed = new TunableNumber("Flywheel/Setpoints/HPIntake(Speed)");
   private TunableNumber intakingAngle = new TunableNumber("Angle/Setpoints/Intaking");
-  private TunableNumber shooterSensorRange = new TunableNumber("Sensors/ShooterSensorRange");
+  private TunableNumber shooterSensorThreshold= new TunableNumber("Sensors/ShooterSensorRange");
 
   private static final SplineInterpolator SPLINE_INTERPOLATOR = new SplineInterpolator();
   private PolynomialSplineFunction m_shooterCurve;
@@ -82,7 +80,6 @@ public class Shooter extends SubsystemBase {
   private final Measure<Distance> MIN_SHOOTING_DISTANCE = Units.Meters.of(0.0);
   private final Measure<Distance> MAX_SHOOTING_DISTANCE;
   
-
   public Shooter() {
     flywheelRight = new CANSparkFlex(Constants.IDs.flywheelRight, CANSparkFlex.MotorType.kBrushless);
     flywheelLeft = new CANSparkFlex(Constants.IDs.flywheelLeft, CANSparkFlex.MotorType.kBrushless);
@@ -92,8 +89,6 @@ public class Shooter extends SubsystemBase {
     // Default
     flywheelLeft.restoreFactoryDefaults();
     flywheelRight.restoreFactoryDefaults();
-
-    
 
     // Limits
     flywheelLeft.setSmartCurrentLimit(60);
@@ -119,7 +114,7 @@ public class Shooter extends SubsystemBase {
     flywheelLeft.burnFlash();
 
     shooter_sensor = new TimeOfFlight(Constants.IDs.shootersensor);
-    shooterSensorRange.setDefault(ShooterConstants.TOFsensorRange);
+    shooterSensorThreshold.setDefault(ShooterConstants.sensorThreshold);
 
   
     fP.setDefault(ShooterConstants.flywheelP);
@@ -255,16 +250,24 @@ public class Shooter extends SubsystemBase {
       SparkPIDController.ArbFFUnits.kVoltage);
   }
   public void flywheelsOnPod() {
-    leftController.setReference(podRPM.get()*Math.PI, CANSparkFlex.ControlType.kVelocity);
-    //rightController.setReference(podRPM.get()*Math.PI, CANSparkFlex.ControlType.kVelocity);
-    rightController.setReference(3, ControlType.kPosition);
+    leftController.setReference(
+      podRPM.get() * 3,
+      CANSparkBase.ControlType.kVelocity,
+      0,
+      feedforward.calculate(subRPM.get()),
+      SparkPIDController.ArbFFUnits.kVoltage);
+  rightController.setReference(
+      podRPM.get() * 3,
+      CANSparkBase.ControlType.kVelocity,
+      0,
+      feedforward.calculate(subRPM.get()),
+      SparkPIDController.ArbFFUnits.kVoltage);
   }
 
   public void intakeHP() {
     flywheelLeft.set(intakeHPspeed.get());
     flywheelRight.set(intakeHPspeed.get());
   }
-
 
   public void disableFlywheels() {
     flywheelLeft.set(0);
@@ -315,11 +318,11 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean shooterSensorOut() {
-    return (shooter_sensor.getRange() < shooterSensorRange.get());
+    return (shooter_sensor.getRange() < shooterSensorThreshold.get());
   }
-
+  
   public boolean invShooterSensorOut() {
-    return (shooter_sensor.getRange() > shooterSensorRange.get());
+    return !(shooter_sensor.getRange() < shooterSensorThreshold.get());
   }
 
   public boolean isSubwooferVelocitySet() {
@@ -347,9 +350,9 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("Angle/Reported Power:", shooter.get());
     SmartDashboard.putNumber("Angle/ReportedVoltage:", shooter.getMotorVoltage().getValueAsDouble());
 
-    SmartDashboard.putNumber("Reported Left Velocity:", leftEncoder.getVelocity());
+    SmartDashboard.putNumber("Flywheel/Reported Left Velocity:", leftEncoder.getVelocity());
     SmartDashboard.putNumber("Flywheel/Reported Left Power:", flywheelLeft.get());
-    SmartDashboard.putNumber("Reported Right Velocity:", rightEncoder.getVelocity());
+    SmartDashboard.putNumber("Flywheel/Reported Right Velocity:", rightEncoder.getVelocity());
     SmartDashboard.putNumber("Flywheel/Reported Right Power:", flywheelRight.get());
 
     SmartDashboard.putBoolean("Angle/Boolean Setpoint Reached:", isAngleSet());
