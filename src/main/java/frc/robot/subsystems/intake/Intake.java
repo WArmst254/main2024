@@ -59,6 +59,11 @@ public class Intake extends SubsystemBase {
     backFeed.set(intakeFeedSpeed.get());
   }
 
+  public void feedSlowToShooter() {
+    frontFeed.set(-0.1);
+    backFeed.set(0.1);
+  }
+
   public void intakeToAmp() {
     intake.set(intakeEntrySpeed.get());
     frontFeed.set(-(intakeFeedSpeed.get()));

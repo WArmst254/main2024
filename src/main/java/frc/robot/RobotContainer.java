@@ -194,7 +194,7 @@ public class RobotContainer {
             () -> ((driverController.y().getAsBoolean() || driverController.rightBumper().getAsBoolean()) && speakerMode) ? AprilTagLock.getR() : -driverController.getRightX()));
 
     resetGyro.onTrue(runOnce(() -> gyro.zeroGyro()));
-    runSpeakerSensorIntake.whileTrue(new GroundIntakeToShooter(intake, shooter))
+    runSpeakerSensorIntake.toggleOnTrue(new GroundIntakeToShooter(intake, shooter).andThen(new BackfeedToScore(intake, shooter)).andThen(new VerySlowFeed(intake, shooter)))
         .onFalse(runOnce(() -> intake.disableIntake()).alongWith(runOnce(() -> shooter.stowShooter())));
     runAmpSensorIntake.whileTrue(new GroundIntakeToAmp(intake, amp, elevator))
         .onFalse(runOnce(() -> intake.disableIntake()).alongWith(runOnce(() -> amp.disableAmp())));

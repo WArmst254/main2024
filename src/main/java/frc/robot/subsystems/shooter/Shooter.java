@@ -170,7 +170,7 @@ public class Shooter extends SubsystemBase {
     CANcoderConfiguration shooterEncoderConfig = new CANcoderConfiguration();
     shooterEncoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
     shooterEncoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
-    shooterEncoderConfig.MagnetSensor.MagnetOffset = 0.105;
+    shooterEncoderConfig.MagnetSensor.MagnetOffset = 0.191;
     absoluteEncoder.getConfigurator().apply(shooterEncoderConfig, 1.0);
     shooter.setNeutralMode(NeutralModeValue.Brake);
 
@@ -262,8 +262,8 @@ public class Shooter extends SubsystemBase {
   public State getAutomaticState() {
     var targetDistance = getTargetDistance();
     SmartDashboard.putNumber("POSE DISTANCE", targetDistance.magnitude());                                    
-    var speed = m_flywheelCurve.value(targetDistance.in(Units.Meters));
-    var angle = m_shooterCurve.value(targetDistance.in(Units.Meters));
+    var speed = m_flywheelCurve.value(targetDistance.magnitude());
+    var angle = m_shooterCurve.value(targetDistance.magnitude());
 
     return new State(speed, angle);
   }
