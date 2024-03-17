@@ -4,10 +4,10 @@ public class ShooterConstants {
     public static double subwooferRPM = 3000;
     public static double subwooferAngle = 0;
     public static double podiumRPM = 3200;
-    public static double podiumAngle = 0.14;
+    public static double podiumAngle = 0.05;
 
     public static double humanPlayerIntakeSpeed = -0.2;
-    public static double groundIntakeAngle = 0.31;
+    public static double groundIntakeAngle = 0.1234;
     public static double sensorThreshold = 335;
 
     public static double flywheelTolerance = 200;

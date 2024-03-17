@@ -8,23 +8,20 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.led.LED.LEDState;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.intake.Intake;
 
 public class ShootWithInterpolation extends Command {
 
   private Intake intake;
   private Shooter shooter;
-  private Vision vision;
 
   /** Creates a new ShootWithInterpolation. */
-  public ShootWithInterpolation(Intake intake, Shooter shooter, Vision vision) {
+  public ShootWithInterpolation(Intake intake, Shooter shooter) {
 
     this.intake = intake;
     this.shooter = shooter;
-    this.vision = vision;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(intake, shooter, vision);
+    addRequirements(intake, shooter);
   }
 
   // Called when the command is initially scheduled.
@@ -37,12 +34,10 @@ public class ShootWithInterpolation extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(!vision.isValidTarget()) {
-      LED.getInstance().changeLedState(LEDState.NO_VISION);
-    }
-    shooter.interpolatedFlywheelVelocity(shooter.getAutomaticState(vision));
-    shooter.interpolatedShooterAngle(shooter.getAutomaticState(vision));
-    if (shooter.isInterpolatedVelocitySet(shooter.getAutomaticState(vision)) && shooter.isAngleSet()) {
+    shooter.interpolatedFlywheelVelocity(shooter.getAutomaticState());
+    shooter.interpolatedShooterAngle(shooter.getAutomaticState());
+
+    if (shooter.isInterpolatedVelocitySet(shooter.getAutomaticState()) && shooter.isAngleSet()) {
       intake.pushToShoot();
       LED.getInstance().changeLedState(LEDState.SHOT_FIRED);
     } else {

@@ -38,6 +38,7 @@ public class HPShooterToFeed extends Command {
           if (!shooter.shooterSensorOut()) {
             shooter.intakeHP();
           } else {
+            shooter.disableFlywheels();
             shooter.lowerToIntake();
             intake.feedFromShooter();
           }

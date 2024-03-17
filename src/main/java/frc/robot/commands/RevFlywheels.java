@@ -5,7 +5,8 @@ package frc.robot.commands;
 // the WPILib BSD license file in the root directory of this project.
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.led.LED;
+import
+ frc.robot.subsystems.led.LED;
 import frc.robot.subsystems.led.LED.LEDState;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.vision.Vision;
@@ -13,15 +14,13 @@ import frc.robot.subsystems.vision.Vision;
 public class RevFlywheels extends Command {
 
   private Shooter shooter;
-  private Vision vision;
 
   /** Creates a new RevFlywheelsWithInterpolation */
-  public RevFlywheels(Shooter shooter, Vision vision) {
+  public RevFlywheels(Shooter shooter) {
 
     this.shooter = shooter;
-    this.vision = vision;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(shooter, vision);
+    addRequirements(shooter);
   }
 
   // Called when the command is initially scheduled.
@@ -32,10 +31,10 @@ public class RevFlywheels extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(!vision.isValidTarget()) {
+    if(!Vision.canSeeAprilTag()) {
       LED.getInstance().changeLedState(LEDState.NO_VISION);
     }
-    shooter.interpolatedFlywheelVelocity(shooter.getAutomaticState(vision));
+    shooter.interpolatedFlywheelVelocity(shooter.getAutomaticState());
   }
 
   // Called once the command ends or is interrupted.

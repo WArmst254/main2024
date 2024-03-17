@@ -46,10 +46,11 @@ public final class Constants {
     public static final int swerveCANcoder1 = 10;
     public static final int swerveCANcoder2 = 11;
     public static final int swerveCANcoder3 = 12;
+    public static final int pivotCANcoder = 61;
     public static final int frontFeed = 13;
     public static final int backFeed = 14;
-    public static final int elevator1 = 30;
-    public static final int elevator2 = 31;
+    public static final int leadElevator = 30;
+    public static final int followerElevator = 31;
     public static final int shooter = 16;
     public static final int intake = 17;
     public static final int amp = 18;
@@ -82,13 +83,9 @@ public final class Constants {
 
   public static final List<Entry<Measure<Distance>, State>> SHOOTER_MAP = Arrays.asList(
       Map.entry(Units.Meters.of(0), new State(2500, 0)),
-      Map.entry(Units.Meters.of(1.225), new State(3100, 0)),
-      Map.entry(Units.Meters.of(1.707), new State(3400, 0.)),
-      Map.entry(Units.Meters.of(2.010), new State(3500, 0.136)),
-      Map.entry(Units.Meters.of(2.540), new State(3500, 0.21)),
-      Map.entry(Units.Meters.of(2.719), new State(3500, 0.20)),
-      Map.entry(Units.Meters.of(3.606), new State(3700, 0.26)),
-      Map.entry(Units.Meters.of(3.630), new State(3700, 0.268)));
+      Map.entry(Units.Meters.of(1.901), new State(3000, 0)),
+      Map.entry(Units.Meters.of(2.253), new State(3100, 0.05)),
+      Map.entry(Units.Meters.of(3.630), new State(3700, 0.1)));
 
   public static final double AprilTagHeights[] = {
       53.38,
@@ -177,5 +174,17 @@ public final class Constants {
         Constants.AprilTags.aprilTagFieldLayout.getFieldLength() - bluePose.getX(),
         bluePose.getY(),
         Rotation2d.fromRadians(Math.PI - bluePose.getRotation().getRadians()));
+  }
+
+  public static class PoseConfig {
+    // Increase these numbers to trust your model's state estimates less.
+    public static final double kPositionStdDevX = 0.1;
+    public static final double kPositionStdDevY = 0.1;
+    public static final double kPositionStdDevTheta = 10;
+
+    // Increase these numbers to trust global measurements from vision less.
+    public static final double kVisionStdDevX = 5;
+    public static final double kVisionStdDevY = 5;
+    public static final double kVisionStdDevTheta = 500;
   }
 }

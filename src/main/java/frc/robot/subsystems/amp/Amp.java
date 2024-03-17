@@ -13,12 +13,18 @@ public class Amp extends SubsystemBase {
    private TunableNumber ampReverseSpeed = new TunableNumber("Amp/Reverse Speed");
    private TunableNumber ampSensorThreshold = new TunableNumber("Sensors/Amp Sensor Threshold");
 
-  private final TalonFX ampMotor = new TalonFX(Constants.IDs.amp);
-  public final TimeOfFlight amp_sensor = new TimeOfFlight(Constants.IDs.ampsensor);
+  private final TalonFX ampMotor;
+  public final TimeOfFlight amp_sensor;
+
 
   public Amp() {
+    ampMotor = new TalonFX(Constants.IDs.amp);
     ampScoreSpeed.setDefault(AmpConstants.scoreSpeed);
     ampReverseSpeed.setDefault(AmpConstants.reverseSpeed);
+    /*Sensor Shtuff */
+    amp_sensor = new TimeOfFlight(Constants.IDs.ampsensor);
+    amp_sensor.setRangingMode(TimeOfFlight.RangingMode.Short, 0.001);
+    amp_sensor.setRangeOfInterest(6, 6, 14, 14);
     ampSensorThreshold.setDefault(AmpConstants.sensorThreshold);
 
     setDefaultCommand(

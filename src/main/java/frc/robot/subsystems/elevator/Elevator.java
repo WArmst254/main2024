@@ -1,6 +1,5 @@
 package frc.robot.subsystems.elevator;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -17,13 +16,13 @@ import frc.robot.util.TunableNumber;
 
 public class Elevator extends SubsystemBase {
 
-  private final TalonFX elevator1 = new TalonFX(Constants.IDs.elevator1);
-  private final TalonFX elevator2 = new TalonFX(Constants.IDs.elevator2);
+  private final TalonFX leadElevator = new TalonFX(Constants.IDs.leadElevator);
+  private final TalonFX followerElevator = new TalonFX(Constants.IDs.followerElevator);
   private final MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
 
-  private TunableNumber mm_eVelocity = new TunableNumber("Elevator/Velocity");
-  private TunableNumber mm_eAcceleration = new TunableNumber("Elevator/Acceleration");
-  private TunableNumber mm_eJerk = new TunableNumber("Elevator/Jerk");
+  private TunableNumber eVelocity = new TunableNumber("Elevator/Velocity");
+  private TunableNumber eAcceleration = new TunableNumber("Elevator/Acceleration");
+  private TunableNumber eJerk = new TunableNumber("Elevator/Jerk");
   private TunableNumber eTolerance = new TunableNumber("Elevator PID/Tolerance");
   private TunableNumber ampPosition = new TunableNumber("Elevator/Amp Setpoint");
   private TunableNumber eP = new TunableNumber("Elevator PID/P");
@@ -33,25 +32,25 @@ public class Elevator extends SubsystemBase {
   private TunableNumber eS = new TunableNumber("Elevator PID/S");
 
   public Elevator() {
-    elevator2.setControl(new Follower(Constants.IDs.elevator1 , false));    
+    followerElevator.setControl(new Follower(Constants.IDs.leadElevator , false));    
     ampPosition.setDefault(ElevatorConstants.ampPosition);
-    eTolerance.setDefault(ElevatorConstants.elevator1Tolerance);
+    eTolerance.setDefault(ElevatorConstants.elevatorTolerance);
     TalonFXConfiguration cfg = new TalonFXConfiguration();
 
-    mm_eVelocity.setDefault(ElevatorConstants.elevator1Velocity);
-    mm_eAcceleration.setDefault(ElevatorConstants.elevator1Acceleration);
-    mm_eJerk.setDefault(ElevatorConstants.elevator1Jerk);
+    eVelocity.setDefault(ElevatorConstants.elevatorVelocity);
+    eAcceleration.setDefault(ElevatorConstants.elevatorAcceleration);
+    eJerk.setDefault(ElevatorConstants.elevatorJerk);
 
     MotionMagicConfigs mm = cfg.MotionMagic;
-    mm.MotionMagicCruiseVelocity = mm_eVelocity.get();
-    mm.MotionMagicAcceleration = mm_eAcceleration.get();
-    mm.MotionMagicJerk = mm_eJerk.get();
+    mm.MotionMagicCruiseVelocity = eVelocity.get();
+    mm.MotionMagicAcceleration = eAcceleration.get();
+    mm.MotionMagicJerk = eJerk.get();
 
-    eP.setDefault(ElevatorConstants.elevator1P);
-    eI.setDefault(ElevatorConstants.elevator1I);
-    eD.setDefault(ElevatorConstants.elevator1D);
-    eV.setDefault(ElevatorConstants.elevator1V);
-    eS.setDefault(ElevatorConstants.elevator1S);
+    eP.setDefault(ElevatorConstants.elevatorP);
+    eI.setDefault(ElevatorConstants.elevatorI);
+    eD.setDefault(ElevatorConstants.elevatorD);
+    eV.setDefault(ElevatorConstants.elevatorV);
+    eS.setDefault(ElevatorConstants.elevatorS);
 
 
     Slot0Configs slot0 = cfg.Slot0;
@@ -66,7 +65,7 @@ public class Elevator extends SubsystemBase {
 
     StatusCode status = StatusCode.StatusCodeNotInitialized;
     for (int i = 0; i < 5; ++i) {
-      status = elevator1.getConfigurator().apply(cfg);
+      status = leadElevator.getConfigurator().apply(cfg);
       if (status.isOK()) break;
     }
     if (!status.isOK()) {
@@ -75,45 +74,36 @@ public class Elevator extends SubsystemBase {
   }
 
   public void periodic() {
-    SmartDashboard.putNumber("Elevator/Reported Position: ", elevator1.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("Elevator/Reported Velocity: ", elevator1.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Elevator/Reported Power:", elevator1.get());
-    SmartDashboard.putNumber("Elevator/Reported Voltage:", elevator1.getMotorVoltage().getValueAsDouble());
+    SmartDashboard.putNumber("Elevator/Reported Position: ", leadElevator.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Elevator/Reported Velocity: ", leadElevator.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Elevator/Reported Power:", leadElevator.get());
+    SmartDashboard.putNumber("Elevator/Reported Voltage:", leadElevator.getMotorVoltage().getValueAsDouble());
   }
 
   public void ampExtendElevator() {
-    elevator1.setControl(m_mmReq.withPosition(ElevatorConstants.ampPosition).withSlot(0));
+    leadElevator.setControl(m_mmReq.withPosition(ElevatorConstants.ampPosition).withSlot(0));
   }
 
   public void stowElevator() {
-    elevator1.setControl(m_mmReq.withPosition(0).withSlot(0));
+    leadElevator.setControl(m_mmReq.withPosition(0).withSlot(0));
   }
 
   public void zeroElevatorPosition() {
-    elevator1.setPosition(0);
+    leadElevator.setPosition(0);
   }
 
   public boolean isElevatorSet() {
-    return (m_mmReq.Position <= (elevator1.getPosition().getValueAsDouble()+eTolerance.get()) && m_mmReq.Position >= (elevator1.getPosition().getValueAsDouble()-eTolerance.get()));
+    return (m_mmReq.Position <= (leadElevator.getPosition().getValueAsDouble()+eTolerance.get()) && m_mmReq.Position >= (leadElevator.getPosition().getValueAsDouble()-eTolerance.get()));
   }
 
   public boolean isElevatorAmped() {
-    return (ampPosition.get() <= (elevator1.getPosition().getValueAsDouble()+eTolerance.get()) && ampPosition.get() >= (elevator1.getPosition().getValueAsDouble()-eTolerance.get()));
+    return (ampPosition.get() <= (leadElevator.getPosition().getValueAsDouble()+eTolerance.get()) && ampPosition.get() >= (leadElevator.getPosition().getValueAsDouble()-eTolerance.get()));
   }
 
   public Command ampElevatorCommand() {
     return runOnce(
             () -> {
-              elevator1.setControl(m_mmReq.withPosition(ampPosition.get()).withSlot(0));
-            })
-        .andThen(run(() -> {}).withTimeout(0.05))
-        .withName("Elevator Lifted");
-  }
-
-  public Command fullElevatorCommand() {
-    return runOnce(
-            () -> {
-              elevator1.setControl(m_mmReq.withPosition(1).withSlot(0));
+              leadElevator.setControl(m_mmReq.withPosition(ampPosition.get()).withSlot(0));
             })
         .andThen(run(() -> {}).withTimeout(0.05))
         .withName("Elevator Lifted");
@@ -122,7 +112,7 @@ public class Elevator extends SubsystemBase {
   public Command stowElevatorCommand() {
     return runOnce(
             () -> {
-              elevator1.setControl(m_mmReq.withPosition(0).withSlot(0));
+              leadElevator.setControl(m_mmReq.withPosition(0).withSlot(0));
             })
         .andThen(run(() -> {}).withTimeout(0.05))
         .withName("Elevator Stowed");

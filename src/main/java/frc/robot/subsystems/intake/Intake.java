@@ -16,17 +16,25 @@ public class Intake extends SubsystemBase {
    private TunableNumber pushToShootFeedSpeed = new TunableNumber("Shooter/Feed Speed");
    private TunableNumber intakeSensorThreshold = new TunableNumber("Sensors/Intake Sensor Threshold");
 
-  private final TalonFX intake = new TalonFX(Constants.IDs.intake);
-  private final TalonFX frontFeed = new TalonFX(Constants.IDs.frontFeed);
-  private final TalonFX backFeed = new TalonFX(Constants.IDs.backFeed);
-  public final TimeOfFlight intake_sensor = new TimeOfFlight(Constants.IDs.intakesensor);
+  private final TalonFX intake;
+  private final TalonFX frontFeed;
+  private final TalonFX backFeed;
+  private final TimeOfFlight intake_sensor;
 
   public Intake() {
+    intake = new TalonFX(Constants.IDs.intake);
+    frontFeed = new TalonFX(Constants.IDs.frontFeed);
+    backFeed = new TalonFX(Constants.IDs.backFeed);
+
     intakeEntrySpeed.setDefault(IntakeConstants.entrySpeed);
     intakeFeedSpeed.setDefault(IntakeConstants.intakeFeedSpeed);
     outakeExitSpeed.setDefault(IntakeConstants.exitSpeed);
     outakeFeedSpeed.setDefault(IntakeConstants.outakeFeedSpeed);
     pushToShootFeedSpeed.setDefault(IntakeConstants.pushSpeed);
+
+    intake_sensor = new TimeOfFlight(Constants.IDs.intakesensor);
+    intake_sensor.setRangingMode(TimeOfFlight.RangingMode.Short, 0.001);
+    intake_sensor.setRangeOfInterest(6, 6, 14, 14);
     intakeSensorThreshold.setDefault(IntakeConstants.sensorThreshold);
 
     setDefaultCommand(

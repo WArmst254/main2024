@@ -7,6 +7,9 @@ import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
+
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,19 +19,26 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants;
+import frc.robot.subsystems.vision.Vision;
+
 import frc.robot.util.LocalADStarAK;
+import frc.robot.util.PoseTracker;
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
+
   private static final double MAX_LINEAR_SPEED = Units.feetToMeters(19);
   private static final double TRACK_WIDTH_X = Units.inchesToMeters(17.5);
   private static final double TRACK_WIDTH_Y = Units.inchesToMeters(17.5);
@@ -43,7 +53,7 @@ public class Drive extends SubsystemBase {
   private final SysIdRoutine sysId;
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
-  private Rotation2d rawGyroRotation = new Rotation2d();
+  public Rotation2d rawGyroRotation = new Rotation2d();
   private SwerveModulePosition[] lastModulePositions = // For delta tracking
       new SwerveModulePosition[] {
         new SwerveModulePosition(),
@@ -52,7 +62,14 @@ public class Drive extends SubsystemBase {
         new SwerveModulePosition()
       };
   private SwerveDrivePoseEstimator poseEstimator =
-      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d(), createStateStdDevs(
+        Constants.PoseConfig.kPositionStdDevX,
+        Constants.PoseConfig.kPositionStdDevY,
+        Constants.PoseConfig.kPositionStdDevTheta),
+    createVisionMeasurementStdDevs(
+        Constants.PoseConfig.kVisionStdDevX,
+        Constants.PoseConfig.kVisionStdDevY,
+        Constants.PoseConfig.kVisionStdDevTheta));
 
   public Drive(
       GyroIO gyroIO,
@@ -164,7 +181,14 @@ public class Drive extends SubsystemBase {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+
+        if(Vision.canSeeAprilTag()){
+          poseEstimator.addVisionMeasurement(Vision.getBotPose(),Vision.getLatency());
+        }
     }
+
+    PoseTracker.field.setRobotPose(getPose());
+  
   }
 
   /**
@@ -251,6 +275,34 @@ public class Drive extends SubsystemBase {
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+  }
+
+   /**
+   * Creates a vector of standard deviations for the states. Standard deviations of model states.
+   * Increase these numbers to trust your model's state estimates less.
+   *
+   * @param x in meters
+   * @param y in meters
+   * @param theta in degrees
+   * @return the Vector of standard deviations need for the poseEstimator
+   */
+  public Vector<N3> createStateStdDevs(double x, double y, double theta) {
+    return VecBuilder.fill(x, y, Units.degreesToRadians(theta));
+  }
+
+
+  /**
+   * Creates a vector of standard deviations for the vision measurements. Standard deviations of
+   * global measurements from vision. Increase these numbers to trust global measurements from
+   * vision less.
+   *
+   * @param x in meters
+   * @param y in meters
+   * @param theta in degrees
+   * @return the Vector of standard deviations need for the poseEstimator
+   */
+  public Vector<N3> createVisionMeasurementStdDevs(double x, double y, double theta) {
+    return VecBuilder.fill(x, y, Units.degreesToRadians(theta));
   }
 
   /**
