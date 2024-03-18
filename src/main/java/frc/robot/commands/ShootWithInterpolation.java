@@ -54,7 +54,7 @@ public class ShootWithInterpolation extends Command {
     LED.getInstance().changeLedState(LEDState.IDLE);
   }
 
- //Returns true when the command should end.
+// Returns true when the command should end.
   @Override
   public boolean isFinished() {
     if (!shooter.shooterSensorOut()) {

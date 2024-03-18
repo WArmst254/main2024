@@ -7,7 +7,7 @@ public class ShooterConstants {
     public static double podiumAngle = 0.05;
 
     public static double humanPlayerIntakeSpeed = -0.2;
-    public static double groundIntakeAngle = 0.1234;
+    public static double groundIntakeAngle = 0.1;
     public static double sensorThreshold = 335;
 
     public static double flywheelTolerance = 200;
@@ -25,9 +25,9 @@ public class ShooterConstants {
     public static double shooterVelocity = 30;
     public static double shooterAcceleration = 30;
     public static double shooterJerk = 100;
-    public static double shooterP = 30;
-    public static double shooterI = 20;
-    public static double shooterD = 0.12;
+    public static double shooterP = 100;
+    public static double shooterI = 0;
+    public static double shooterD = 0.1;
     public static double shooterV = 0.12;
     public static double shooterS = 0.25;
 }

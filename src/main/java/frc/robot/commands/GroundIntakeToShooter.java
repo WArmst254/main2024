@@ -53,7 +53,6 @@ public class GroundIntakeToShooter extends Command {
   @Override
   public void end(boolean interrupted) {
     intake.disableIntake();
-    shooter.stowShooter();
   }
 
   // Returns true when the command should end.
