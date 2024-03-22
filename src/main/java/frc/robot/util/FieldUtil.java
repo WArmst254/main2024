@@ -28,16 +28,16 @@ public class FieldUtil {
         }
 
         return BlueSpeakerPosition;
-    }
-
+        }
+    
     /**
      * Get the position of whichever alliance you are on
      * 
      * @return the speaker position
      */
     public static Translation2d getAllianceAmpPosition() {
-
-        Optional<Alliance> alliance = DriverStation.getAlliance();
+        
+Optional<Alliance> alliance = DriverStation.getAlliance();
 
         if (alliance.isPresent()) {
             return alliance.get() == DriverStation.Alliance.Blue ? BlueAmpPosition : RedAmpPosition;
@@ -47,7 +47,7 @@ public class FieldUtil {
     }
 
     public static boolean isAllianceBlue() {
-        boolean isAllianceBlue = true;
+boolean isAllianceBlue = true;
 
         if (DriverStation.getAlliance().isPresent()) {
             isAllianceBlue = DriverStation.getAlliance().get() == Alliance.Blue;

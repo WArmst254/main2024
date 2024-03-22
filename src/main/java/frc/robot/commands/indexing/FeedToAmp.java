@@ -5,8 +5,6 @@
 package frc.robot.commands.indexing;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.led.LED;
-import frc.robot.subsystems.led.LED.LEDState;
 import frc.robot.subsystems.amp.Amp;
 import frc.robot.subsystems.intake.Intake;
 
@@ -27,7 +25,6 @@ public class FeedToAmp extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    LED.getInstance().changeLedState(LEDState.INTAKING_AMP);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -40,7 +37,6 @@ public class FeedToAmp extends Command {
     } else {
       intake.disableIntake();
       amp.disableAmp();
-      LED.getInstance().changeLedState(LEDState.INTAKE_SUCCESS_AMP);
     }
 
   }

@@ -28,7 +28,6 @@ public class FeedToShooter extends Command {
   @Override
   public void initialize() {
     shooter.lowerToIntake();
-    LED.getInstance().changeLedState(LEDState.INTAKING_SPEAKER);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -39,7 +38,7 @@ public class FeedToShooter extends Command {
       intake.feedToShooter();
     } else {
       intake.disableFeeds();
-      LED.getInstance().changeLedState(LEDState.INTAKE_SUCCESS_SPEAKER);
+      LED.getInstance().changeLedState(LEDState.SHOOTER_INTAKE_SUCCESSFUL);
     }
 
   }

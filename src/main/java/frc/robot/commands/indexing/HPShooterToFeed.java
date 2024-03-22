@@ -2,8 +2,6 @@ package frc.robot.commands.indexing;
 
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.led.LED;
-import frc.robot.subsystems.led.LED.LEDState;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.intake.Intake;
 
@@ -25,7 +23,6 @@ public class HPShooterToFeed extends Command {
     @Override
     public void initialize() {
       shooter.stowShooter();
-       LED.getInstance().changeLedState(LEDState.INTAKING_SPEAKER);
     }
   
     // Called every time the scheduler runs while the command is scheduled.
@@ -33,7 +30,6 @@ public class HPShooterToFeed extends Command {
     public void execute() {
 
       if(intake.intakeSensorOut()) {
-        LED.getInstance().changeLedState(LEDState.NOTE_IN_FEED);
         } else {
           if (!shooter.shooterSensorOut()) {
             shooter.intakeHP();

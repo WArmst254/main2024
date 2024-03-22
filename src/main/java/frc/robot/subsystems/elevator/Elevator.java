@@ -8,6 +8,8 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -18,7 +20,7 @@ public class Elevator extends SubsystemBase {
 
   private final TalonFX leadElevator = new TalonFX(Constants.IDs.leadElevator);
   private final TalonFX followerElevator = new TalonFX(Constants.IDs.followerElevator);
-  private final MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0);
+  private final MotionMagicVoltage m_mmReq = new MotionMagicVoltage(0).withEnableFOC(true);
 
   private TunableNumber eVelocity = new TunableNumber("Elevator/Velocity");
   private TunableNumber eAcceleration = new TunableNumber("Elevator/Acceleration");
@@ -45,6 +47,7 @@ public class Elevator extends SubsystemBase {
     mm.MotionMagicCruiseVelocity = eVelocity.get();
     mm.MotionMagicAcceleration = eAcceleration.get();
     mm.MotionMagicJerk = eJerk.get();
+    cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     eP.setDefault(ElevatorConstants.elevatorP);
     eI.setDefault(ElevatorConstants.elevatorI);

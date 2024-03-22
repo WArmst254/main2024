@@ -1,16 +1,13 @@
 package frc.robot.util;
 
 import edu.wpi.first.math.controller.PIDController;
-import java.util.function.Supplier;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class AprilTagLock {
 
-   static PIDController rotationPID = createPIDController();
+   public static PIDController rotationPID = createPIDController();
     private static PIDController createPIDController() {
-        PIDController pid = new PIDController(0.03, 0, 0.0005);
+        PIDController pid = new PIDController(0.03, 0, 0.0006);
         pid.setTolerance(0.01);
         pid.enableContinuousInput(0, 360);
         pid.setSetpoint(0);
@@ -19,16 +16,16 @@ public class AprilTagLock {
     }
    
     public static double getR() {
-       
-        Translation2d target = FieldUtil.getAllianceSpeakerPosition();
-        SmartDashboard.putNumber("POSE TARGET X", target.getX());
-        SmartDashboard.putNumber("POSE TARGET Y", target.getY());
+    //     Translation2d target = FieldUtil.getAllianceSpeakerPosition();
+    //     SmartDashboard.putNumber("POSE TARGET X", target.getX());
+    //     SmartDashboard.putNumber("POSE TARGET Y", target.getY());
 
-         Supplier<Rotation2d> robotAngle = () -> Rotation2d.fromRadians(  // Find the angle to turn the robot to
-    Math.atan((PoseTracker.field.getRobotPose().getY() - target.getY())
-        / (PoseTracker.field.getRobotPose().getX() - target.getX())));
+    //      Supplier<Rotation2d> robotAngle = () -> Rotation2d.fromRadians(  // Find the angle to turn the robot to
+    // Math.atan((PoseTracker.field.getRobotPose().getY() - target.getY())
+    //     / (PoseTracker.field.getRobotPose().getX() - target.getX())));
 
-        return rotationPID.calculate(PoseTracker.field.getRobotPose().getRotation().getDegrees(), robotAngle.get().getDegrees());
+    //     return rotationPID.calculate(PoseTracker.field.getRobotPose().getRotation().getDegrees(), robotAngle.get().getDegrees());
+    return rotationPID.calculate(NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0));
     }
     
 }

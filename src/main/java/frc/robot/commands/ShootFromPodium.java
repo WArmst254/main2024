@@ -5,10 +5,10 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.led.LED;
-import frc.robot.subsystems.led.LED.LEDState;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.led.LED;
+import frc.robot.subsystems.led.LED.LEDState;
 
 public class ShootFromPodium extends Command {
 
@@ -28,18 +28,19 @@ public class ShootFromPodium extends Command {
   @Override
   public void initialize() {
     shooter.lowerToShootPod();
-     LED.getInstance().changeLedState(LEDState.MANUAL_SHOOTING);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if(shooter.shooterSensorOut()) {
     shooter.flywheelsOnPod();
     if (shooter.isPodiumVelocitySet() && shooter.isAngleSet()) {
       intake.pushToShoot();
-      LED.getInstance().changeLedState(LEDState.SHOT_FIRED);
     } else {
       intake.disableFeeds();
+    } } else {
+      LED.getInstance().changeLedState(LEDState.SHOOTER_ABSENT);
     }
 
   }
@@ -50,7 +51,6 @@ public class ShootFromPodium extends Command {
     intake.disableFeeds();
     shooter.disableFlywheels();
     shooter.stowShooter();
-    LED.getInstance().changeLedState(LEDState.IDLE);
   }
 
  //Returns true when the command should end.

@@ -1,5 +1,7 @@
 package frc.robot.subsystems.amp;
 
+import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.playingwithfusion.TimeOfFlight;
 
@@ -9,8 +11,8 @@ import frc.robot.Constants;
 import frc.robot.util.TunableNumber;
 
 public class Amp extends SubsystemBase {
-   private TunableNumber ampScoreSpeed = new TunableNumber("Amp/Score Speed");
-   private TunableNumber ampReverseSpeed = new TunableNumber("Amp/Reverse Speed");
+    private final VoltageOut voltageOut = new VoltageOut(0).withEnableFOC(true);
+    private final NeutralOut neutralOut = new NeutralOut();
    private TunableNumber ampSensorThreshold = new TunableNumber("Sensors/Amp Sensor Threshold");
 
   private final TalonFX ampMotor;
@@ -19,33 +21,24 @@ public class Amp extends SubsystemBase {
 
   public Amp() {
     ampMotor = new TalonFX(Constants.IDs.amp);
-    ampScoreSpeed.setDefault(AmpConstants.scoreSpeed);
-    ampReverseSpeed.setDefault(AmpConstants.reverseSpeed);
     /*Sensor Shtuff */
     amp_sensor = new TimeOfFlight(Constants.IDs.ampsensor);
     amp_sensor.setRangingMode(TimeOfFlight.RangingMode.Short, 0.001);
     amp_sensor.setRangeOfInterest(6, 6, 14, 14);
     ampSensorThreshold.setDefault(AmpConstants.sensorThreshold);
 
-    setDefaultCommand(
-        runOnce(
-                () -> {
-                  ampMotor.set(0);
-                })
-            .andThen(run(() -> {}))
-            .withName("Amp Idle"));
   }
 
   public void ampOuttakeOn() {
-    ampMotor.set(ampScoreSpeed.get());
+    ampMotor.setControl(voltageOut.withOutput(10));
   }
 
   public void ampIntakeOn() {
-    ampMotor.set(-ampReverseSpeed.get());
+    ampMotor.setControl(voltageOut.withOutput(-10));
   }
 
   public void disableAmp() {
-    ampMotor.set(0);
+    ampMotor.setControl(neutralOut);
   }
 
   public boolean ampSensorOut() {

@@ -83,12 +83,13 @@ public final class Constants {
 
   public static final List<Entry<Measure<Distance>, State>> SHOOTER_MAP = Arrays.asList(
       Map.entry(Units.Meters.of(0), new State(2500, 0)),
-      Map.entry(Units.Meters.of(1.381), new State(3000, 0)),
-      Map.entry(Units.Meters.of(1.819), new State(3000, 0.025)),
-      Map.entry(Units.Meters.of(2.392), new State(3000, 0.047)),
-      Map.entry(Units.Meters.of(3.093), new State(3200, 0.067)),
-      Map.entry(Units.Meters.of(3.483), new State(3700, 0.0695)),
-      Map.entry(Units.Meters.of(3.63), new State(4500, 0.0748)));
+      Map.entry(Units.Meters.of(1.225), new State(3100, 0)),
+      Map.entry(Units.Meters.of(1.707), new State(3400, 0.095)),
+      Map.entry(Units.Meters.of(2.010), new State(3500, 0.133)),
+      Map.entry(Units.Meters.of(2.540), new State(3500, 0.19)),
+      Map.entry(Units.Meters.of(2.719), new State(4500, 0.206)),
+      Map.entry(Units.Meters.of(3.606), new State(3700, 0.242)),
+      Map.entry(Units.Meters.of(3.630), new State(3700, 0.248)));
 
   public static final double AprilTagHeights[] = {
       53.38,

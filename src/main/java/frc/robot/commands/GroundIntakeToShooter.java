@@ -28,7 +28,7 @@ public class GroundIntakeToShooter extends Command {
   @Override
   public void initialize() {
     shooter.lowerToIntake();
-     LED.getInstance().changeLedState(LEDState.INTAKING_SPEAKER);
+    LED.getInstance().changeLedState(LEDState.SHOOTER_ABSENT);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -36,15 +36,9 @@ public class GroundIntakeToShooter extends Command {
   public void execute() {
 
     if (!shooter.shooterSensorOut()) {
-      intake.intakeToShooter();
-      if(intake.intakeSensorOut()) {
-        LED.getInstance().changeLedState(LEDState.NOTE_IN_FEED);
-      } else {
-        LED.getInstance().changeLedState(LEDState.INTAKING_SPEAKER);
-      }
+    intake.intakeToShooter();
     } else {
       intake.disableIntake();
-      LED.getInstance().changeLedState(LEDState.INTAKE_SUCCESS_SPEAKER);
     }
 
   }

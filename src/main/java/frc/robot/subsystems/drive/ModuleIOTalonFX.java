@@ -175,12 +175,12 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   @Override
   public void setDriveVoltage(double volts) {
-    driveTalon.setControl(new VoltageOut(volts));
+    driveTalon.setControl(new VoltageOut(volts).withEnableFOC(true));
   }
 
   @Override
   public void setTurnVoltage(double volts) {
-    turnTalon.setControl(new VoltageOut(volts));
+    turnTalon.setControl(new VoltageOut(volts).withEnableFOC(true));
   }
 
   @Override

@@ -30,27 +30,22 @@ public class GroundIntakeToAmp extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    LED.getInstance().changeLedState(LEDState.AMP_ABSENT);
     elevator.stowElevator();
-     LED.getInstance().changeLedState(LEDState.INTAKING_AMP);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
+    LED.getInstance().changeLedState(LEDState.AMP_INTAKING);
     if (!amp.ampSensorOut() && !elevator.isElevatorSet()) {
       intake.disableIntake();
     } else if (!amp.ampSensorOut() && elevator.isElevatorSet()) {
       intake.intakeToAmp();
       amp.ampOuttakeOn();
-      if(intake.intakeSensorOut()) {
-        LED.getInstance().changeLedState(LEDState.NOTE_IN_FEED);
-      } else {
-        LED.getInstance().changeLedState(LEDState.INTAKING_AMP);
-      }
     } else {
+      LED.getInstance().changeLedState(LEDState.AMP_INTAKE_SUCCESSFUL);
       intake.disableIntake();
-      LED.getInstance().changeLedState(LEDState.INTAKE_SUCCESS_AMP);
     }
 
   }

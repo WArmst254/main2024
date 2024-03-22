@@ -3,64 +3,53 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems.led;
-import java.util.Optional;
 
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdleConfiguration;
+import com.ctre.phoenix.led.ColorFlowAnimation;
+import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
+import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import com.ctre.phoenix.led.FireAnimation;
 import com.ctre.phoenix.led.LarsonAnimation;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdle.VBatOutputMode;
-import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
-import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
-import com.ctre.phoenix.led.TwinkleAnimation;
-import com.ctre.phoenix.led.TwinkleAnimation.TwinklePercent;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.util.FieldUtil;
 
 public class LED extends SubsystemBase {
     private static LED led = null;
-    CANdle candle = new CANdle(Constants.IDs.led);
-    private Optional<Alliance> alliance = Optional.empty();
+    CANdle candle = new CANdle(20);
+
+    private int[][] ledZones = new int[4][2];
 
     public enum LEDState {
-      IDLE, 
+      OFF,
       DISABLED,
-      CONTROLLERS_DISCONNECTED,
+      DISABLED_NO_CONTROLLERS,
+      E_STOPPED,
       PREMATCH,
       AUTON,
-      OFF,
 
-      SPEAKER,
-      AMP,
-
-      INTAKING_SPEAKER,
-      INTAKE_SUCCESS_SPEAKER,
-
-      INTAKING_AMP,
-      INTAKE_SUCCESS_AMP,
-
-      MANUAL_SHOOTING,
-      VISION_SHOOTING,
-
-      AMP_SCORING,
-
-      SHOT_FIRED,
-
-      NOTE_IN_FEED,
-      NO_VISION,
-
-      REQUEST_HP_INTAKE,
-      HP_AMPLIFY,
-      HP_COOPERTITION
+      AMP_ABSENT,
+      SHOOTER_ABSENT,
+      AMP_INTAKING,
+      SHOOTER_INTAKING,
+      AMP_INTAKE_SUCCESSFUL,
+      SHOOTER_INTAKE_SUCCESSFUL,
+      READY_TO_SHOOT,
+      READY_TO_AMP,
+      AMPING,
+      SHOOTING,
+      FIRED,
+      HP_INTAKE;
   }
 
-  private LEDState currentState = LEDState.OFF;
+  private LEDState currentState = LEDState.DISABLED;
 
   public LED() {
       changeLedState(LEDState.OFF);
@@ -68,11 +57,23 @@ public class LED extends SubsystemBase {
       configAll.statusLedOffWhenActive = true;
       configAll.disableWhenLOS = false;
       configAll.stripType = LEDStripType.GRB;
-      configAll.brightnessScalar = 0.1;
+      configAll.brightnessScalar = 0.99;
       configAll.vBatOutputMode = VBatOutputMode.Modulated;
 
       candle.configAllSettings(configAll, 100);
       candle.configLOSBehavior(true);
+
+      ledZones[0][0] = 8;
+      ledZones[0][1] = 30;
+  
+      ledZones[1][0] = 39;
+      ledZones[1][1] = 23;
+  
+      ledZones[2][0] = 60;
+      ledZones[2][1] = 27;
+  
+      ledZones[3][0] = 90;
+      ledZones[3][1] = 26;
   }
 
    public void changeLedState(LEDState state) {
@@ -80,137 +81,112 @@ public class LED extends SubsystemBase {
         for (int i = 0; i < 10; ++i) {
           candle.clearAnimation(i);
         }
-        candle.setLEDs(0, 0, 0, 0, 0, 48);
+        candle.setLEDs(0, 0, 0, 0, 8, 102);
 
         switch (state) {
             default:
             break;
 
-            case IDLE:
-              candle.animate(new SingleFadeAnimation(255,255,255,255,0.9,48,0));
-              currentState = LEDState.IDLE;
-            break;
-
             case DISABLED:
-              candle.animate(new RainbowAnimation(0.7, 0.9, 300, false,0));
-              currentState = LEDState.DISABLED;
+            candle.animate(new ColorFlowAnimation(255, 255, 255, 0, 0.5, ledZones[0][1] + ledZones[1][1], Direction.Backward, ledZones[0][0]), 1);
+            candle.animate(new ColorFlowAnimation(255, 255, 255, 0, 0.5, ledZones[2][1] + ledZones[3][1] - 1, Direction.Forward, ledZones[2][0]), 2);      
             break;
 
-            case PREMATCH:
-              currentState = LEDState.PREMATCH;
-            break;
-
-            case CONTROLLERS_DISCONNECTED:
-              candle.animate(new TwinkleAnimation(255, 0, 178, 255, 1, 400, TwinklePercent.Percent64,0));
-              currentState = LEDState.CONTROLLERS_DISCONNECTED;
+            case DISABLED_NO_CONTROLLERS:
+            candle.animate(new ColorFlowAnimation(255, 255, 255, 0, 0.5, ledZones[0][1] + ledZones[1][1], Direction.Backward, ledZones[0][0]), 1);
+            candle.animate(new ColorFlowAnimation(255, 255, 255, 0, 0.5, ledZones[2][1] + ledZones[3][1] - 1, Direction.Forward, ledZones[2][0]), 2);      
             break;
 
             case AUTON:
-              candle.animate(new FireAnimation(0.7, 0.8, 48, .7, .5,false, 0));
+            candle.animate(
+              new FireAnimation(1, 0.7, ledZones[0][1], 0.7, 0.25, false, ledZones[0][0]), 1);
+      candle.animate(
+              new FireAnimation(1, 0.7, ledZones[1][1], 0.7, 0.25, true, ledZones[1][0]), 2);
+      candle.animate(
+              new FireAnimation(1, 0.7, ledZones[2][1], 0.7, 0.25, false, ledZones[2][0]), 3);
+      candle.animate(
+              new FireAnimation(1, 0.7, ledZones[3][1], 0.7, 0.25, true, ledZones[3][0]), 4);   
               currentState = LEDState.AUTON;
             break;
+
+            case PREMATCH:
+                currentState = LEDState.PREMATCH;
+                break;
+
+            case HP_INTAKE:
+              candle.animate(new StrobeAnimation(255,77,0,0,.5, 112));
+              currentState = LEDState.HP_INTAKE;
 
             case OFF:
               currentState = LEDState.OFF;
             break;
 
-            case SPEAKER:
-              candle.setLEDs(128,0,255, 0, 0, 48);
-              currentState = LEDState.SPEAKER;
+            case SHOOTER_INTAKING:
+            candle.animate(new StrobeAnimation(255,128,0,0,.5, 112));
+            currentState = LEDState.SHOOTER_INTAKING;
+
+            case SHOOTER_ABSENT: 
+            candle.animate(new SingleFadeAnimation(255, 128, 0, 0, 0.6, 112, 8));
+            currentState = LEDState.SHOOTER_ABSENT;
             break;
 
-            case AMP:
-              candle.setLEDs(255,0,0, 0, 0, 48);
-              currentState = LEDState.AMP;
+            case SHOOTER_INTAKE_SUCCESSFUL: 
+            candle.setLEDs(0,255,0, 0, 8, 112);
+
+            case SHOOTING:
+            candle.animate(new LarsonAnimation(255, 128, 0, 0, 0.5, ledZones[0][1] + ledZones[1][1], BounceMode.Center, ledZones[0][0], 0), 1);
+            candle.animate(new LarsonAnimation(255, 128, 0, 0, 0.5, ledZones[2][1] + ledZones[3][1] - 1, BounceMode.Center, ledZones[2][0], 0), 2);      
+
+            case AMP_INTAKING:
+            candle.animate(new StrobeAnimation(255,0,128,0,.5, 112));
+            currentState = LEDState.AMP_INTAKING;
+
+            case AMP_ABSENT: 
+            candle.animate(new SingleFadeAnimation(255, 0, 128, 0, 0.6, 112, 8));
+            currentState = LEDState.AMP_ABSENT;
             break;
 
-            case INTAKING_SPEAKER:
-            candle.animate(new SingleFadeAnimation(128, 0, 255, 0, 0.9, 48), 1);
-              currentState = LEDState.INTAKING_SPEAKER;
+            case AMP_INTAKE_SUCCESSFUL: 
+            candle.setLEDs(0,255,0, 0, 8, 112);
+            currentState = LEDState.AMP_INTAKE_SUCCESSFUL;
             break;
 
-            case INTAKING_AMP:
-              candle.animate(new SingleFadeAnimation(255, 0, 0, 0, 0.9, 48), 1);
-              currentState = LEDState.INTAKING_AMP;
-            break;
-
-            case MANUAL_SHOOTING:
-              candle.animate(new LarsonAnimation(128, 0, 255, 0, 1, 48, BounceMode.Center, 7));
-              currentState = LEDState.MANUAL_SHOOTING;
-            break;
-
-            case VISION_SHOOTING:
-              candle.animate(new LarsonAnimation(0, 255, 0, 0, 1, 48, BounceMode.Center, 7));
-              currentState = LEDState.VISION_SHOOTING;
-            break;
-
-            case NOTE_IN_FEED: 
-              candle.animate(new SingleFadeAnimation(0, 0, 0, 255, 1, 48, 8), 1);
-              currentState = LEDState.NOTE_IN_FEED;
-            break;
-
-            case AMP_SCORING:
-              candle.animate(new LarsonAnimation(255, 0, 0, 0, 1, 48, BounceMode.Center, 7));
-              currentState = LEDState.AMP_SCORING;
-            break;
-
-            case NO_VISION:
-              candle.animate(new StrobeAnimation(255,0,0,0,.3, 48));
-              currentState = LEDState.NO_VISION;
-            break;
-
-            case SHOT_FIRED:
-              candle.animate(new FireAnimation(0.9, 0.8, 48, .7, .5,false, 0));
-              currentState = LEDState.SHOT_FIRED;
-            break;
-
-            case HP_AMPLIFY:
-              candle.animate(new StrobeAnimation(0,0,255,0,.5, 48));
-              currentState = LEDState.HP_AMPLIFY;
-            break;
-
-            case HP_COOPERTITION:
-              candle.animate(new StrobeAnimation(255,255,0,0,.5, 48));
-              currentState = LEDState.HP_COOPERTITION;
-            break;
-
-            case REQUEST_HP_INTAKE:
-              candle.animate(new StrobeAnimation(255,128,0,0,.5, 48));
-              currentState = LEDState.REQUEST_HP_INTAKE;
-            break;
-
-
-            case INTAKE_SUCCESS_SPEAKER:
-              candle.setLEDs(128,0,255,0,0, 24);
-              candle.setLEDs(0,255,0,0,24, 20);
-              currentState = LEDState.INTAKE_SUCCESS_SPEAKER;
-            break;
-
-            case INTAKE_SUCCESS_AMP:
-              candle.setLEDs(255,0,0,0,0, 24);
-              candle.setLEDs(0,255,0,0,24, 20);
-              currentState = LEDState.INTAKE_SUCCESS_SPEAKER;
-            break;
+            case AMPING:
+            candle.animate(new LarsonAnimation(255, 0, 128, 0, 0.5, ledZones[0][1] + ledZones[1][1], BounceMode.Center, ledZones[0][0], 0), 1);
+            candle.animate(new LarsonAnimation(255, 0, 128, 0, 0.5, ledZones[2][1] + ledZones[3][1] - 1, BounceMode.Center, ledZones[2][0], 0), 2);      
 
         }
+
+            
     }
 
     public void periodic() {
-      alliance = DriverStation.getAlliance();
 
       if(DriverStation.isEStopped()) {
-        candle.animate(new StrobeAnimation(255,0,0,0,.5, 48));
+        candle.animate(new StrobeAnimation(255,0,0,0,.5, 112));
       }
 
-      if (currentState == LEDState.PREMATCH) {
-              if (alliance.get() == Alliance.Red){
-                  // Red team
-                  candle.animate(new SingleFadeAnimation(255, 0, 0, 0, 0.2, 48), 1);
-              } else {
-                  // Blue Team
-                  candle.animate(new SingleFadeAnimation(0, 0, 255, 0, 0.2, 48), 1);
-              }
-          }
+       if (currentState == LEDState.PREMATCH) {
+
+            if (NetworkTableInstance.getDefault().isConnected()) {
+              
+                if (!FieldUtil.isAllianceBlue()) {
+                    // Red team
+                    candle.animate(new ColorFlowAnimation(255, 0, 0, 0, 0.5, ledZones[0][1] + ledZones[1][1], Direction.Backward, ledZones[0][0]), 1);
+                    candle.animate(new ColorFlowAnimation(255, 0, 0, 0, 0.5, ledZones[2][1] + ledZones[3][1] - 1, Direction.Forward, ledZones[2][0]), 2);      
+
+                } else {
+                    // Blue Team
+                    candle.animate(new ColorFlowAnimation(0, 0, 255, 0, 0.5, ledZones[0][1] + ledZones[1][1], Direction.Backward, ledZones[0][0]), 1);
+                    candle.animate(new ColorFlowAnimation(0, 0, 255, 0, 0.5, ledZones[2][1] + ledZones[3][1] - 1, Direction.Forward, ledZones[2][0]), 2);      
+
+                }
+            } else {
+
+              candle.animate(new ColorFlowAnimation(255, 255, 255, 0, 0.5, ledZones[0][1] + ledZones[1][1], Direction.Backward, ledZones[0][0]), 1);
+              candle.animate(new ColorFlowAnimation(255, 255, 255, 0, 0.5, ledZones[2][1] + ledZones[3][1] - 1, Direction.Forward, ledZones[2][0]), 2);      
+            }
+        }
     }
 
     public static LED getInstance() {

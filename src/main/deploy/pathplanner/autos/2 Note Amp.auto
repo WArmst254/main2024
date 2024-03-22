@@ -1,0 +1,110 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.50898277759552,
+      "y": 7.313541412353516
+    },
+    "rotation": -90.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "elevatorUp"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2 Note Amp.1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "amp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "elevatorDown"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ampOff"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2 Note Amp.2"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intakeAmp"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "2 Note Amp.3"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeOff"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2 Note Amp.4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "elevatorUp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "amp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "elevatorDown"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ampOff"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "Choreo",
+  "choreoAuto": true
+}

@@ -173,6 +173,6 @@
       ]
     }
   },
-  "folder": null,
+  "folder": "PathPlanner",
   "choreoAuto": false
 }

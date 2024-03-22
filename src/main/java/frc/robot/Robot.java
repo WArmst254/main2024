@@ -1,6 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.led.LED;
@@ -74,47 +73,41 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-    if(!DriverStation.isJoystickConnected(0) && !DriverStation.isJoystickConnected(1)) {  
-      LED.getInstance().changeLedState(LEDState.PREMATCH);
-      } else {
-        LED.getInstance().changeLedState(LEDState.CONTROLLERS_DISCONNECTED);
-      }
- 
+    LED.getInstance().changeLedState(LEDState.PREMATCH);
     
   }
 
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
+    //LED.getInstance().changeLedState(LEDState.DISABLED);
     //m_robotContainer.checkControllers();
     m_robotContainer.checkSensors();
-
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing
     // finished or interrupted commands, and running subsystem periodic() methods.
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    LED.getInstance().periodic();
+   LED.getInstance().periodic();
   }
 
   /** This function is called once when the robot is disabled. */
   @Override
   public void disabledInit() {
-    if(!DriverStation.isJoystickConnected(0) && !DriverStation.isJoystickConnected(1)) {  
     LED.getInstance().changeLedState(LEDState.DISABLED);
-    } else {
-    LED.getInstance().changeLedState(LEDState.CONTROLLERS_DISCONNECTED);
-    }
   }
 
   /** This function is called periodically when disabled. */
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    // LED.getInstance().changeLedState(LEDState.DISABLED);
+  }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    LED.getInstance().changeLedState(LEDState.AUTON);
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
     m_robotContainer.zeroSuperstructure();
 
@@ -122,7 +115,7 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
-    LED.getInstance().changeLedState(LEDState.AUTON);
+    //LED.getInstance().changeLedState(LEDState.AUTON);
   }
 
   /** This function is called periodically during autonomous. */
@@ -140,7 +133,7 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    LED.getInstance().changeLedState(LEDState.IDLE);
+    //LED.getInstance().changeLedState(LEDState.IDLE);
   }
 
   /** This function is called periodically during operator control. */

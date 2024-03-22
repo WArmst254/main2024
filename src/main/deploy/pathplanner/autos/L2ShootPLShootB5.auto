@@ -14,7 +14,7 @@
         {
           "type": "named",
           "data": {
-            "name": "shoot"
+            "name": "shootSub"
           }
         },
         {
@@ -63,7 +63,7 @@
         {
           "type": "named",
           "data": {
-            "name": "shoot"
+            "name": "shootSub"
           }
         },
         {
@@ -75,6 +75,6 @@
       ]
     }
   },
-  "folder": "Start Long",
+  "folder": "PathPlanner",
   "choreoAuto": false
 }

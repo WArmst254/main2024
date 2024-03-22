@@ -1,24 +1,16 @@
 {
-  "robotWidth": 0.762,
-  "robotLength": 0.927,
+  "robotWidth": 0.76,
+  "robotLength": 0.93,
   "holonomicMode": true,
   "pathFolders": [
-    "A0Exit",
-    "A1AmpPL",
-    "A2AmpPLAmpA1",
     "A2AmpPLAmpB1",
-    "L0Exit",
-    "L1ShootPL",
-    "L2ShootPLShootA3",
     "L2ShootPLShootB5",
-    "L3ShootPLShootA3ShootA2",
     "L4ShootPLShootA3ShootA2ShootA1",
-    "S0Exit",
-    "S1ShootPL",
     "S2ShootPLShootA2"
   ],
   "autoFolders": [
-    "New Folder"
+    "Choreo",
+    "PathPlanner"
   ],
   "defaultMaxVel": 5.0,
   "defaultMaxAccel": 5.0,

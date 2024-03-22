@@ -1,5 +1,7 @@
 package frc.robot.subsystems.intake;
 
+import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.playingwithfusion.TimeOfFlight;
 
@@ -9,11 +11,10 @@ import frc.robot.Constants;
 import frc.robot.util.TunableNumber;
 
 public class Intake extends SubsystemBase {
-  private TunableNumber intakeEntrySpeed = new TunableNumber("Intake/Intake Entry Speed");
-   private TunableNumber intakeFeedSpeed = new TunableNumber("Intake/Intake Feed Speed");
-   private TunableNumber outakeExitSpeed = new TunableNumber("Intake/Outake Exit Speed");
-   private TunableNumber outakeFeedSpeed = new TunableNumber("Intake/Outake Feed Speed");
-   private TunableNumber pushToShootFeedSpeed = new TunableNumber("Shooter/Feed Speed");
+
+  private final VoltageOut voltageOut = new VoltageOut(0).withEnableFOC(true);
+  private final NeutralOut neutralOut = new NeutralOut();
+
    private TunableNumber intakeSensorThreshold = new TunableNumber("Sensors/Intake Sensor Threshold");
 
   private final TalonFX intake;
@@ -26,90 +27,77 @@ public class Intake extends SubsystemBase {
     frontFeed = new TalonFX(Constants.IDs.frontFeed);
     backFeed = new TalonFX(Constants.IDs.backFeed);
 
-    intakeEntrySpeed.setDefault(IntakeConstants.entrySpeed);
-    intakeFeedSpeed.setDefault(IntakeConstants.intakeFeedSpeed);
-    outakeExitSpeed.setDefault(IntakeConstants.exitSpeed);
-    outakeFeedSpeed.setDefault(IntakeConstants.outakeFeedSpeed);
-    pushToShootFeedSpeed.setDefault(IntakeConstants.pushSpeed);
-
     intake_sensor = new TimeOfFlight(Constants.IDs.intakesensor);
     intake_sensor.setRangingMode(TimeOfFlight.RangingMode.Short, 0.001);
     intake_sensor.setRangeOfInterest(6, 6, 14, 14);
     intakeSensorThreshold.setDefault(IntakeConstants.sensorThreshold);
-
-    setDefaultCommand(
-        runOnce(
-                () -> {
-                  intake.set(0);
-                  frontFeed.set(0);
-                  backFeed.set(0);
-                })
-            .andThen(run(() -> {}))
-            .withName("Intake Idle"));
   }
 
   public void intakeToShooter() {
-    intake.set(intakeEntrySpeed.get());
-    frontFeed.set(-(intakeFeedSpeed.get()));
-    backFeed.set(intakeFeedSpeed.get());
+    intake.setControl(voltageOut.withOutput(s10));
+    frontFeed.setControl(voltageOut.withOutput(-10));
+    backFeed.setControl(voltageOut.withOutput(4));
   }
 
   public void feedToShooter() {
-    frontFeed.set(-(intakeFeedSpeed.get()));
-    backFeed.set(intakeFeedSpeed.get());
+    frontFeed.setControl(voltageOut.withOutput(-10));
+    backFeed.setControl(voltageOut.withOutput(4));
   }
 
   public void feedSlowToShooter() {
-    frontFeed.set(-0.1);
-    backFeed.set(0.1);
+    frontFeed.setControl(voltageOut.withOutput(-2));
+    backFeed.setControl(voltageOut.withOutput(2));
   }
 
   public void intakeToAmp() {
-    intake.set(intakeEntrySpeed.get());
-    frontFeed.set(-(intakeFeedSpeed.get()));
-    backFeed.set(-(intakeFeedSpeed.get()));
+    intake.setControl(voltageOut.withOutput(10));
+    frontFeed.setControl(voltageOut.withOutput(-10));
+    backFeed.setControl(voltageOut.withOutput(-10));
   }
-
 
   public void feedFromShooter() {
-    frontFeed.set(outakeFeedSpeed.get());
-    backFeed.set(-(outakeFeedSpeed.get()));
+    frontFeed.setControl(voltageOut.withOutput(10));
+    backFeed.setControl(voltageOut.withOutput(-10));
   }
 
-  public void feedFromAmp(){
-    frontFeed.set(outakeFeedSpeed.get());
-    backFeed.set(-(outakeFeedSpeed.get()));
+  public void feedFromAmp() {
+    frontFeed.setControl(voltageOut.withOutput(10));
+    backFeed.setControl(voltageOut.withOutput(-10));
 }
 
   public void outakeFromShooter() {
-    intake.set(-(outakeExitSpeed.get()));
-    frontFeed.set(outakeFeedSpeed.get());
-    backFeed.set(-(outakeFeedSpeed.get()));
+    intake.setControl(voltageOut.withOutput(-10));
+    frontFeed.setControl(voltageOut.withOutput(4));
+    backFeed.setControl(voltageOut.withOutput(-10));
   }
 
   public void outakeFromAmp() {
-    intake.set(-(outakeExitSpeed.get()));
-    frontFeed.set(-(outakeFeedSpeed.get()));
-    backFeed.set(-(outakeFeedSpeed.get()));
+    intake.setControl(voltageOut.withOutput(-10));
+    frontFeed.setControl(voltageOut.withOutput(-10));
+    backFeed.setControl(voltageOut.withOutput(-10));
   }
 
   public void disableIntake() {
-    intake.set(0);
-    frontFeed.set(0);
-    backFeed.set(0);
+    intake.setControl(neutralOut);
+    frontFeed.setControl(neutralOut);
+    backFeed.setControl(neutralOut);
+  }
+
+  public void disableFrontRoller() {
+    intake.setControl(neutralOut);
   }
 
   public void disableFeeds() {
-    backFeed.set(0);
-    frontFeed.set(0);
+    backFeed.setControl(neutralOut);
+    frontFeed.setControl(neutralOut);
   }
 
   public void intakeOn() {
-    intake.set(intakeEntrySpeed.get());
+    intake.setControl(voltageOut.withOutput(10));
   }
 
   public void pushToShoot() {
-    frontFeed.set(-(pushToShootFeedSpeed.get()));
+    frontFeed.setControl(voltageOut.withOutput(-5));
   }
 
   public double intakeSensor() {
