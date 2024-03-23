@@ -27,7 +27,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
-import frc.robot.subsystems.vision.Vision;
 
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.PoseTracker;
@@ -181,10 +180,6 @@ public class Drive extends SubsystemBase {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-
-        if(Vision.canSeeAprilTag()){
-          poseEstimator.addVisionMeasurement(Vision.getBotPose(),Vision.getLatency());
-        }
     }
 
     PoseTracker.field.setRobotPose(getPose());

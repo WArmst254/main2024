@@ -197,7 +197,7 @@ public class RobotContainer {
         runOnce(() -> gyro.zeroGyro()));
 
     runSpeakerSensorIntake
-      .toggleOnTrue(
+      .whileTrue(
         new GroundIntakeToShooter(intake, shooter)
         .andThen(new BackfeedToScore(intake, shooter))
         .andThen(new VerySlowFeed(intake, shooter)))
@@ -207,7 +207,7 @@ public class RobotContainer {
           runOnce(() -> shooter.stowShooter())));
 
     runAmpSensorIntake
-      .toggleOnTrue(
+      .whileTrue(
         new GroundIntakeToAmp(intake, amp, elevator))
       .onFalse(
         runOnce(() -> intake.disableIntake())
@@ -279,7 +279,7 @@ public class RobotContainer {
           runOnce(() -> shooter.disableFlywheels()));
 
     runSensorHPIntakeToSpeaker
-      .toggleOnTrue(
+      .whileTrue(
         new HPShooterToFeed(intake, shooter)
         .andThen(
           new FeedToShooter(intake, shooter)))

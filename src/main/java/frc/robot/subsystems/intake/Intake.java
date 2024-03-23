@@ -34,7 +34,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void intakeToShooter() {
-    intake.setControl(voltageOut.withOutput(s10));
+    intake.setControl(voltageOut.withOutput(10));
     frontFeed.setControl(voltageOut.withOutput(-10));
     backFeed.setControl(voltageOut.withOutput(4));
   }

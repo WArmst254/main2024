@@ -85,11 +85,11 @@ public final class Constants {
       Map.entry(Units.Meters.of(0), new State(2500, 0)),
       Map.entry(Units.Meters.of(1.225), new State(3100, 0)),
       Map.entry(Units.Meters.of(1.707), new State(3400, 0.095)),
-      Map.entry(Units.Meters.of(2.010), new State(3500, 0.133)),
-      Map.entry(Units.Meters.of(2.540), new State(3500, 0.19)),
-      Map.entry(Units.Meters.of(2.719), new State(4500, 0.206)),
-      Map.entry(Units.Meters.of(3.606), new State(3700, 0.242)),
-      Map.entry(Units.Meters.of(3.630), new State(3700, 0.248)));
+      Map.entry(Units.Meters.of(2.010), new State(3500, 0.145)),
+      Map.entry(Units.Meters.of(2.540), new State(3700, 0.22)),
+      Map.entry(Units.Meters.of(2.719), new State(3900, 0.234)),
+      Map.entry(Units.Meters.of(3.606), new State(4100, 0.277)),
+      Map.entry(Units.Meters.of(3.630), new State(4200, 0.280)));
 
   public static final double AprilTagHeights[] = {
       53.38,
