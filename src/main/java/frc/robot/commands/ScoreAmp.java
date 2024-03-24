@@ -15,10 +15,9 @@ public class ScoreAmp extends Command {
 
   private Intake intake;
   private Amp amp;
-  private Elevator elevator;
 
   /** Creates a new ScoreAmp */
-  public ScoreAmp(Intake intake, Amp amp, Elevator elevator) {
+  public ScoreAmp(Intake intake, Amp amp) {
 
     this.intake = intake;
     this.amp = amp;
@@ -38,7 +37,7 @@ public class ScoreAmp extends Command {
       intake.intakeToAmp();
       LED.getInstance().changeLedState(LEDState.AMP_ABSENT);
     }
-    if(amp.ampSensorOut() && elevator.isElevatorAmped()) {
+    if(amp.ampSensorOut()) {
       intake.disableIntake();
       amp.ampOuttakeOn();  
     }

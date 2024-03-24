@@ -337,8 +337,8 @@ public void flywheelsOnSub() {
     rightTalon.setControl(neutralControl);
   }
   public void intakeHP() {
-    leftTalon.set(fIntakeHPspeed.get());
-    rightTalon.set(fIntakeHPspeed.get());
+    leftTalon.setVoltage(-2);
+    rightTalon.setVoltage(-2);
   }
 
   public void lowerToIntake() {

@@ -146,7 +146,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("intakeShooter", new GroundIntakeToShooter(intake, shooter).andThen(new BackfeedToScore(intake, shooter)).andThen(new VerySlowFeed(intake, shooter)));
     NamedCommands.registerCommand("elevatorUp", elevator.ampElevatorCommand());
     NamedCommands.registerCommand("elevatorDown", elevator.stowElevatorCommand());
-    NamedCommands.registerCommand("amp", new ScoreAmp(intake, amp, elevator));
+    NamedCommands.registerCommand("amp", new ScoreAmp(intake, amp));
     NamedCommands.registerCommand("ampOff", runOnce(() -> amp.disableAmp()).alongWith(elevator.stowElevatorCommand()));
     NamedCommands.registerCommand("intakeAmp", new GroundIntakeToAmp(intake, amp, elevator));
     NamedCommands.registerCommand("intakeOff", runOnce(() -> intake.disableIntake()).alongWith(runOnce(() -> shooter.stowShooter())).alongWith(runOnce(() -> amp.disableAmp())));
@@ -162,6 +162,7 @@ public class RobotContainer {
     autoChooser.addOption("Old 2 Sub", new PathPlannerAuto("S2ShootPLShootA2"));
     autoChooser.addOption("Old 2 Long", new PathPlannerAuto("L2ShootPLShootB5"));
     autoChooser.addOption("Old 4 Long", new PathPlannerAuto("L4ShootPLShootA3ShootA2ShootA1"));
+    autoChooser.addOption("ampside", new PathPlannerAuto("ampside"));
 
     autoChooser.addOption("New 2 Amp", new PathPlannerAuto("2 Note Amp"));
     autoChooser.addOption("New 3 Sub-Mid", new PathPlannerAuto("3 Note Center-Center"));

@@ -1,7 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 public class ShooterConstants {
-    public static double subwooferRPM = 3000;
+    public static double subwooferRPM = 3400;
     public static double subwooferAngle = 0;
     public static double podiumRPM = 3700;
     public static double podiumAngle = 0.15;

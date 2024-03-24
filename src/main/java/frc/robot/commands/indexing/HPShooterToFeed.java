@@ -28,9 +28,6 @@ public class HPShooterToFeed extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-
-      if(intake.intakeSensorOut()) {
-        } else {
           if (!shooter.shooterSensorOut()) {
             shooter.intakeHP();
           } else {
@@ -38,7 +35,6 @@ public class HPShooterToFeed extends Command {
             shooter.lowerToIntake();
             intake.feedFromShooter();
           }
-        }
 
 
   
