@@ -26,10 +26,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants;
 
 import frc.robot.util.LocalADStarAK;
-import frc.robot.util.PoseTracker;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -61,14 +59,7 @@ public class Drive extends SubsystemBase {
         new SwerveModulePosition()
       };
   private SwerveDrivePoseEstimator poseEstimator =
-      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d(), createStateStdDevs(
-        Constants.PoseConfig.kPositionStdDevX,
-        Constants.PoseConfig.kPositionStdDevY,
-        Constants.PoseConfig.kPositionStdDevTheta),
-    createVisionMeasurementStdDevs(
-        Constants.PoseConfig.kVisionStdDevX,
-        Constants.PoseConfig.kVisionStdDevY,
-        Constants.PoseConfig.kVisionStdDevTheta));
+      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
   public Drive(
       GyroIO gyroIO,
@@ -181,8 +172,6 @@ public class Drive extends SubsystemBase {
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
-
-    PoseTracker.field.setRobotPose(getPose());
   
   }
 
