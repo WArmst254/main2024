@@ -1,0 +1,62 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.81,
+      "y": 6.651185591813652
+    },
+    "rotation": -120.0314161901074
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "shootSub"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootOff"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Copy of L2ShootPLShootB5_1"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intakeShooter"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Copy of L2ShootPLShootB5_2"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeOff"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "PathPlanner",
+  "choreoAuto": false
+}
