@@ -1,9 +1,12 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.led.LED;
-import frc.robot.subsystems.led.LED.LEDState;
+import frc.robot.util.Alert;
+import frc.robot.util.Alert.AlertType;
 
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -11,6 +14,8 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+
+import com.ctre.phoenix6.CANBus;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -21,6 +26,29 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
   private RobotContainer m_robotContainer;
+  private static final double lowBatteryVoltage = 11.8;
+  private static final double lowBatteryDisabledTime = 1.5;
+
+  private static final double canErrorTimeThreshold = 0.5; // Seconds to disable alert
+  private static final double canivoreErrorTimeThreshold = 0.5;
+
+  private final Timer disabledTimer = new Timer();
+  private final Timer canInitialErrorTimer = new Timer();
+  private final Timer canErrorTimer = new Timer();
+  private final Timer canivoreErrorTimer = new Timer();
+
+    private final Alert canErrorAlert =
+      new Alert("CAN errors detected, robot may not be controllable.", AlertType.ERROR);
+  private final Alert canivoreErrorAlert =
+      new Alert("CANivore error detected, robot may not be controllable.", AlertType.ERROR);
+  private final Alert lowBatteryAlert =
+      new Alert(
+          "Battery voltage is very low, consider turning off the robot or replacing the battery.",
+          AlertType.WARNING);
+          private final Alert driverDisconnected =
+          new Alert("Driver controller disconnected (port 0).", AlertType.WARNING);
+      private final Alert operatorDisconnected =
+          new Alert("Operator controller disconnected (port 1).", AlertType.WARNING);
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -72,9 +100,14 @@ public class Robot extends LoggedRobot {
     Logger.start();
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
+     // Reset alert timers
+    canInitialErrorTimer.restart();
+    canErrorTimer.restart();
+    canivoreErrorTimer.restart();
+    disabledTimer.restart();
+
+    RobotController.setBrownoutVoltage(6.0);
     m_robotContainer = new RobotContainer();
-    LED.getInstance().changeLedState(LEDState.PREMATCH);
-    
   }
 
   /** This function is called periodically during all modes. */
@@ -82,34 +115,88 @@ public class Robot extends LoggedRobot {
   public void robotPeriodic() {
     //LED.getInstance().changeLedState(LEDState.DISABLED);
     //m_robotContainer.checkControllers();
-    m_robotContainer.checkSensors();
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing
     // finished or interrupted commands, and running subsystem periodic() methods.
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
+
     CommandScheduler.getInstance().run();
-   LED.getInstance().periodic();
+
+      // Robot container periodic methods
+      boolean isDriverDisconnected = !DriverStation.isJoystickConnected(m_robotContainer.driverController.getHID().getPort())
+      || !DriverStation.getJoystickIsXbox(m_robotContainer.driverController.getHID().getPort());
+      boolean isOperatorDisconnected = !DriverStation.isJoystickConnected(m_robotContainer.operatorController.getHID().getPort())
+      || !DriverStation.getJoystickIsXbox(m_robotContainer.operatorController.getHID().getPort());
+
+      driverDisconnected.set(isDriverDisconnected);
+
+      if(isDriverDisconnected) {
+         //Leds.getInstance().driverErrorAlert = true;
+      }
+    operatorDisconnected.set(isOperatorDisconnected);
+
+      if(isOperatorDisconnected) {
+        //Leds.getInstance().operatorErrorAlert = true;
+      }
+
+    // Check CAN status
+    var canStatus = RobotController.getCANStatus();
+    if (canStatus.transmitErrorCount > 0 || canStatus.receiveErrorCount > 0) {
+      canErrorTimer.restart();
+    }
+
+    boolean canError =  !canErrorTimer.hasElapsed(canErrorTimeThreshold)
+    && !canInitialErrorTimer.hasElapsed(canErrorTimeThreshold);
+
+    canErrorAlert.set(canError);
+
+    if(canError) {
+      //Leds.getInstance().canErrorAlert = true;
+    }
+
+     var canivoreStatus = CANBus.getStatus("CAN0");
+            if (!canivoreStatus.Status.isOK()
+            || canStatus.transmitErrorCount > 0
+            || canStatus.receiveErrorCount > 0) {
+          canivoreErrorTimer.restart();
+        }
+
+        boolean canivoreError =  !canivoreErrorTimer.hasElapsed(canivoreErrorTimeThreshold)
+        && !canInitialErrorTimer.hasElapsed(canErrorTimeThreshold);
+
+        canivoreErrorAlert.set(canivoreError);
+
+        if(canivoreError) {
+          //Leds.getInstance().canivoreErrorAlert = true;
+        }
+
+      // Low battery alert
+    if (DriverStation.isEnabled()) {
+      disabledTimer.reset();
+    }
+
+    if (RobotController.getBatteryVoltage() <= lowBatteryVoltage
+        && disabledTimer.hasElapsed(lowBatteryDisabledTime)) {
+        lowBatteryAlert.set(true);
+      //Leds.getInstance().lowBatteryAlert = true;
+    }
   }
 
   /** This function is called once when the robot is disabled. */
   @Override
   public void disabledInit() {
-    LED.getInstance().changeLedState(LEDState.DISABLED);
   }
 
   /** This function is called periodically when disabled. */
   @Override
   public void disabledPeriodic() {
-    // LED.getInstance().changeLedState(LEDState.DISABLED);
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    LED.getInstance().changeLedState(LEDState.AUTON);
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-    m_robotContainer.zeroSuperstructure();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
@@ -133,7 +220,6 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    //LED.getInstance().changeLedState(LEDState.IDLE);
   }
 
   /** This function is called periodically during operator control. */
