@@ -1,8 +1,10 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.Alert;
@@ -62,6 +64,7 @@ public class Robot extends LoggedRobot {
     Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
     Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
     Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+
     switch (BuildConstants.DIRTY) {
       case 0:
         Logger.recordMetadata("GitDirty", "All changes committed");
@@ -74,26 +77,16 @@ public class Robot extends LoggedRobot {
         break;
     }
 
-    // Set up data receivers & replay source
-    switch (Constants.currentMode) {
-      case REAL:
+     if(isReal()) {
         // Running on a real robot, log to a USB stick ("/U/logs")
         Logger.addDataReceiver(new WPILOGWriter());
         Logger.addDataReceiver(new NT4Publisher());
-        break;
-
-      case SIM:
-        // Running a physics simulator, log to NT
-        Logger.addDataReceiver(new NT4Publisher());
-        break;
-
-      case REPLAY:
-        // Replaying a log, set up replay source
+        new PowerDistribution(1, ModuleType.kRev).setSwitchableChannel(true);
+  } else {
         setUseTiming(false); // Run as fast as possible
         String logPath = LogFileUtil.findReplayLog();
         Logger.setReplaySource(new WPILOGReader(logPath));
         Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
-        break;
     }
 
     // Start AdvantageKit logger
@@ -202,6 +195,10 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+
+    RobotContainer.odometryFlag = true;
+
+    RobotContainer.drive.enableStatorLimits(false);
     //LED.getInstance().changeLedState(LEDState.AUTON);
   }
 
@@ -213,6 +210,9 @@ public class Robot extends LoggedRobot {
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
+     //Cancels everything from auto
+     CommandScheduler.getInstance().cancelAll();
+
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
@@ -220,6 +220,9 @@ public class Robot extends LoggedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    RobotContainer.drive.overrideVisionOdo = false;
+    RobotContainer.drive.enableStatorLimits(true);
   }
 
   /** This function is called periodically during operator control. */

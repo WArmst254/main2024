@@ -1,39 +1,38 @@
 package frc.robot.subsystems.drive;
-
-import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
+
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+
 public interface ModuleIO {
-  @AutoLog
-  public static class ModuleIOInputs {
-    public double drivePositionRad = 0.0;
-    public double driveVelocityRadPerSec = 0.0;
-    public double driveAppliedVolts = 0.0;
-    public double[] driveCurrentAmps = new double[] {};
+    
+    @AutoLog
+    public static class ModuleIOInputs {
+        public double movePosition = 0; // m
+        public double moveVelocity = 0; // m/s
+        public double moveVoltage = 0; // Volts
+        public double moveStatorCurrent = 0; // Amps
+        public double moveSupplyCurrent = 0; // Amps
 
-    public Rotation2d turnAbsolutePosition = new Rotation2d();
-    public Rotation2d turnPosition = new Rotation2d();
-    public double turnVelocityRadPerSec = 0.0;
-    public double turnAppliedVolts = 0.0;
-    public double[] turnCurrentAmps = new double[] {};
+        public double turnAbsolutePosition = 0; // rot
+        public double turnRotorPosition = 0; // rot
+        public double turnVelocity = 0; // rot/s
+        public double turnVoltage = 0; // Volts
+        public double turnStatorCurrent = 0; // Amps
+        public double turnSupplyCurrent = 0; // Amps
+    }
 
-    public double[] odometryTimestamps = new double[] {};
-    public double[] odometryDrivePositionsRad = new double[] {};
-    public Rotation2d[] odometryTurnPositions = new Rotation2d[] {};
-  }
+    public default void updateInputs(ModuleIOInputs inputs) {}
 
-  /** Updates the set of loggable inputs. */
-  public default void updateInputs(ModuleIOInputs inputs) {}
+    public default void set(SwerveModuleState state) {}
+    public abstract void setBoltage(double voltage);
+    public abstract SwerveModulePosition getPosition();
+    public abstract SwerveModuleState getState();
+    public SwerveModule getModule();
+    
+    public abstract void enableMoveStatorLimit(boolean enable);
 
-  /** Run the drive motor at the specified voltage. */
-  public default void setDriveVoltage(double volts) {}
 
-  /** Run the turn motor at the specified voltage. */
-  public default void setTurnVoltage(double volts) {}
-
-  /** Enable or disable brake mode on the drive motor. */
-  public default void setDriveBrakeMode(boolean enable) {}
-
-  /** Enable or disable brake mode on the turn motor. */
-  public default void setTurnBrakeMode(boolean enable) {}
 }

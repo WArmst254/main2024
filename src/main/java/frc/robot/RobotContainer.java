@@ -5,7 +5,6 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -14,12 +13,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
 import frc.robot.subsystems.Amp;
 import frc.robot.subsystems.Feeder;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
-import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.subsystems.joystick.JoystickSubsystem;
 import frc.robot.util.Alert;
 import frc.robot.util.Alert.AlertType;
 
@@ -37,9 +32,13 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
   // Subsystems
-  private final Drive drive;
+  public static final DriveSubsystem drive = new DriveSubsystem();
   private final Feeder feeder;
   private final Amp amp;
+   public static final JoystickSubsystem joysticks = new JoystickSubsystem();
+
+  public static boolean odometryFlag = false;
+
 
   // Auto Chooser
   private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
@@ -114,45 +113,6 @@ public class RobotContainer {
 
     feeder = new Feeder();
     amp = new Amp();
-    switch (Constants.currentMode) {
-      case REAL:
-        // Real robot, instantiate hardware IO implementations
-        drive = new Drive(
-            new GyroIOPigeon2(true),
-            new ModuleIOTalonFX(0),
-            new ModuleIOTalonFX(1),
-            new ModuleIOTalonFX(2),
-            new ModuleIOTalonFX(3));
-            Shuffleboard.getTab("Subsystems").add("Swerve", drive);
-        break;
-
-      case SIM:
-        // Sim robot, instantiate physics sim IO implementations
-        drive = new Drive(
-            new GyroIO() {
-            },
-            new ModuleIOSim(),
-            new ModuleIOSim(),
-            new ModuleIOSim(),
-            new ModuleIOSim());
-        break;
-
-      default:
-        // Replayed robot, disable IO implementations
-        drive = new Drive(
-            new GyroIO() {
-            },
-            new ModuleIO() {
-            },
-            new ModuleIO() {
-            },
-            new ModuleIO() {
-            },
-            new ModuleIO() {
-            });
-        break;
-       
-    }
     configureAutos();
     configureButtonBindings();
     hasAmpNote = amp.isNotePresentTOF();
@@ -196,11 +156,8 @@ public class RobotContainer {
 
     // Drive Controls
     drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -driverController.getLeftY(),
-            () -> -driverController.getLeftX(),
-            () -> -driverController.getRightX()));
+      new DriveCommand(drive, joysticks)
+      );
   }
 
   /** Updates the alerts for disconnected controllers. */
